@@ -81,4 +81,5 @@ gulp.task('flash-online', function(cb){
 
 
 gulp.task('build',['compile-online'])
+gulp.task('travis', ['compile-online']);
 gulp.task('default', ['build']);
