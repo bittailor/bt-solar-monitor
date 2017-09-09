@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="cdt.managedbuild.toolchain.gnu.cross.base.1898394868">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.cross.base.1898394868" moduleId="org.eclipse.cdt.core.settings" name="Default">
+				<externalSettings>
+					<externalSetting>
+						<entry flags="RESOLVED" kind="includePath" name="/Users/bittailor/Documents/Code/particle.io/workspace/../firmware/hal/src/photon/api"/>
+					</externalSetting>
+				</externalSettings>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildProperties="" description="" id="cdt.managedbuild.toolchain.gnu.cross.base.1898394868" name="Default" parent="org.eclipse.cdt.build.core.emptycfg">
+					<folderInfo id="cdt.managedbuild.toolchain.gnu.cross.base.1898394868.1177810009" name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.base.473609581" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.base">
+							<option id="cdt.managedbuild.option.gnu.cross.prefix.977298920" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix"/>
+							<option id="cdt.managedbuild.option.gnu.cross.path.1719350317" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.846725230" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+							<builder arguments="" buildPath="${ProjDirPath}/.." command="gulp" id="cdt.managedbuild.builder.gnu.cross.2030286045" incrementalBuildTarget="compile-local" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.1673577226" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
+								<option id="gnu.c.compiler.option.include.paths.1833778345" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/user/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/user/libraries&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/wiring/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/system/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/services/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/communication/src&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/shared&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/photon&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/stm32f2xx&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/stm32&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/shared/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/CMSIS/Device/ST/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/SPARK_Firmware_Driver/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/shared/STM32/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/STM32_StdPeriph_Driver/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/STM32_USB_Device_Driver/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/STM32_USB_Host_Driver/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/STM32_USB_OTG_Driver/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/dynalib/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Firmware/lib/Sensors/src}&quot;"/>
+								</option>
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.449914367" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="SPARK=1"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1251389029" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.53039591" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+								<option id="gnu.cpp.compiler.option.include.paths.1389769300" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/user/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/user/libraries&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/wiring/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/system/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/services/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/communication/src&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/shared&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/photon&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/stm32f2xx&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/stm32&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/shared/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/CMSIS/Device/ST/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/SPARK_Firmware_Driver/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/shared/STM32/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/STM32_StdPeriph_Driver/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/STM32_USB_Device_Driver/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/STM32_USB_Host_Driver/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/STM32_USB_OTG_Driver/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/dynalib/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Firmware/lib/Sensors/src}&quot;"/>
+								</option>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.1685018826" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="SPARK=1"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.429339185" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.82810449" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.741097859" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.623999846" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.1800093845" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.731517818" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
+								<option id="gnu.both.asm.option.include.paths.133312545" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/user/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/user/libraries&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/wiring/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/system/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/services/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/communication/src&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/shared&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/photon&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/stm32f2xx&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/stm32&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/shared/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/CMSIS/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/CMSIS/Device/ST/Include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/SPARK_Firmware_Driver/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/shared/STM32/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/STM32_StdPeriph_Driver/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/STM32_USB_Device_Driver/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/STM32_USB_Host_Driver/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/STM32_USB_OTG_Driver/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/dynalib/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Firmware/lib/Sensors/src}&quot;"/>
+								</option>
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1408359538" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="Firmware.null.1350047628" name="Firmware"/>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Default">
+			<resource resourceType="PROJECT" workspacePath="/Firmware"/>
+		</configuration>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.cross.base.1898394868;cdt.managedbuild.toolchain.gnu.cross.base.1898394868.1177810009;cdt.managedbuild.tool.gnu.cross.c.compiler.1673577226;cdt.managedbuild.tool.gnu.c.compiler.input.1251389029">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.toolchain.gnu.cross.base.1898394868;cdt.managedbuild.toolchain.gnu.cross.base.1898394868.1177810009;cdt.managedbuild.tool.gnu.cross.cpp.compiler.53039591;cdt.managedbuild.tool.gnu.cpp.compiler.input.429339185">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+</cproject>
