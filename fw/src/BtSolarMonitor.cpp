@@ -7,13 +7,12 @@ STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
 SYSTEM_MODE(MANUAL);
 SYSTEM_THREAD(ENABLED);
 
+Serial1LogHandler logHandler(115200,LOG_LEVEL_ALL);
 
 //===
 retained uint32_t sLoopCounter = 0;
+retained uint8_t sSensorState = 0;
 //===
-
-
-Serial1LogHandler logHandler(115200,LOG_LEVEL_ALL);
 
 int sBlueLed = 7;
 
@@ -42,13 +41,16 @@ Bt::Sensors::SensorArray<Bt::Sensors::INA219,Bt::Sensors::INA219Reading,NUMBER_O
 
 
 void setup() {
-  BT_CORE_LOG_INFO("*** bt-solar-monitor ***");
+  BT_CORE_LOG_INFO("*** bt-solar-monitor [%d]  ***",(uint32_t)sSensorState);
   Wire.setSpeed(CLOCK_SPEED_100KHZ);
   Wire.begin();
   pinMode(sBlueLed, OUTPUT);
   digitalWrite(sBlueLed, LOW);
-  for (Bt::Sensors::INA219& sensor : sSensors) {
+  if (sSensorState == 0) {
+     for (Bt::Sensors::INA219& sensor : sSensors) {
         sensor.begin();
+     }
+     sSensorState = 1;
   }
 }
 
