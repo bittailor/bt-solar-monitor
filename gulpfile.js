@@ -8,6 +8,7 @@ var plugins = require('gulp-load-plugins')();
 var pwd = process.cwd();
 
 var conf = {
+    device: "bt-photon-2",
     fw: {
         out: 'fw/target'
     }
@@ -62,7 +63,7 @@ gulp.task('compile-online', function(cb){
 });
 
 gulp.task('flash-local', function(cb){
-    spawn('particle', ['flash', 'bt-photon-1', './target/fw.bin'],{
+    spawn('particle', ['flash', conf.device, './target/fw.bin'],{
         stdio: 'inherit',
         cwd:'./fw'
     }).on('exit', (code) => {
@@ -71,7 +72,7 @@ gulp.task('flash-local', function(cb){
 });
 
 gulp.task('flash-online', function(cb){
-    spawn('particle', ['flash', 'bt-photon-1', '.'],{
+    spawn('particle', ['flash', conf.device, '.'],{
         stdio: 'inherit',
         cwd:'./fw'
     }).on('exit', (code) => {
