@@ -3,18 +3,19 @@
 #include <Bt/Sensors/SensorArray.h>
 #include <Bt/Core/Log.h>
 
+STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
 SYSTEM_MODE(MANUAL);
-
 SYSTEM_THREAD(ENABLED);
 
 
-#define DELAY 1000
+//===
+retained uint32_t sLoopCounter = 0;
+//===
+
 
 Serial1LogHandler logHandler(115200,LOG_LEVEL_ALL);
 
 int sBlueLed = 7;
-int sRedLed = 6;
-bool sState = false;
 
 #define NUMBER_OF_SENSORS 6
 
@@ -36,43 +37,35 @@ std::array<Bt::Sensors::INA219, NUMBER_OF_SENSORS> sSensors{{
       {Wire, sAddresses[5], Bt::Sensors::INA219::Gain::GAIN_80MV,  8192, 50}
 }};
 
-
 Bt::Sensors::SensorArray<Bt::Sensors::INA219,Bt::Sensors::INA219Reading,NUMBER_OF_SENSORS> sSensorArray{sSensors,3};
 
-uint32_t sLoopCounter = 0;
 
-void toggle() {
-   sState = !sState;
-   digitalWrite(sBlueLed, sState ? HIGH : LOW);
-   digitalWrite(sRedLed, sState ? HIGH : LOW);
-}
 
 void setup() {
-  BT_CORE_LOG_INFO("*** Start ... ***");
-  delay(2000);
-  BT_CORE_LOG_INFO("*** ... GO    ***");
+  BT_CORE_LOG_INFO("*** bt-solar-monitor ***");
   Wire.setSpeed(CLOCK_SPEED_100KHZ);
   Wire.begin();
   pinMode(sBlueLed, OUTPUT);
-  pinMode(sRedLed, OUTPUT);
-  digitalWrite(sBlueLed, sState ? HIGH : LOW);
-  digitalWrite(sRedLed, sState ? HIGH : LOW);
+  digitalWrite(sBlueLed, LOW);
   for (Bt::Sensors::INA219& sensor : sSensors) {
         sensor.begin();
   }
 }
 
 void loop() {
+   digitalWrite(sBlueLed, HIGH);
    unsigned long timer = millis();
    sLoopCounter++;
    BT_CORE_LOG_INFO("loop %u [" __DATE__ " " __TIME__ "]", sLoopCounter );
-   toggle();
    auto readings = sSensorArray.readAll();
    for (Bt::Sensors::INA219Reading& reading : readings) {
       BT_CORE_LOG_INFO("Reading - [%s] U = %f I = %f ", reading.valid ? "valid" : "invalid"  ,reading.busVoltage, reading.current);
    }
    timer = millis() - timer;
    BT_CORE_LOG_INFO("go to sleep after loop %u took %d ms", sLoopCounter, timer);
-   System.sleep(A0,RISING,2);
+   Serial1.flush();
+   digitalWrite(sBlueLed, LOW);
+   //System.sleep(A0,RISING,2);
+   System.sleep(SLEEP_MODE_DEEP,2);
 }
 
