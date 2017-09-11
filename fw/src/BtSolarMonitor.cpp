@@ -1,4 +1,5 @@
 #include "Particle.h"
+#include <nokia-5110-lcd.h>
 #include <Bt/Sensors/INA219.h>
 #include <Bt/Sensors/SensorArray.h>
 #include <Bt/Core/Log.h>
@@ -7,7 +8,7 @@ STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
 SYSTEM_MODE(MANUAL);
 SYSTEM_THREAD(ENABLED);
 
-Serial1LogHandler logHandler(115200,LOG_LEVEL_ALL);
+Serial1LogHandler logHandler(115200,LOG_LEVEL_WARN);
 
 //===
 retained uint32_t sLoopCounter = 0;
@@ -40,13 +41,20 @@ Bt::Sensors::SensorArray<Bt::Sensors::INA219,Bt::Sensors::INA219Reading,NUMBER_O
 
 
 
+Nokia5110LCD::Display sDisplay(A2, D6, D5, A0);
+
 void setup() {
-  BT_CORE_LOG_INFO("*** bt-solar-monitor [%d]  ***",(uint32_t)sSensorState);
+  BT_CORE_LOG_DEBUG("*** bt-solar-monitor [%d]  ***",(uint32_t)sSensorState);
   Wire.setSpeed(CLOCK_SPEED_100KHZ);
   Wire.begin();
   pinMode(sBlueLed, OUTPUT);
   digitalWrite(sBlueLed, LOW);
+
+  sDisplay.begin();
   if (sSensorState == 0) {
+     sDisplay.setup(); // This will setup our pins, and initialize the LCD
+     sDisplay.setContrast(55); // Pretty good value, play around with it
+     sDisplay.updateDisplay(); // with displayMap untouched, SFE logo
      for (Bt::Sensors::INA219& sensor : sSensors) {
         sensor.begin();
      }
@@ -58,13 +66,19 @@ void loop() {
    digitalWrite(sBlueLed, HIGH);
    unsigned long timer = millis();
    sLoopCounter++;
-   BT_CORE_LOG_INFO("loop %u [" __DATE__ " " __TIME__ "]", sLoopCounter );
+   BT_CORE_LOG_DEBUG("loop %u [" __DATE__ " " __TIME__ "]", sLoopCounter );
    auto readings = sSensorArray.readAll();
-   for (Bt::Sensors::INA219Reading& reading : readings) {
-      BT_CORE_LOG_INFO("Reading - [%s] U = %f I = %f ", reading.valid ? "valid" : "invalid"  ,reading.busVoltage, reading.current);
+   sDisplay.clearDisplay();
+   sDisplay.setStr(String::format("Loop %d",sLoopCounter), 0, 0, BLACK);
+   for(std::size_t i = 0 ; i < readings.size() ; i++) {
+      Bt::Sensors::INA219Reading& reading = readings[i];
+      BT_CORE_LOG_DEBUG("Reading - [%s] U = %f I = %f ", reading.valid ? "valid" : "invalid"  ,reading.busVoltage, reading.current);
+      sDisplay.setStr(String::format("%.2f %.3f",reading.busVoltage,reading.current), 0, (i+1)*8, BLACK);
    }
+   sDisplay.updateDisplay();
    timer = millis() - timer;
-   BT_CORE_LOG_INFO("go to sleep after loop %u took %d ms", sLoopCounter, timer);
+   BT_CORE_LOG_DEBUG("go to sleep after loop %u took %d ms", sLoopCounter, timer);
+   BT_CORE_LOG_WARN("%d ms",timer);
    Serial1.flush();
    digitalWrite(sBlueLed, LOW);
    //System.sleep(A0,RISING,2);
