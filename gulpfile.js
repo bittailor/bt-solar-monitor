@@ -8,14 +8,15 @@ var plugins = require('gulp-load-plugins')();
 var pwd = process.cwd();
 
 var conf = {
-    device: "bt-photon-2",
+    device: "bt-electron-solar-monitor",
+    platform: "electron",
     fw: {
         out: 'fw/target'
     }
 };
 
 gulp.task('clean-make', function(cb) {
-    spawn('make', ['clean', 'PLATFORM=photon', 'APPDIR=' + path.join(pwd, 'fw')],{
+    spawn('make', ['clean', 'PLATFORM=' + conf.platform, 'APPDIR=' + path.join(pwd, 'fw')],{
         stdio: 'inherit',
         cwd:'../firmware/main'
     }).on('exit', (code) => {
@@ -32,7 +33,7 @@ gulp.task('clean-dir', function () {
 gulp.task('clean',['clean-dir','clean-make'])
 
 gulp.task('compile-core', function(cb){
-    spawn('make', ['all', 'PLATFORM=photon', 'APPDIR=' + path.join(pwd, 'fw')],{
+    spawn('make', ['all', 'PLATFORM=' + conf.platform, 'APPDIR=' + path.join(pwd, 'fw')],{
         stdio: 'inherit',
         cwd:'../firmware/modules'
     }).on('exit', (code) => {
@@ -42,7 +43,7 @@ gulp.task('compile-core', function(cb){
 });
 
 gulp.task('compile-local', function(cb){
-    spawn('make' , [ /*'-s',*/ 'all', 'PLATFORM=photon', 'APPDIR=' + path.join(pwd, 'fw')],{
+    spawn('make' , [ /*'-s',*/ 'all', 'PLATFORM=' + conf.platform, 'APPDIR=' + path.join(pwd, 'fw')],{
         stdio: 'inherit',
         cwd:'../firmware/main'
     }).on('exit', (code) => {
@@ -53,7 +54,7 @@ gulp.task('compile-local', function(cb){
 
 gulp.task('compile-online', function(cb){
     fs.mkdirs(conf.fw.out,function(err){
-        spawn('particle', ['compile', 'photon', '.' ,  '--saveTo' ,  path.join('target' , 'fw.bin')],{
+        spawn('particle', ['compile', conf.platform, '.' ,  '--saveTo' ,  path.join('target' , 'fw.bin')],{
             stdio: 'inherit',
             cwd:'./fw'
         }).on('exit', (code) => {
@@ -64,6 +65,24 @@ gulp.task('compile-online', function(cb){
 
 gulp.task('flash-local', function(cb){
     spawn('particle', ['flash', conf.device, './target/fw.bin'],{
+        stdio: 'inherit',
+        cwd:'./fw'
+    }).on('exit', (code) => {
+        cb(code)
+    }); 
+});
+
+gulp.task('flash-usb', function(cb){
+    spawn('particle', ['flash', '--usb', './target/fw.bin'],{
+        stdio: 'inherit',
+        cwd:'./fw'
+    }).on('exit', (code) => {
+        cb(code)
+    }); 
+});
+
+gulp.task('flash-serial', function(cb){
+    spawn('particle', ['flash', '--serial', './target/fw.bin'],{
         stdio: 'inherit',
         cwd:'./fw'
     }).on('exit', (code) => {

@@ -5,7 +5,7 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.toolchain.gnu.cross.base.1898394868" moduleId="org.eclipse.cdt.core.settings" name="Default">
 				<externalSettings>
 					<externalSetting>
-						<entry flags="RESOLVED" kind="includePath" name="/Users/bittailor/Documents/Code/particle.io/workspace/../firmware/hal/src/photon/api"/>
+						<entry flags="RESOLVED" kind="includePath" name="/Users/bittailor/Documents/Code/particle.io/workspace/../firmware/hal/src/electron/api"/>
 					</externalSetting>
 				</externalSettings>
 				<extensions>
@@ -35,7 +35,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/communication/src&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/shared&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/photon&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/electron&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/stm32f2xx&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/stm32&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/shared/inc&quot;"/>
@@ -66,7 +66,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/communication/src&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/shared&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/photon&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/electron&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/stm32f2xx&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/stm32&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/shared/inc&quot;"/>
@@ -105,7 +105,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/communication/src&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/shared&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/photon&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/electron&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/stm32f2xx&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/hal/src/stm32&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/shared/inc&quot;"/>
