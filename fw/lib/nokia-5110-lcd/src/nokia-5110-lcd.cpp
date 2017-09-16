@@ -185,6 +185,7 @@ void Nokia5110LCD::Display::begin()
    SPI.begin();
    SPI.setDataMode(SPI_MODE0);
    SPI.setBitOrder(MSBFIRST);
+   setup();
 }
 	
 void Nokia5110LCD::Display::setup()
