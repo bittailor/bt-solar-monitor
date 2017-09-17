@@ -176,27 +176,19 @@ Nokia5110LCD::Display::~Display()
 // sends magical commands to the PCD8544
 void Nokia5110LCD::Display::begin()
 {
-   pinMode(pinSCE, OUTPUT);
-   pinMode(pinDC, OUTPUT);
-   pinMode(pinSDIN, OUTPUT);
-   pinMode(pinSCLK, OUTPUT);
-   pinMode(pinBL, OUTPUT);
-   analogWrite(pinBL, 255);
-   SPI.begin();
-   SPI.setDataMode(SPI_MODE0);
-   SPI.setBitOrder(MSBFIRST);
-   setup();
-}
+	// configure control pins
+	pinMode(pinSCE, OUTPUT);
+	pinMode(pinRESET, OUTPUT);
+	pinMode(pinDC, OUTPUT);
+	pinMode(pinSDIN, OUTPUT);
+	pinMode(pinSCLK, OUTPUT);
+	pinMode(pinBL, OUTPUT);
+	analogWrite(pinBL, 255);
+
+	SPI.begin();
+	SPI.setDataMode(SPI_MODE0);
+	SPI.setBitOrder(MSBFIRST);
 	
-void Nokia5110LCD::Display::setup()
-{
-   // configure control pins
-
-
-
-
-   pinMode(pinRESET, OUTPUT);
-
 	// reset the LCD to a known state
 	digitalWrite(pinRESET, LOW);
 	digitalWrite(pinRESET, HIGH);

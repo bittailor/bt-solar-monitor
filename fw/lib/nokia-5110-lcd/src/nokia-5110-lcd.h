@@ -41,8 +41,6 @@ namespace Nokia5110LCD
 			//This sends the magical commands to the PCD8544
 			void begin();
 
-			void setup();
-
 			// There are two memory banks in the LCD, data/RAM and commands.
 			// This function sets the DC pin high or low depending, and then 
 			// sends the data byte
