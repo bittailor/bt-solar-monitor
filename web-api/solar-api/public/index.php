@@ -20,7 +20,18 @@ $app = new \Slim\App($config);
 
 // Define app routes
 $app->get('/hello/{name}', function ($request, $response, $args) {
+    error_log("GET /hello/{$args['name']}");
     return $response->write("Hello " . $args['name']);
+});
+
+$app->post('/binary/test', function ($request, $response, $args) {
+    error_log("POST /binary/test");
+    $raw = $request->getBody()->getContents();
+    error_log($raw);
+    error_log(print_r(unpack('na/nb',$raw), true));
+    error_log(print_r(unpack('n*',$raw), true));
+    #error_log(print_r( $request->getBody(), true ));
+    return $response->write("OK");
 });
 
 // Run app

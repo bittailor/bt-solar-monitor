@@ -1,9 +1,17 @@
+#include <functional>
 #include <Particle.h>
 #include <cellular_hal.h>
 #include <nokia-5110-lcd.h>
+#include <Bt/Core/Log.h>
 #include <Bt/Sensors/INA219.h>
 #include <Bt/Sensors/SensorArray.h>
-#include <Bt/Core/Log.h>
+#include <Bt/SolarMonitor/AveragingFilter.h>
+#include <Bt/SolarMonitor/StorageFilter.h>
+#include <Bt/SolarMonitor/MessageFilter.h>
+
+#define MEASURE_SLEEP 2
+#define AVERAGE_MINUTES 5
+#define STOARGE_HOURS 1
 
 #define APN       "gprs.swisscom.ch"
 #define USERNAME  ""
@@ -49,6 +57,19 @@ std::array<Bt::Sensors::INA219, NUMBER_OF_SENSORS> sSensors{{
 Bt::Sensors::SensorArray<Bt::Sensors::INA219,Bt::Sensors::INA219Reading,NUMBER_OF_SENSORS> sSensorArray{sSensors,3};
 
 
+static const size_t STORAGE_SIZE = ((STOARGE_HOURS*60)/AVERAGE_MINUTES);
+
+
+typedef Bt::SolarMonitor::StorageFilter<STORAGE_SIZE> StorageFilter;
+typedef Bt::SolarMonitor::MessageFilter<STORAGE_SIZE> MessageFilter;
+
+
+MessageFilter sMessageFilter;
+StorageFilter sStorageFilter(std::bind(&MessageFilter::consume,&sMessageFilter, std::placeholders::_1));
+Bt::SolarMonitor::AveragingFilter sAveragingFilter(((AVERAGE_MINUTES*60)/MEASURE_SLEEP),
+                                                   std::bind(&StorageFilter::consume,&sStorageFilter, std::placeholders::_1));
+
+
 // CE
 // RST
 // DC
@@ -92,6 +113,7 @@ void loop() {
    unsigned long timer = millis();
    sLoopCounter++;
    //BT_CORE_LOG_INFO("loop a %u [" __DATE__ " " __TIME__ "]", sLoopCounter );
+
    auto readings = sSensorArray.readAll();
    sDisplay.clearDisplay();
    sDisplay.setStr(String::format("Loop %d",sLoopCounter), 0, 0, BLACK);
@@ -99,19 +121,20 @@ void loop() {
       Bt::Sensors::INA219Reading& reading = readings[i];
       //BT_CORE_LOG_INFO("Reading - [%s] U = %f I = %f ", reading.valid ? "valid" : "invalid"  ,reading.busVoltage, reading.current);
       sDisplay.setStr(String::format("%.2f %.3f",reading.busVoltage,reading.current), 0, (i+1)*8, BLACK);
+      sAveragingFilter.consume(Bt::SolarMonitor::MeasurementRecord{readings});
    }
    sDisplay.updateDisplay();
    timer = millis() - timer;
    //BT_CORE_LOG_INFO("go to sleep after loop %u took %d ms", sLoopCounter, timer);
    //BT_CORE_LOG_WARN("%d ms",timer);
 
-   if((sLoopCounter % 10) == 9) {
+   if((sLoopCounter % 1800) == 1) {
       tryPublish();
    }
 
    Serial1.flush();
    digitalWrite(sBlueLed, LOW);
-   System.sleep(A0,RISING,2);
+   System.sleep(A0, RISING, MEASURE_SLEEP);
    //System.sleep(SLEEP_MODE_SOFTPOWEROFF,2);
 }
 
@@ -158,6 +181,7 @@ void setCharging(bool enable) {
 }
 
 void tryPublish() {
+   unsigned long timer = millis();
    BT_CORE_LOG_INFO("Cellular.on() ...");
    Cellular.on();
    BT_CORE_LOG_INFO("... Cellular.on() DONE");
@@ -171,63 +195,55 @@ void tryPublish() {
    Particle.process();
    CellularSignal sig = Cellular.RSSI();
    BT_CORE_LOG_INFO("RSSI %d -dBm QUAL %d dB ", sig.rssi, sig.qual);
-   TCPClient client;
-   BT_CORE_LOG_INFO("connecting...");
-   String loopMsg = String::format("%d",sLoopCounter);
 
-   //const char* host = "broker.shiftr.io";
-   const char* host = "solar.bockmattli.ch";
+   BT_CORE_LOG_INFO("Cellular.connect() ...");
+   Particle.connect();
+   BT_CORE_LOG_INFO("... Cellular.connect() DONE");
 
-
-   if (client.connect(host, 80))
-   {
-      BT_CORE_LOG_INFO("... connecting DONE");
-//      client.print("POST /electron/2/loop HTTP/1.0\r\n");
-//      client.print("Host: ");client.print(host);client.print("\r\n");
-//      client.print("Authorization: Basic YnQtc29sYXItZGV2aWNlOjcxOTg2YWJlODI5NjcyMTA=\r\n");
-//      client.print("Content-Length: ");client.print(loopMsg.length());client.print("\r\n");
-//      client.print("\r\n");
-//      client.print(loopMsg);
-//      client.print("\r\n");
-//      client.flush();
-
-      client.println("GET /hello/electron HTTP/1.0"); // 8 bytes
-      client.print("Host: ");client.println(host);
-      client.println("Content-Length: 0");
-      client.println();
-
+   BT_CORE_LOG_INFO("while(!Particle.connected() ...");
+   while(!Particle.connected()) {
+      Particle.process();
    }
-   else
-   {
-      BT_CORE_LOG_INFO("connection failed");
-   }
-   BT_CORE_LOG_INFO("<Message>");
-   while (client.available() || client.connected())
-   {
-      int available = client.available();
-      BT_CORE_LOG_DEBUG("available == %d", available);
-      if (available)
-      {
-         char c = client.read();
-         Serial1.print(c);
+   BT_CORE_LOG_INFO("... while(!Particle.connected() DONE");
+
+   for (int msgCounter = 0; msgCounter < 8; ++msgCounter) {
+
+      const size_t MESSAGE_SIZE = 250;
+      char message[MESSAGE_SIZE+1] = {0};
+
+      size_t used = snprintf(message, MESSAGE_SIZE, "loop %lu.%d : ", sLoopCounter, msgCounter);
+      for (size_t i = used; i < MESSAGE_SIZE ; ++i) {
+         message[i] = ((i-used) % 56) + 65;
       }
+      message[MESSAGE_SIZE] = 0;
 
-      if (!client.connected())
-      {
-         Serial1.println();
-         BT_CORE_LOG_INFO("disconnecting.");
-         Serial1.println();
-      }
+      BT_CORE_LOG_INFO("Particle.publish(%d) %d ...", msgCounter, strlen(message));
+      bool ack = Particle.publish("e/2/loop", message, WITH_ACK);
+      BT_CORE_LOG_INFO(" ... Particle.publish(%d) %d", msgCounter, ack);
+      Particle.process();
+
    }
-   BT_CORE_LOG_INFO("</Message>");
-   client.stop();
-   client.flush();
+
+   BT_CORE_LOG_INFO("Cellular.disconnect() ...");
+   Particle.disconnect();
+   BT_CORE_LOG_INFO("... Cellular.disconnect() DONE");
+
+   BT_CORE_LOG_INFO("while(Particle.connected() ...");
+   while(Particle.connected()) {
+      Particle.process();
+   }
+   BT_CORE_LOG_INFO("... while(Particle.connected() DONE");
+
    BT_CORE_LOG_INFO("Cellular.disconnect() ...");
    Cellular.disconnect();
    BT_CORE_LOG_INFO("... Cellular.disconnect() DONE");
    BT_CORE_LOG_INFO("Cellular.off() ...");
    Cellular.off();
    BT_CORE_LOG_INFO("... Cellular.off() DONE");
+   timer = millis() - timer;
+
+   BT_CORE_LOG_INFO("publish took %lu ms",timer);
+   BT_CORE_LOG_INFO("free memory: %lu", System.freeMemory());
 }
 
 
