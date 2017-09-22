@@ -1,6 +1,10 @@
 #include <functional>
 #include <Particle.h>
+
+#if PLATFORM_ID == 10
 #include <cellular_hal.h>
+#endif
+
 #include <nokia-5110-lcd.h>
 #include <Bt/Core/Log.h>
 #include <Bt/Sensors/INA219.h>
@@ -8,17 +12,38 @@
 #include <Bt/SolarMonitor/AveragingFilter.h>
 #include <Bt/SolarMonitor/StorageFilter.h>
 #include <Bt/SolarMonitor/MessageFilter.h>
+#include <Bt/SolarMonitor/ForkFilter.h>
+#include <Bt/SolarMonitor/DisplayFilter.h>
+#include <Bt/SolarMonitor/ValidateFilter.h>
 
-#define MEASURE_SLEEP 2
-#define AVERAGE_MINUTES 5
-#define STOARGE_HOURS 1
+// ==== <Configuration> ==========
+
+#define MEASURE_SLEEP 1
+
+const size_t AVERAGE_MINUTES =  5;
+const size_t STOARGE_MINUTES = 30;
 
 #define APN       "gprs.swisscom.ch"
 #define USERNAME  ""
 #define PASSWORD  ""
 
+// ==== </Configuration> ==========
+
 SYSTEM_MODE(MANUAL);
+
+#if PLATFORM_ID == 10
 STARTUP(cellular_credentials_set(APN, USERNAME, PASSWORD, NULL));
+#endif
+
+#if PLATFORM_ID == 10
+   #define Radio Cellular
+#else
+   #define Radio WiFi
+#endif
+
+
+
+
 
 //STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
 //SYSTEM_THREAD(ENABLED);
@@ -33,6 +58,7 @@ Serial1LogHandler logHandler(115200,LOG_LEVEL_INFO);
 uint32_t sLoopCounter = 0;
 
 int sBlueLed = 7;
+
 
 uint8_t sAddresses[] = {
          0x40,
@@ -54,20 +80,31 @@ std::array<Bt::Sensors::INA219, NUMBER_OF_SENSORS> sSensors{{
    {Wire, sAddresses[5], Bt::Sensors::INA219::Gain::GAIN_80MV,  8192, 50}
 }};
 
-Bt::Sensors::SensorArray<Bt::Sensors::INA219,Bt::Sensors::INA219Reading,NUMBER_OF_SENSORS> sSensorArray{sSensors,3};
+Bt::Sensors::SensorArray<Bt::Sensors::INA219,Bt::Sensors::INA219Reading,NUMBER_OF_SENSORS> sSensorArray{sSensors,1};
 
+Nokia5110LCD::Display sDisplay(A2, D6, D5, A0);
 
-static const size_t STORAGE_SIZE = ((STOARGE_HOURS*60)/AVERAGE_MINUTES);
+static const size_t STORAGE_SIZE = (STOARGE_MINUTES/AVERAGE_MINUTES);
 
-
-typedef Bt::SolarMonitor::StorageFilter<STORAGE_SIZE> StorageFilter;
-typedef Bt::SolarMonitor::MessageFilter<STORAGE_SIZE> MessageFilter;
-
+typedef Bt::SolarMonitor::StorageFilter<STORAGE_SIZE, NUMBER_OF_SENSORS> StorageFilter;
+typedef Bt::SolarMonitor::MessageFilter<STORAGE_SIZE, NUMBER_OF_SENSORS> MessageFilter;
+typedef Bt::SolarMonitor::DisplayFilter<NUMBER_OF_SENSORS> DisplayFilter;
+typedef Bt::SolarMonitor::ValidateFilter<NUMBER_OF_SENSORS> ValidateFilter;
+typedef Bt::SolarMonitor::AveragingFilter<NUMBER_OF_SENSORS> AveragingFilter;
+typedef Bt::SolarMonitor::ForkFilter<std::array<Bt::Sensors::INA219Reading, NUMBER_OF_SENSORS>,2> ForkFilter;
 
 MessageFilter sMessageFilter;
 StorageFilter sStorageFilter(std::bind(&MessageFilter::consume,&sMessageFilter, std::placeholders::_1));
-Bt::SolarMonitor::AveragingFilter sAveragingFilter(((AVERAGE_MINUTES*60)/MEASURE_SLEEP),
+AveragingFilter sAveragingFilter(((AVERAGE_MINUTES*60)/MEASURE_SLEEP),
                                                    std::bind(&StorageFilter::consume,&sStorageFilter, std::placeholders::_1));
+
+ValidateFilter sValidateFilter(std::bind(&AveragingFilter::consume, &sAveragingFilter, std::placeholders::_1));
+DisplayFilter sDisplayFilter(sDisplay);
+ForkFilter sForkFilter(ForkFilter::Consumers{
+   std::bind(&DisplayFilter::consume, &sDisplayFilter, std::placeholders::_1),
+   std::bind(&ValidateFilter::consume, &sValidateFilter, std::placeholders::_1),
+});
+
 
 
 // CE
@@ -78,12 +115,12 @@ Bt::SolarMonitor::AveragingFilter sAveragingFilter(((AVERAGE_MINUTES*60)/MEASURE
 void setCharging(bool enable);
 void tryPublish();
 
-Nokia5110LCD::Display sDisplay(A2, D6, D5, A0);
 
-FuelGauge sFuelGauge;
 
 void setup() {
    BT_CORE_LOG_INFO("*** bt-solar-monitor***");
+   RGB.control(true);
+   RGB.color(0, 0, 0);
    setCharging(false);
    Wire.setSpeed(CLOCK_SPEED_100KHZ);
    Wire.begin();
@@ -93,53 +130,57 @@ void setup() {
    sDisplay.setContrast(55); // Pretty good value, play around with it
    sDisplay.updateDisplay(); // with displayMap untouched, SFE logo
 
-   BT_CORE_LOG_INFO("!!! Cellular.on()  !!!");
-   Cellular.on();
-   BT_CORE_LOG_INFO("!!! Cellular.off()  !!!");
-   Cellular.off();
-   BT_CORE_LOG_INFO("!!! Cellular DONE  !!!");
 
+   BT_CORE_LOG_INFO("!!! Cellular.on()  !!!");
+   Radio.on();
+   BT_CORE_LOG_INFO("!!! Cellular.off()  !!!");
+   Radio.off();
+   BT_CORE_LOG_INFO("!!! Cellular DONE  !!!");
+#if PLATFORM_ID == 10
    BT_CORE_LOG_INFO("!!! FuelGauge.sleep()  !!!");
-   sFuelGauge.sleep();
+   FuelGauge().sleep();
    BT_CORE_LOG_INFO("!!! FuelGauge DONE  !!!");
+#endif
 
    for (Bt::Sensors::INA219& sensor : sSensors) {
       sensor.begin();
    }
+
+
+}
+
+void mySleep(unsigned long ms) {
+   unsigned long timer = millis();
+   while(millis() - timer <  ms) {
+      __WFI();
+   }
 }
 
 void loop() {
-   digitalWrite(sBlueLed, HIGH);
+   //digitalWrite(sBlueLed, HIGH);
    unsigned long timer = millis();
    sLoopCounter++;
    //BT_CORE_LOG_INFO("loop a %u [" __DATE__ " " __TIME__ "]", sLoopCounter );
-
    auto readings = sSensorArray.readAll();
-   sDisplay.clearDisplay();
-   sDisplay.setStr(String::format("Loop %d",sLoopCounter), 0, 0, BLACK);
-   for(std::size_t i = 0 ; i < readings.size() ; i++) {
-      Bt::Sensors::INA219Reading& reading = readings[i];
-      //BT_CORE_LOG_INFO("Reading - [%s] U = %f I = %f ", reading.valid ? "valid" : "invalid"  ,reading.busVoltage, reading.current);
-      sDisplay.setStr(String::format("%.2f %.3f",reading.busVoltage,reading.current), 0, (i+1)*8, BLACK);
-      sAveragingFilter.consume(Bt::SolarMonitor::MeasurementRecord{readings});
-   }
-   sDisplay.updateDisplay();
+   sForkFilter.consume(readings);
    timer = millis() - timer;
    //BT_CORE_LOG_INFO("go to sleep after loop %u took %d ms", sLoopCounter, timer);
-   //BT_CORE_LOG_WARN("%d ms",timer);
+   BT_CORE_LOG_WARN("%lu ms",timer);
 
    if((sLoopCounter % 1800) == 1) {
       tryPublish();
    }
 
    Serial1.flush();
-   digitalWrite(sBlueLed, LOW);
+   //digitalWrite(sBlueLed, LOW);
+   //delay(MEASURE_SLEEP * 1000);
+   //Bt::Core::msSleep(500);
    System.sleep(A0, RISING, MEASURE_SLEEP);
-   //System.sleep(SLEEP_MODE_SOFTPOWEROFF,2);
+   //System.sleep(SLEEP_MODE_SOFTPOWEROFF, MEASURE_SLEEP);
 }
 
 void setCharging(bool enable) {
-
+#if PLATFORM_ID == 10
    PMIC pmic;
 
    // DisableCharging turns of charging. DisableBATFET completely disconnects the battery.
@@ -177,24 +218,22 @@ void setCharging(bool enable) {
    Wire3.write(CHARGE_TIMER_CONTROL_REGISTER);
    Wire3.write(DATA);
    Wire3.endTransmission(true);
-
+#endif
 }
 
 void tryPublish() {
    unsigned long timer = millis();
    BT_CORE_LOG_INFO("Cellular.on() ...");
-   Cellular.on();
+   Radio.on();
    BT_CORE_LOG_INFO("... Cellular.on() DONE");
    BT_CORE_LOG_INFO("Cellular.connect() ...");
-   Cellular.connect();
+   Radio.connect();
    BT_CORE_LOG_INFO("... Cellular.connect() DONE");
-   while(! Cellular.ready() &&  Cellular.connecting()) {
+   while(! Radio.ready() &&  Radio.connecting()) {
       BT_CORE_LOG_INFO("Check - Cellular.ready()");
       Particle.process();
    }
    Particle.process();
-   CellularSignal sig = Cellular.RSSI();
-   BT_CORE_LOG_INFO("RSSI %d -dBm QUAL %d dB ", sig.rssi, sig.qual);
 
    BT_CORE_LOG_INFO("Cellular.connect() ...");
    Particle.connect();
@@ -235,10 +274,10 @@ void tryPublish() {
    BT_CORE_LOG_INFO("... while(Particle.connected() DONE");
 
    BT_CORE_LOG_INFO("Cellular.disconnect() ...");
-   Cellular.disconnect();
+   Radio.disconnect();
    BT_CORE_LOG_INFO("... Cellular.disconnect() DONE");
    BT_CORE_LOG_INFO("Cellular.off() ...");
-   Cellular.off();
+   Radio.off();
    BT_CORE_LOG_INFO("... Cellular.off() DONE");
    timer = millis() - timer;
 

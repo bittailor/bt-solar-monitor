@@ -49,6 +49,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/STM32_USB_OTG_Driver/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/dynalib/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Firmware/lib/Sensors/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/bt-solar-monitor/src}&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.449914367" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="SPARK=1"/>
@@ -80,6 +81,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/STM32_USB_OTG_Driver/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/dynalib/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Firmware/lib/Sensors/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/bt-solar-monitor/src}&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1685018826" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="SPARK=1"/>
@@ -118,7 +120,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/STM32_USB_Host_Driver/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/platform/MCU/STM32F2xx/STM32_USB_OTG_Driver/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../firmware/dynalib/inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Firmware/lib/Sensors/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/bt-solar-monitor/src}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/bt-solar-monitor/lib/Sensors/src}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1408359538" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>

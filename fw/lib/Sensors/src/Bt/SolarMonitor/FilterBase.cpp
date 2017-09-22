@@ -1,7 +1,13 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - Bt::SolarMonitor::Averaging
+//  BITTAILOR.CH - Bt::SolarMonitor::FilterBase
 //
 //*************************************************************************************************
 
-#include "Bt/SolarMonitor/Averaging.h"
+#include "Bt/SolarMonitor/FilterBase.h"
+
+namespace Bt {
+namespace SolarMonitor {
+
+} // namespace SolarMonitor
+} // namespace Bt

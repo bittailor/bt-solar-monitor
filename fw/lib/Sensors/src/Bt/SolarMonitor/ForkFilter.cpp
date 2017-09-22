@@ -1,7 +1,8 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - Bt::SolarMonitor::Averaging
+//  BITTAILOR.CH - Bt::SolarMonitor::ForkFilter
 //
 //*************************************************************************************************
 
-#include "Bt/SolarMonitor/Averaging.h"
+#include "Bt/SolarMonitor/ForkFilter.h"
+

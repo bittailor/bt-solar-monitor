@@ -21,7 +21,6 @@ struct INA219Reading {
 	bool valid;
 	float current;
 	float busVoltage;
-	float shuntVoltage;
 };
 
 class INA219

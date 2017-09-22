@@ -14,11 +14,11 @@
 namespace Bt {
 namespace SolarMonitor {
 
-template<size_t N>
+template<size_t N, size_t R>
 class StorageFilter
 {
    public:
-      typedef std::function<void(const std::array<MeasurementRecord, N>&)> Consumer;
+      typedef std::function<void(const std::array<MeasurementRecord<R>, N>&)> Consumer;
 
       StorageFilter(const Consumer& pConsumer = Consumer()):mIndex(0),mConsumer(pConsumer){
 
@@ -31,7 +31,7 @@ class StorageFilter
 
       }
 
-      void consume(const MeasurementRecord& pMeasurementRecord) {
+      void consume(const MeasurementRecord<R>& pMeasurementRecord) {
          mStorage[mIndex] = pMeasurementRecord;
          mIndex++;
          if(mIndex >= N) {
@@ -48,7 +48,7 @@ class StorageFilter
 
    private:
       size_t mIndex;
-      std::array<MeasurementRecord, N> mStorage;
+      std::array<MeasurementRecord<R>, N> mStorage;
       Consumer mConsumer;
       
 };

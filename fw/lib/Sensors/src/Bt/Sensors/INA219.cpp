@@ -110,14 +110,12 @@ INA219Reading INA219::read() {
       BT_CORE_LOG_DEBUG("INA219 [0x%02x] - checkForReading busvoltageRegister = 0x%04x Conversion Ready = %d ", mAddress, busvoltageRegister, conversionReady);
       if(conversionReady == 1) {
          int16_t rawCurrent = readRegister(INA219_REGISTER_CURRENT);
-         int16_t rawShuntVoltage = readRegister(INA219_REGISTER_SHUNTVOLTAGE);
          int16_t rawBusVoltage =  (int16_t)((busvoltageRegister >> 3) * 4);
 
          float current = rawCurrent;
          current = current / (( 1000 / mCurrentLSB ) * 1000);
-         float shuntVoltage = rawShuntVoltage * 0.01;
          float busVoltage = rawBusVoltage * 0.001;
-         return INA219Reading{true, current, busVoltage, shuntVoltage};
+         return INA219Reading{true, current, busVoltage};
       }
       loopGuard--;
       BT_CORE_LOG_WARN("INA219 [0x%02x] - not ready yet %d", mAddress, loopGuard);

@@ -47,7 +47,7 @@ class Stream {
 
 };
 
-template<size_t N>
+template<size_t N, size_t R>
 class MessageFilter
 {
    public:
@@ -61,17 +61,14 @@ class MessageFilter
       MessageFilter& operator=(const MessageFilter&) = delete;
       ~MessageFilter(){}
 
-      void consume(const std::array<MeasurementRecord, N> pRecords) {
+      void consume(const std::array<MeasurementRecord<R>, N> pRecords) {
          size_t messageIndex = 0;
          Stream stream(mMessages[messageIndex],MESSAGE_BUFFER_LENGHT);
 
-         for (const MeasurementRecord& record : pRecords) {
-            stream << record.panelA()
-                   << record.panelB()
-                   << record.batteryA()
-                   << record.batteryB()
-                   << record.load()
-                   << record.control();
+         for (const MeasurementRecord<R>& measurements : pRecords) {
+            for (const Measurement& measurement : measurements) {
+               stream << measurement;
+            }
          }
       }
 

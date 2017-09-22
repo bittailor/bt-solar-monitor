@@ -8,8 +8,10 @@ var plugins = require('gulp-load-plugins')();
 var pwd = process.cwd();
 
 var conf = {
-    device: "bt-electron-solar-monitor",
-    platform: "electron",
+    //device: "bt-electron-solar-monitor",
+    //platform: "electron",
+    device: "bt-photon-2",
+    platform: "photon",
     fw: {
         out: 'fw/target'
     }

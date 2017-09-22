@@ -10,6 +10,7 @@
 #include <array>
 #include <Particle.h>
 #include "Bt/Core/Log.h"
+#include "Bt/Core/Sleep.h"
 
 namespace Bt {
 namespace Sensors {
@@ -26,12 +27,19 @@ class SensorArray
       SensorArray& operator=(const SensorArray&) = delete;
 
       std::array<Reading,N> readAll() {
+         static int sCounter = 0;
+         sCounter++;
          BT_CORE_LOG_DEBUG("SensorArray - power up");
          for (Sensor& sensor : mSensors) {
             sensor.powerUp();
          }
          BT_CORE_LOG_DEBUG("SensorArray - up [%d]");
-         delay(mPowerUpDelayInMs);
+         if(sCounter % 2 == 1) {
+            Bt::Core::msSleep(mPowerUpDelayInMs);
+         } else {
+            delay(mPowerUpDelayInMs);
+         }
+
          std::array<Reading,N> readings;
          for(std::size_t i = 0 ; i < N ; i++) {
             readings[i]= mSensors[i].read();

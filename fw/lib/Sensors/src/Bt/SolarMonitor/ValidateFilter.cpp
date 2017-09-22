@@ -1,7 +1,7 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - Bt::SolarMonitor::Averaging
+//  BITTAILOR.CH - Bt::SolarMonitor::ValidateFilter
 //
 //*************************************************************************************************
 
-#include "Bt/SolarMonitor/Averaging.h"
+#include "Bt/SolarMonitor/ValidateFilter.h"
