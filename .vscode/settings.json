@@ -38,6 +38,9 @@
         "type_traits": "cpp",
         "utility": "cpp",
         "valarray": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "__locale": "cpp",
+        "string": "cpp",
+        "thread": "cpp"
     }
 }

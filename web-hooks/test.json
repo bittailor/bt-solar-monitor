@@ -1,0 +1,10 @@
+{
+    "eventName": "e/2",
+    "url": "http://bc3b3247.ngrok.io/hook/data",
+    "headers": {
+      "X-Timestamp": "{{PARTICLE_PUBLISHED_AT}}"
+    },
+    "json": {
+        "value": "{{PARTICLE_EVENT_VALUE}}"
+    }
+  }

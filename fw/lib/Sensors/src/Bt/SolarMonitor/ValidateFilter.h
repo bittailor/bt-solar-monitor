@@ -15,7 +15,7 @@
 #include <Bt/Core/Log.h>
 #include <Bt/Sensors/INA219.h>
 #include <Bt/SolarMonitor/FilterBase.h>
-#include <Bt/SolarMonitor/Measurement.h>
+#include <Bt/SolarMonitor/Reading.h>
 
 
 namespace Bt {
@@ -25,7 +25,7 @@ template<size_t N>
 class ValidateFilter
 {
    public:
-      typedef std::function<void(const std::array<Bt::SolarMonitor::Measurement, N>&)> Consumer;
+      typedef std::function<void(const std::array<Bt::SolarMonitor::Reading, N>&)> Consumer;
 
       ValidateFilter(const Consumer& pConsumer): mConsumer(pConsumer) {
       }
@@ -41,11 +41,11 @@ class ValidateFilter
 
          if(allValid) {
             if (mConsumer) {
-               std::array<Bt::SolarMonitor::Measurement, N> measurements;
+               std::array<Bt::SolarMonitor::Reading, N> measurements;
                std::transform(pReadings.begin(),pReadings.end(),
                               measurements.begin(),
-                              [](const Sensors::INA219Reading& reading) -> Measurement {
-                                 return Measurement{reading.current, reading.busVoltage};
+                              [](const Sensors::INA219Reading& reading) -> Reading {
+                                 return Reading{reading.current, reading.busVoltage};
                               });
                mConsumer(measurements);
             }

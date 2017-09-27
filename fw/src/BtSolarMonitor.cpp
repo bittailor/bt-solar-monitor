@@ -15,13 +15,14 @@
 #include <Bt/SolarMonitor/ForkFilter.h>
 #include <Bt/SolarMonitor/DisplayFilter.h>
 #include <Bt/SolarMonitor/ValidateFilter.h>
+#include <Bt/SolarMonitor/PublishFilter.h>
 
 // ==== <Configuration> ==========
 
 #define MEASURE_SLEEP 1
 
-const size_t AVERAGE_MINUTES =  5;
-const size_t STOARGE_MINUTES = 30;
+const size_t AVERAGE_SECONDS = 5;  //  5 *60;
+const size_t STOARGE_SECONDS = 10;  // 30 * 5 *60;
 
 #define APN       "gprs.swisscom.ch"
 #define USERNAME  ""
@@ -48,7 +49,7 @@ STARTUP(cellular_credentials_set(APN, USERNAME, PASSWORD, NULL));
 //STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
 //SYSTEM_THREAD(ENABLED);
 
-Serial1LogHandler logHandler(115200,LOG_LEVEL_INFO);
+Serial1LogHandler logHandler(115200,LOG_LEVEL_ALL);
 
 //===
 //retained uint32_t sLoopCounter = 0;
@@ -84,19 +85,20 @@ Bt::Sensors::SensorArray<Bt::Sensors::INA219,Bt::Sensors::INA219Reading,NUMBER_O
 
 Nokia5110LCD::Display sDisplay(A2, D6, D5, A0);
 
-static const size_t STORAGE_SIZE = (STOARGE_MINUTES/AVERAGE_MINUTES);
+static const size_t STORAGE_SIZE = (STOARGE_SECONDS/AVERAGE_SECONDS);
 
-typedef Bt::SolarMonitor::StorageFilter<STORAGE_SIZE, NUMBER_OF_SENSORS> StorageFilter;
-typedef Bt::SolarMonitor::MessageFilter<STORAGE_SIZE, NUMBER_OF_SENSORS> MessageFilter;
+typedef Bt::SolarMonitor::PublishFilter<decltype(Radio),decltype(Particle)> PublishFilter;
+typedef Bt::SolarMonitor::MessageFilter<NUMBER_OF_SENSORS,STORAGE_SIZE> MessageFilter;
 typedef Bt::SolarMonitor::DisplayFilter<NUMBER_OF_SENSORS> DisplayFilter;
 typedef Bt::SolarMonitor::ValidateFilter<NUMBER_OF_SENSORS> ValidateFilter;
 typedef Bt::SolarMonitor::AveragingFilter<NUMBER_OF_SENSORS> AveragingFilter;
 typedef Bt::SolarMonitor::ForkFilter<std::array<Bt::Sensors::INA219Reading, NUMBER_OF_SENSORS>,2> ForkFilter;
 
-MessageFilter sMessageFilter;
-StorageFilter sStorageFilter(std::bind(&MessageFilter::consume,&sMessageFilter, std::placeholders::_1));
-AveragingFilter sAveragingFilter(((AVERAGE_MINUTES*60)/MEASURE_SLEEP),
-                                                   std::bind(&StorageFilter::consume,&sStorageFilter, std::placeholders::_1));
+
+PublishFilter sPublishFilter(Radio,Particle);
+MessageFilter sMessageFilter(std::bind(&PublishFilter::consume, &sPublishFilter, std::placeholders::_1, std::placeholders::_2));
+AveragingFilter sAveragingFilter(((AVERAGE_SECONDS)/MEASURE_SLEEP),
+                                 std::bind(&MessageFilter::consume,&sMessageFilter, std::placeholders::_1));
 
 ValidateFilter sValidateFilter(std::bind(&AveragingFilter::consume, &sAveragingFilter, std::placeholders::_1));
 DisplayFilter sDisplayFilter(sDisplay);
@@ -119,8 +121,8 @@ void tryPublish();
 
 void setup() {
    BT_CORE_LOG_INFO("*** bt-solar-monitor***");
-   RGB.control(true);
-   RGB.color(0, 0, 0);
+   //RGB.control(true);
+   //RGB.color(0, 0, 0);
    setCharging(false);
    Wire.setSpeed(CLOCK_SPEED_100KHZ);
    Wire.begin();
@@ -149,15 +151,8 @@ void setup() {
 
 }
 
-void mySleep(unsigned long ms) {
-   unsigned long timer = millis();
-   while(millis() - timer <  ms) {
-      __WFI();
-   }
-}
-
 void loop() {
-   //digitalWrite(sBlueLed, HIGH);
+   digitalWrite(sBlueLed, HIGH);
    unsigned long timer = millis();
    sLoopCounter++;
    //BT_CORE_LOG_INFO("loop a %u [" __DATE__ " " __TIME__ "]", sLoopCounter );
@@ -165,14 +160,14 @@ void loop() {
    sForkFilter.consume(readings);
    timer = millis() - timer;
    //BT_CORE_LOG_INFO("go to sleep after loop %u took %d ms", sLoopCounter, timer);
-   BT_CORE_LOG_WARN("%lu ms",timer);
+   //BT_CORE_LOG_WARN("%lu ms",timer);
 
-   if((sLoopCounter % 1800) == 1) {
-      tryPublish();
-   }
+//   if((sLoopCounter % 1800) == 1) {
+//      tryPublish();
+//   }
 
    Serial1.flush();
-   //digitalWrite(sBlueLed, LOW);
+   digitalWrite(sBlueLed, LOW);
    //delay(MEASURE_SLEEP * 1000);
    //Bt::Core::msSleep(500);
    System.sleep(A0, RISING, MEASURE_SLEEP);

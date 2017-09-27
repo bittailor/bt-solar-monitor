@@ -9,6 +9,7 @@
 
 #include <array>
 #include <functional>
+#include "Bt/Core/Log.h"
 #include "Bt/SolarMonitor/MeasurementRecord.h"
 
 namespace Bt {
@@ -37,6 +38,7 @@ class StorageFilter
          if(mIndex >= N) {
             mIndex = 0;
             if(mConsumer) {
+               BT_CORE_LOG_INFO("StorageFilter: storage full send it out.");
                mConsumer(mStorage);
             }
          }

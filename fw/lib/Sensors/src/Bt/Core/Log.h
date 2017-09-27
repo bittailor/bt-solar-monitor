@@ -7,6 +7,8 @@
 #ifndef INC__Bt_Core_Log__hpp
 #define INC__Bt_Core_Log__hpp
 
+#include "Particle.h"
+
 #define BT_CORE_LOG_DEBUG(formatString, ...) Log.trace(String::format(formatString,##__VA_ARGS__))
 //#define BT_CORE_LOG_DEBUG(formatString, ...)
 

@@ -10,13 +10,13 @@
 #include <array>
 #include <algorithm>
 #include <Bt/Sensors/INA219.h>
-#include <Bt/SolarMonitor/Measurement.h>
+#include <Bt/SolarMonitor/Reading.h>
 
 namespace Bt {
 namespace SolarMonitor {
 
 template <size_t N>
-using MeasurementRecord = std::array<Measurement,N>;
+using MeasurementRecord = std::array<Reading,N>;
 
 template <size_t N>
 inline const MeasurementRecord<N> operator+(const MeasurementRecord<N> lhs,const MeasurementRecord<N>& rhs)
@@ -26,7 +26,7 @@ inline const MeasurementRecord<N> operator+(const MeasurementRecord<N> lhs,const
            lhs.begin(),lhs.end(),
            rhs.begin(),
            sum.begin(),
-           [](const Measurement& l, const Measurement& r) -> Measurement {return l+r;}
+           [](const Reading& l, const Reading& r) -> Reading {return l+r;}
   );
   return sum;
 }
@@ -38,7 +38,7 @@ inline const MeasurementRecord<N> operator/(const MeasurementRecord<N> lhs, doub
    std::transform(
             lhs.begin(),lhs.end(),
             div.begin(),
-            [rhs](const Measurement& l) -> Measurement {return l/rhs;}
+            [rhs](const Reading& l) -> Reading {return l/rhs;}
    );
    return div;
 }
