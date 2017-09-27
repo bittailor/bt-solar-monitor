@@ -1,6 +1,6 @@
 # Sensors
 
-A Particle library for Sensors
+A Particle library for BtCore
 
 ## Welcome to your library!
 
