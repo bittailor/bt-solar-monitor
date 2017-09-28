@@ -12,24 +12,13 @@ namespace Bt {
 namespace Encoding {
 namespace Z85 {
 
-class Z85Test : public ::testing::Test {
 
-   protected:
-
-      virtual void SetUp() {
-      }
-
-      virtual void TearDown() {
-
-      }
-
-      Z85 mZ85;
-
-};
-
-
-TEST_F(Z85Test, encode) {
-   EXPECT_EQ(1,0);
+TEST(Z85Test, encode) {
+   const size_t BUFFER_SIZE = 100;
+   char buffer[BUFFER_SIZE];
+   uint8_t input[] = {0x86 , 0x4F , 0xD2 , 0x6F , 0xB5 , 0x59 , 0xF7 , 0x5B};
+   encode(input, sizeof(input)/sizeof(input[0]), buffer, BUFFER_SIZE);
+   EXPECT_STREQ(buffer,"HelloWorld");
 }
 
 

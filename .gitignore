@@ -5,10 +5,10 @@
 node_modules/
 
 fw/target/
+fw/lib/BtCore/test/ext
 
 # 3rd party libs currently not commited
 fw/lib/HttpClient
-
 
 web-api/solar-api/vendor/
 web-api/skeleton/

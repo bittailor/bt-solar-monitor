@@ -4,6 +4,7 @@ var fs = require('fs-extra')
 var del = require('del');
 var gulp = require('gulp');
 var plugins = require('gulp-load-plugins')();
+var Q = require('q');
 
 var pwd = process.cwd();
 
@@ -13,9 +14,52 @@ var conf = {
     device: "bt-photon-2",
     platform: "photon",
     fw: {
-        out: 'fw/target'
+        out: 'fw/target',
+        ext: 'fw/lib/BtCore/test/ext'
     }
 };
+
+
+//----
+
+function installGit(url , branch) {
+    var deferred = Q.defer();
+    plugins.util.log(`** install git ${url} ${branch} **`);    
+    var args = ['clone'];
+    if (branch) {
+        args.push('--branch');
+        args.push(branch);    
+    }
+    args.push(url);    
+    spawn('git', args,{
+        stdio: 'inherit',
+        cwd: conf.fw.ext,
+    }).on('exit', (code) => {
+        if(code !== 0) {
+            deferred.reject(code);
+        } else {
+            deferred.resolve(code);
+        }     
+    });
+    return deferred.promise;
+}
+    
+//----
+
+
+gulp.task('install-ext', function(){    
+    return fs.mkdirs(conf.fw.ext).then(function(){
+        var clones = [];
+        clones.push(installGit('https://github.com/google/googletest.git', 'release-1.8.0'));
+        return Q.all(clones);
+    });  
+});
+
+gulp.task('install',['install-ext']);
+
+
+
+//----
 
 gulp.task('clean-make', function(cb) {
     spawn('make', ['clean', 'PLATFORM=' + conf.platform, 'APPDIR=' + path.join(pwd, 'fw')],{
@@ -102,6 +146,6 @@ gulp.task('flash-online', function(cb){
 });
 
 
-gulp.task('build',['compile-online'])
+gulp.task('build',['compile-online']);
 gulp.task('travis', ['compile-online']);
 gulp.task('default', ['build']);
