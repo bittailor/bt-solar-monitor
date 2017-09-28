@@ -25,6 +25,7 @@ var conf = {
 
 function sh(cmd, args, options) {
     var deferred = Q.defer();
+    plugins.util.log(cmd , args.join(" "))
     spawn(cmd, args, options).on('exit', (code) => {
         if(code !== 0) {
             deferred.reject(code);
