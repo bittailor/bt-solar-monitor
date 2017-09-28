@@ -22,6 +22,21 @@ var conf = {
 
 //----
 
+
+function sh(cmd, args, options) {
+    var deferred = Q.defer();
+    spawn(cmd, args, options).on('exit', (code) => {
+        if(code !== 0) {
+            deferred.reject(code);
+        } else {
+            deferred.resolve(code);
+        }     
+    });
+    return deferred.promise;
+}
+
+//----
+
 function installGit(url , branch) {
     var deferred = Q.defer();
     plugins.util.log(`** install git ${url} ${branch} **`);    
@@ -57,9 +72,22 @@ gulp.task('install-ext', function(){
 
 gulp.task('install',['install-ext']);
 
+//----
 
+gulp.task('fw:host:test', () => {
+    var out = path.join(conf.fw.out, 'host-test');
+    var options = { stdio: 'inherit', cwd: out };
+    return fs.mkdirs(out)
+    .then(() => {       
+        return sh('cmake', ['../../lib/BtCore/test'], options);
+    })
+    .then(()=>{
+        return sh('make', ['check'], options);
+    });
+});
 
 //----
+
 
 gulp.task('clean-make', function(cb) {
     spawn('make', ['clean', 'PLATFORM=' + conf.platform, 'APPDIR=' + path.join(pwd, 'fw')],{

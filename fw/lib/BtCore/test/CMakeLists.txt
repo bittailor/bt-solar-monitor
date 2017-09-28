@@ -31,5 +31,5 @@ add_executable( BtCoreTest ${TEST_SOURCES} )
 # Link test executable against gtest & gtest_main
 target_link_libraries(BtCoreTest BtCore gtest gtest_main)
 
-add_test(RunBtCoreTest BtCoreTest)
-add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} DEPENDS BtCoreTest)
+# add_test(RunBtCoreTest BtCoreTest)
+add_custom_target(check COMMAND BtCoreTest DEPENDS BtCoreTest)
