@@ -166,5 +166,5 @@ gulp.task('flash-online', function(cb){
 
 
 gulp.task('build',['compile-local','fw:host:test']);
-gulp.task('travis', ['compile-online']);
+gulp.task('travis', ['compile-online', 'fw:host:test']);
 gulp.task('default', ['build']);
