@@ -5,7 +5,7 @@
 node_modules/
 
 fw/target/
-fw/lib/BtCore/test/ext
+fw/external
 
 # 3rd party libs currently not commited
 fw/lib/HttpClient

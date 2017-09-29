@@ -15,17 +15,19 @@ var conf = {
     platform: "photon",
     fw: {
         out: 'fw/target',
-        ext: 'fw/lib/BtCore/test/ext'
+        ext: 'fw/external'
     }
 };
 
-
 //----
 
-
-function sh(cmd, args, options) {
+function sh(cmd, args, cwd) {
     var deferred = Q.defer();
     plugins.util.log(cmd , args.join(" "))
+    var options = {
+        stdio: 'inherit',
+        cwd: cwd,
+    }
     spawn(cmd, args, options).on('exit', (code) => {
         if(code !== 0) {
             deferred.reject(code);
@@ -47,21 +49,10 @@ function installGit(url , branch) {
         args.push(branch);    
     }
     args.push(url);    
-    spawn('git', args,{
-        stdio: 'inherit',
-        cwd: conf.fw.ext,
-    }).on('exit', (code) => {
-        if(code !== 0) {
-            deferred.reject(code);
-        } else {
-            deferred.resolve(code);
-        }     
-    });
-    return deferred.promise;
+    return sh('git', args,conf.fw.ext)
 }
     
 //----
-
 
 gulp.task('install-ext', function(){    
     return fs.mkdirs(conf.fw.ext).then(function(){
@@ -77,13 +68,12 @@ gulp.task('install',['install-ext']);
 
 gulp.task('fw:host:test', () => {
     var out = path.join(conf.fw.out, 'host-test');
-    var options = { stdio: 'inherit', cwd: out };
     return fs.mkdirs(out)
     .then(() => {       
-        return sh('cmake', ['../../lib/BtCore/test'], options);
+        return sh('cmake', ['-DCMAKE_BUILD_TYPE=Debug','../../'], out);
     })
     .then(()=>{
-        return sh('make', ['check'], options);
+        return sh('make', ['check'], out);
     });
 });
 
@@ -107,7 +97,7 @@ gulp.task('clean-dir', function () {
 
 gulp.task('clean',['clean-dir','clean-make'])
 
-gulp.task('compile-core', function(cb){
+gulp.task('gulp', function(cb){
     spawn('make', ['all', 'PLATFORM=' + conf.platform, 'APPDIR=' + path.join(pwd, 'fw')],{
         stdio: 'inherit',
         cwd:'../firmware/modules'
@@ -175,6 +165,6 @@ gulp.task('flash-online', function(cb){
 });
 
 
-gulp.task('build',['compile-online']);
+gulp.task('build',['compile-local','fw:host:test']);
 gulp.task('travis', ['compile-online']);
 gulp.task('default', ['build']);

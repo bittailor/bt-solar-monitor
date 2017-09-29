@@ -20,6 +20,7 @@ constexpr int requiredEncodeBufferSize(size_t pSize)
 }
 
 bool encode(const uint8_t* pData, size_t pSize, char* buffer, size_t pMaxBufferSize);
+size_t decode(const char* pString, uint8_t* pBuffer, size_t pMaxBufferSize);
 
 } // namespace Z85
 } // namespace Encoding
