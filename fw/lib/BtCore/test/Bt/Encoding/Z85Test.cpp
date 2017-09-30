@@ -61,11 +61,72 @@ TEST(Z85Test, roundtrip_int16_t) {
    uint8_t outputArray[sizeOfArry(inputArray)];
 
    encode(inputArray, sizeOfArry(inputArray), buffer, BUFFER_SIZE);
+   std::cout << std::endl << "******" << std::endl << (const char*)buffer << std::endl << "******" << std::endl;
    size_t lenght = decode(buffer, outputArray, sizeOfArry(outputArray));
+   std::cout << std::endl << "******" << std::endl;
+   for(int i : outputArray) {
+      std::cout << i << std::endl;
+   }
+   std::cout << "******" << std::endl;
    int16_t output1 = Bt::Core::binaryRead<int16_t>(outputArray);
    int16_t output2 = Bt::Core::binaryRead<int16_t>(outputArray+sizeof(int16_t));
    EXPECT_EQ(output1, input1);
    EXPECT_EQ(output2, input2);
+}
+
+TEST(Z85Test, roundtrip_negative_int16_t) {
+   const size_t BUFFER_SIZE = 100;
+   char buffer[BUFFER_SIZE];
+
+   int16_t input1 = -1;
+   int16_t input2 = -2;
+   uint8_t inputArray[2*sizeof(int16_t)];
+   Bt::Core::binaryAppend(input1,inputArray);
+   Bt::Core::binaryAppend(input2,inputArray+sizeof(int16_t));
+   uint8_t outputArray[sizeOfArry(inputArray)];
+
+   encode(inputArray, sizeOfArry(inputArray), buffer, BUFFER_SIZE);
+   std::cout << std::endl << "******" <<  strlen((const char*)buffer)  << std::endl << (const char*)buffer << std::endl << "******" << std::endl;
+   size_t lenght = decode(buffer, outputArray, sizeOfArry(outputArray));
+   std::cout << std::endl << "******" << std::endl;
+   for(int i : outputArray) {
+      std::cout << i << std::endl;
+   }
+   std::cout << "******" << std::endl;
+   int16_t output1 = Bt::Core::binaryRead<int16_t>(outputArray);
+   int16_t output2 = Bt::Core::binaryRead<int16_t>(outputArray+sizeof(int16_t));
+   EXPECT_EQ(output1, input1);
+   EXPECT_EQ(output2, input2);
+}
+
+TEST(Z85Test, roundtrip_negative_int16_t_borders) {
+   const size_t BUFFER_SIZE = 100;
+   char buffer[BUFFER_SIZE];
+
+   int16_t inputs[] = {32767, 2345 , 1, 0, 0, -1 , -5432 , -32768};
+   int16_t outputs[sizeOfArry(inputs)] = {0};
+
+   uint8_t inputArray[sizeof(inputs)];
+
+   for (int i = 0; i < sizeOfArry(inputs); ++i) {
+      Bt::Core::binaryAppend(inputs[i],inputArray + i * sizeof(int16_t));
+   }
+
+   uint8_t outputArray[sizeof(inputs)];
+   encode(inputArray, sizeOfArry(inputArray), buffer, BUFFER_SIZE);
+   std::cout << std::endl << "******" <<  strlen((const char*)buffer) << std::endl << (const char*)buffer << std::endl << "******" << std::endl;
+   size_t lenght = decode(buffer, outputArray, sizeOfArry(outputArray));
+   std::cout << std::endl << "******" << lenght << std::endl;
+   for(int i : outputArray) {
+      std::cout << i << std::endl;
+   }
+   std::cout << "******" << std::endl;
+
+   for (int i = 0; i < sizeOfArry(outputs); ++i) {
+      outputs[i] = Bt::Core::binaryRead<int16_t>(outputArray + i * sizeof(int16_t));
+   }
+
+   EXPECT_THAT(std::vector<int16_t>(outputs, outputs+sizeOfArry(outputs)), ElementsAreArray(inputs));
 }
 
 

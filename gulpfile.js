@@ -16,6 +16,9 @@ var conf = {
     fw: {
         out: 'fw/target',
         ext: 'fw/external'
+    },
+    web: {
+        api: 'web-api/solar-api'
     }
 };
 
@@ -75,6 +78,18 @@ gulp.task('fw:host:test', () => {
     .then(()=>{
         return sh('make', ['check'], out);
     });
+});
+
+//----
+
+gulp.task('web:api:test', () => {
+    var cwd = conf.web.api;
+    return sh('vendor/bin/phpunit', ['tests'], cwd);
+});
+
+gulp.task('web:api:serve', () => {
+    var cwd = path.join(conf.web.api,'public');
+    return sh('php', ['-S', 'localhost:8080'], cwd);
 });
 
 //----

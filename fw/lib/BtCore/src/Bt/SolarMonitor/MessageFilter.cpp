@@ -25,7 +25,7 @@ Message::Message() {
 void Message::begin(size_t id, size_t i, size_t n) {
    mBuffer[0] = 0;
    mCount = 0;
-   snprintf(mBuffer, MESSAGE_BUFFER_LENGHT, "%u:%u:%u:", id, i, n);
+   snprintf(mBuffer, MESSAGE_BUFFER_LENGHT, "%u|%u|%u|", id, i, n);
 }
 
 void Message::append(const Reading& pReading) {

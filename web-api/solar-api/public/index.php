@@ -11,6 +11,8 @@ if (PHP_SAPI == 'cli-server') {
 
 require __DIR__ . '/../vendor/autoload.php';
 
+use SolarApi\Message;
+
 // Create and configure Slim app
 $config = ['settings' => [
     'addContentLengthHeader' => false,
@@ -38,7 +40,7 @@ $app->post('/hook/data', function ($request, $response, $args) {
     $data = $parsedBody['data'];
     error_log("data:");
     error_log(print_r($data, true));
-    $parts  = explode(":", $data);
+    $parts  = explode("|", $data);
     error_log("parts:");
     error_log(print_r($parts, true)); 
     
@@ -46,13 +48,9 @@ $app->post('/hook/data', function ($request, $response, $args) {
     error_log("encoded:");
     error_log(print_r($encoded, true)); 
     
-    $decoded = z85_decode($encoded);
-    error_log("decoded:");
-    error_log(print_r($decoded, true)); 
-
-    $unpacked = unpack('n*',$decoded);
-    error_log("unpacked:");
-    error_log(print_r($unpacked, true)); 
+    $values = Message::unpack($encoded);  ;
+    error_log("values:");
+    error_log(print_r($values, true)); 
 
     #error_log(print_r( $request->getBody(), true ));
     return $response->write("OK");
