@@ -29,25 +29,25 @@ $app->get('/hello/{name}', function ($request, $response, $args) {
 $app->post('/hook/data', function ($request, $response, $args) {
     error_log("POST /hook/data");
     $raw = $request->getBody()->getContents();
-    error_log("raw:");
-    error_log($raw);
-    error_log("raw-print_r:");
-    error_log(print_r($raw, true));
+    #error_log("raw:");
+    #error_log($raw);
+    #error_log("raw-print_r:");
+    #error_log(print_r($raw, true));
     $parsedBody = $request->getParsedBody();
-    error_log("parsedBody:");
-    error_log(print_r($parsedBody, true));
+    #error_log("parsedBody:");
+    #error_log(print_r($parsedBody, true));
 
     $data = $parsedBody['data'];
-    error_log("data:");
-    error_log(print_r($data, true));
+    #error_log("data:");
+    #error_log(print_r($data, true));
     $parts  = explode("|", $data);
-    error_log("parts:");
-    error_log(print_r($parts, true)); 
+    #error_log("parts:");
+    #error_log(print_r($parts, true)); 
     
     $encoded = $parts[3];
-    error_log("encoded:");
-    error_log(print_r($encoded, true)); 
-    
+    #error_log("encoded:");
+    #error_log(print_r($encoded, true)); 
+    error_log("message $parts[0] $parts[1] $parts[2] >");
     $values = Message::unpack($encoded);  ;
     error_log("values:");
     error_log(print_r($values, true)); 

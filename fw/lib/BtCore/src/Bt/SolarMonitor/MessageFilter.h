@@ -44,7 +44,7 @@ class MessageFilter
       typedef std::function<void(const MessageString*, size_t size)> Consumer;
 
       MessageFilter(const Consumer& pConsumer = Consumer())
-      :mMessageCounter(0), mCurrentMessageToAppend(0), mConsumer(pConsumer){
+      :mMessageCounter(0), mNumerOfStoredMeasurementRecords(0), mCurrentMessageToAppend(0), mConsumer(pConsumer){
          mMessages[0].begin(mMessageCounter, mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
       }
 
@@ -54,12 +54,13 @@ class MessageFilter
 
       void consume(const MeasurementRecord<N>& pRecords) {
          Message& message = mMessages[mCurrentMessageToAppend];
-         BT_CORE_LOG_INFO("MessageFilter: append to %u of %u :", mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
          for(const Reading& reading : pRecords) {
             message.append(reading);
          }
-         if(message.full()) {
-            BT_CORE_LOG_INFO("MessageFilter: message %u of %u full :", mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
+         mNumerOfStoredMeasurementRecords++;
+         BT_CORE_LOG_INFO("MessageFilter: append MeasurementRecord %u of %u to Message %u of %u :", mNumerOfStoredMeasurementRecords, C , mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
+         if(message.full() || mNumerOfStoredMeasurementRecords >= C) {
+            BT_CORE_LOG_INFO("MessageFilter: message %u of %u ready :", mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
             message.end();
             mCurrentMessageToAppend++;
             if(mCurrentMessageToAppend >= NUMBER_OF_MESSAGES) {
@@ -76,6 +77,7 @@ class MessageFilter
                }
                mMessageCounter++;
                mCurrentMessageToAppend = 0;
+               mNumerOfStoredMeasurementRecords = 0;
             }
             mMessages[mCurrentMessageToAppend].begin(mMessageCounter, mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
 
@@ -90,11 +92,13 @@ class MessageFilter
    private:
       static const size_t MESSAGE_BUFFER_LENGHT = 256;
       static const size_t NUMBER_OF_MEASUREMENTRECORD_PER_MESSAGE = 6;
+
       static const size_t NUMBER_OF_MESSAGES = ( C / NUMBER_OF_MEASUREMENTRECORD_PER_MESSAGE) +
                                                ( C % NUMBER_OF_MEASUREMENTRECORD_PER_MESSAGE != 0 ? 1 : 0); // +1;
 
       typedef char MessageBuffer[MESSAGE_BUFFER_LENGHT];
       size_t mMessageCounter;
+      size_t mNumerOfStoredMeasurementRecords;
       size_t mCurrentMessageToAppend;
       std::array<Message,NUMBER_OF_MESSAGES> mMessages;
       Consumer mConsumer;

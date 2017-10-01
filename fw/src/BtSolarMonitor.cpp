@@ -21,8 +21,8 @@
 
 #define MEASURE_SLEEP 1
 
-const size_t AVERAGE_SECONDS = 5;  //  5 *60;
-const size_t STOARGE_SECONDS = 10;  // 30 * 5 *60;
+const size_t AVERAGE_SECONDS = 5 *60;        // 5    //  5 *60;
+const size_t STOARGE_SECONDS = 60 * 60 * 4;  // 40;  // 30 * 5 *60;
 
 #define APN       "gprs.swisscom.ch"
 #define USERNAME  ""
@@ -49,7 +49,7 @@ STARTUP(cellular_credentials_set(APN, USERNAME, PASSWORD, NULL));
 //STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
 //SYSTEM_THREAD(ENABLED);
 
-Serial1LogHandler logHandler(115200,LOG_LEVEL_ALL);
+Serial1LogHandler logHandler(115200,LOG_LEVEL_INFO);
 
 //===
 //retained uint32_t sLoopCounter = 0;
@@ -120,7 +120,7 @@ void tryPublish();
 
 
 void setup() {
-   BT_CORE_LOG_INFO("*** bt-solar-monitor***");
+   BT_CORE_LOG_INFO("*** bt-solar-monitor 2 ***");
    //RGB.control(true);
    //RGB.color(0, 0, 0);
    setCharging(false);
