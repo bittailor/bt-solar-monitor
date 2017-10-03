@@ -21,8 +21,8 @@
 
 #define MEASURE_SLEEP 1
 
-const size_t AVERAGE_SECONDS = 5 *60;        // 5    //  5 *60;
-const size_t STOARGE_SECONDS = 60 * 60 * 4;  // 40;  // 30 * 5 *60;
+const size_t AVERAGE_SECONDS = 5 *  60;     //  2  ; //5 *60; // 5    //  5 *60;
+const size_t STOARGE_SECONDS = 60 * 60;     // 96 ;  // 60 * 60 * 4;  // 40;  // 30 * 5 *60;
 
 #define APN       "gprs.swisscom.ch"
 #define USERNAME  ""
@@ -115,7 +115,7 @@ ForkFilter sForkFilter(ForkFilter::Consumers{
 // BackLight
 
 void setCharging(bool enable);
-void tryPublish();
+void initialPublish();
 
 
 
@@ -132,17 +132,19 @@ void setup() {
    sDisplay.setContrast(55); // Pretty good value, play around with it
    sDisplay.updateDisplay(); // with displayMap untouched, SFE logo
 
-
-   BT_CORE_LOG_INFO("!!! Cellular.on()  !!!");
-   Radio.on();
-   BT_CORE_LOG_INFO("!!! Cellular.off()  !!!");
-   Radio.off();
-   BT_CORE_LOG_INFO("!!! Cellular DONE  !!!");
 #if PLATFORM_ID == 10
    BT_CORE_LOG_INFO("!!! FuelGauge.sleep()  !!!");
    FuelGauge().sleep();
    BT_CORE_LOG_INFO("!!! FuelGauge DONE  !!!");
 #endif
+
+   initialPublish();
+
+//   Radio.on();
+//   BT_CORE_LOG_INFO("!!! Cellular.off()  !!!");
+//   Radio.off();
+//   BT_CORE_LOG_INFO("!!! Cellular DONE  !!!");
+
 
    for (Bt::Sensors::INA219& sensor : sSensors) {
       sensor.begin();
@@ -216,7 +218,7 @@ void setCharging(bool enable) {
 #endif
 }
 
-void tryPublish() {
+void initialPublish() {
    unsigned long timer = millis();
    BT_CORE_LOG_INFO("Cellular.on() ...");
    Radio.on();
@@ -240,23 +242,9 @@ void tryPublish() {
    }
    BT_CORE_LOG_INFO("... while(!Particle.connected() DONE");
 
-   for (int msgCounter = 0; msgCounter < 8; ++msgCounter) {
-
-      const size_t MESSAGE_SIZE = 250;
-      char message[MESSAGE_SIZE+1] = {0};
-
-      size_t used = snprintf(message, MESSAGE_SIZE, "loop %lu.%d : ", sLoopCounter, msgCounter);
-      for (size_t i = used; i < MESSAGE_SIZE ; ++i) {
-         message[i] = ((i-used) % 56) + 65;
-      }
-      message[MESSAGE_SIZE] = 0;
-
-      BT_CORE_LOG_INFO("Particle.publish(%d) %d ...", msgCounter, strlen(message));
-      bool ack = Particle.publish("e/2/loop", message, WITH_ACK);
-      BT_CORE_LOG_INFO(" ... Particle.publish(%d) %d", msgCounter, ack);
-      Particle.process();
-
-   }
+   bool ack = Particle.publish("e/2/status", "start", WITH_ACK);
+   BT_CORE_LOG_INFO(" ... Particle.publish(\"start\") %d", ack);
+   Particle.process();
 
    BT_CORE_LOG_INFO("Cellular.disconnect() ...");
    Particle.disconnect();

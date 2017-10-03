@@ -11,4 +11,6 @@ fw/external
 fw/lib/HttpClient
 
 web-api/solar-api/vendor/
+web-api/solar-api/filestorage/
+
 web-api/skeleton/

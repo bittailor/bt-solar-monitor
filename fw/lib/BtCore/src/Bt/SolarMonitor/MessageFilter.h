@@ -71,7 +71,7 @@ class MessageFilter
                   }
                   BT_CORE_LOG_INFO("MessageFilter: new messages [%u] ready:", NUMBER_OF_MESSAGES);
                   for (size_t i = 0; i < NUMBER_OF_MESSAGES; ++i) {
-                     BT_CORE_LOG_INFO("  - [%u]: %s", i,  messages[i]);
+                     BT_CORE_LOG_DEBUG("  - [%u]: %u", i, strlen(messages[i]));
                   }
                   mConsumer(messages, NUMBER_OF_MESSAGES);
                }
@@ -80,7 +80,6 @@ class MessageFilter
                mNumerOfStoredMeasurementRecords = 0;
             }
             mMessages[mCurrentMessageToAppend].begin(mMessageCounter, mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
-
          }
 
       }

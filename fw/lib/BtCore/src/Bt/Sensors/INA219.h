@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include <Particle.h>
+#include <Bt/Core/Platform.h>
 
 namespace Bt {
 namespace Sensors {

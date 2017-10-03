@@ -5,42 +5,105 @@ use SolarApi\Message;
 
 class MessageTest extends TestCase
 {
-    public function testMessage_int16_t()
+    public function testMessage_MeasurementsCount()
     {
-        $messageString = "5.vUd";
-        $values = Message::unpack($messageString);     
-        $this->assertEquals('array', gettype($values));
-        $this->assertEquals(2, count( $values));
-        $this->assertEquals(array(4567, 4711), $values);
+        $message = $this->createExampleMessageWithThreeMeasurements();
+        $this->assertEquals(3, count($message->measurements));
     }
 
-    public function testMessage_int16_t_negative()
+    public function testMessage_MeasurementDates()
     {
-        $messageString = "%nSb#";
-        $values = Message::unpack($messageString);     
-        $this->assertEquals('array', gettype($values));
-        $this->assertEquals(2, count( $values));
-        $this->assertEquals(array(-1, -2), $values);
+        $message = $this->createExampleMessageWithThreeMeasurements();
+        $this->assertEquals(new DateTime('2017-10-01T13:14:15Z'), $message->measurements[0]->timestamp);
+        $this->assertEquals(new DateTime('2017-10-01T13:24:15Z'), $message->measurements[1]->timestamp);
+        $this->assertEquals(new DateTime('2017-10-01T13:34:15Z'), $message->measurements[2]->timestamp);
     }
 
-    public function testMessage_int16_t_borders()
+    public function testMessage_MeasurementReadings()
     {
-        $messageString = "FbY*70096100960(D1FQ";
-        $values = Message::unpack($messageString);     
-        $this->assertEquals('array', gettype($values));
-        $this->assertEquals(array(32767, 2345 , 1, 0, 0, -1 , -5432 , -32768), $values);
+        $message = $this->createExampleMessageWithThreeMeasurements();
+        $this->assertEquals(0.139, $message->measurements[0]->readings[2]->current);
+        $this->assertEquals(1.168, $message->measurements[0]->readings[5]->voltage);
+        $this->assertEquals(0.219, $message->measurements[1]->readings[0]->current);
+        $this->assertEquals(1.248, $message->measurements[1]->readings[3]->voltage);
+        $this->assertEquals(0.359, $message->measurements[2]->readings[4]->current);
+        $this->assertEquals(1.328, $message->measurements[2]->readings[1]->voltage);
     }
 
-
-    
-
-    public function testSolarMessage()
+    public function testMessage_OneEntry()
     {
-        $messageString = "00S(M00S(E00J/A00A-u%n0fi000Cc00S(H00S(y00A-z00A-u%n0fg000Cc00S(H00S(z00J/A00rVu%n0fg000Ca00S(H00S(z00J/C00rVu%n0fi000Cb00S(G00S(x00S(B00A-v%n0fg000Cc00S(H00S(z00J/A00A-u%n0fg000Cb";
-        $values = Message::unpack($messageString);     
-        $this->assertEquals('array', gettype($values));
-        $this->assertEquals(2*6*6, count( $values));
+        $message = $this->createExampleMessageWithOneMeasurements();
+        $this->assertEquals(new DateTime('2017-10-01T13:14:15Z'), $message->measurements[0]->timestamp);
     }
-  
+
+    public function testMessage_TwoEntry()
+    {
+        $message = $this->createExampleMessageWithTwoMeasurements();
+        $this->assertEquals(new DateTime('2017-10-01T13:14:15Z'), $message->measurements[0]->timestamp);
+        $this->assertEquals(new DateTime('2017-10-01T13:53:15Z'), $message->measurements[1]->timestamp);
+    }
+
+    function createExampleMessageWithThreeMeasurements() {
+         return new Message(
+            '2017-10-01T13:14:15Z',
+            '2017-10-01T13:34:15Z',
+            array(
+                119 , 1118,     
+                129 , 1128,     
+                139 , 1138,     
+                149 , 1148,     
+                159 , 1158,     
+                169 , 1168,
+                
+                219 , 1218,     
+                229 , 1228,     
+                239 , 1238,     
+                249 , 1248,     
+                259 , 1258,     
+                269 , 1268,
+
+                319 , 1318,     
+                329 , 1328,     
+                339 , 1338,     
+                349 , 1348,     
+                359 , 1358,     
+                369 , 1368,
+            ));
+    }
+
+    function createExampleMessageWithOneMeasurements() {
+        return new Message(
+           '2017-10-01T13:14:15Z',
+           '2017-10-01T13:14:15Z',
+           array(
+               119 , 1118,     
+               129 , 1128,     
+               139 , 1138,     
+               149 , 1148,     
+               159 , 1158,     
+               169 , 1168,
+           ));
+   }
+
+   function createExampleMessageWithTwoMeasurements() {
+    return new Message(
+       '2017-10-01T13:14:15Z',
+       '2017-10-01T13:53:15Z',
+       array(
+           119 , 1118,     
+           129 , 1128,     
+           139 , 1138,     
+           149 , 1148,     
+           159 , 1158,     
+           169 , 1168,
+        
+           319 , 1318,     
+           329 , 1328,     
+           339 , 1338,     
+           349 , 1348,     
+           359 , 1358,     
+           369 , 1368,
+       ));
+    }
 }
 ?>

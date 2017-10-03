@@ -18,6 +18,8 @@ include_directories(${gmock_SOURCE_DIR}/include ${gmock_SOURCE_DIR})
 set(BTCORE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/lib/BtCore/src)
 set(BTCORE_SOURCE_FILES 
     ${BTCORE_SOURCE_DIR}/Bt/Encoding/Z85.cpp    
+    ${BTCORE_SOURCE_DIR}/Bt/SolarMonitor/MessageFilter.cpp
+    ${BTCORE_SOURCE_DIR}/Bt/Core/Platform.cpp    
 )
 
 include_directories(${BTCORE_SOURCE_DIR})

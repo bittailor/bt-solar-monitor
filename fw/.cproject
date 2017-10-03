@@ -58,6 +58,7 @@
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.449914367" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="SPARK=1"/>
 									<listOptionValue builtIn="false" value="retained"/>
+									<listOptionValue builtIn="false" value="SPARK_PLATFORM"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1251389029" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -90,6 +91,7 @@
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1685018826" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="SPARK=1"/>
 									<listOptionValue builtIn="false" value="retained"/>
+									<listOptionValue builtIn="false" value="SPARK_PLATFORM"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.429339185" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>

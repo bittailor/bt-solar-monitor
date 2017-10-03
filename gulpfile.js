@@ -9,10 +9,10 @@ var Q = require('q');
 var pwd = process.cwd();
 
 var conf = {
-    //device: "bt-electron-solar-monitor",
-    //platform: "electron",
-    device: "bt-photon-2",
-    platform: "photon",
+    device: "bt-electron-solar",
+    platform: "electron",
+    //device: "bt-photon-2",
+    //platform: "photon",
     fw: {
         out: 'fw/target',
         ext: 'fw/external'
@@ -112,7 +112,7 @@ gulp.task('clean-dir', function () {
 
 gulp.task('clean',['clean-dir','clean-make'])
 
-gulp.task('gulp', function(cb){
+gulp.task('compile-core', function(cb){
     spawn('make', ['all', 'PLATFORM=' + conf.platform, 'APPDIR=' + path.join(pwd, 'fw')],{
         stdio: 'inherit',
         cwd:'../firmware/modules'

@@ -10,6 +10,7 @@ if (PHP_SAPI == 'cli-server') {
 }
 
 require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../filestorage/configuration/configuration.php';
 
 use SolarApi\Message;
 
@@ -18,13 +19,73 @@ $config = ['settings' => [
     'addContentLengthHeader' => false,
 ]];
 
+date_default_timezone_set('Europe/Zurich');
+
 $app = new \Slim\App($config);
+
+$container = $app->getContainer();
+$container['WebHookController'] = function($c) {
+    return new SolarApi\WebHookController(new SolarApi\MessageFactory(), new SolarApi\MessageToXivelyConverter());
+};
 
 // Define app routes
 $app->get('/hello/{name}', function ($request, $response, $args) {
     error_log("GET /hello/{$args['name']}");
     return $response->write("Hello " . $args['name']);
 });
+
+$app->post('/hook/execute', SolarApi\HomeController::class . ':execute');
+
+$app->post('/test/toxively', function ($request, $response, $args) {
+    $raw = $request->getBody()->getContents();
+    $parsedBody = $request->getParsedBody();
+    $data = $parsedBody['data'];
+    $factory = new SolarApi\MessageFactory();
+    $converter = new SolarApi\MessageToXively();
+    $message = $factory->create($data);
+    $xiMessage = $converter->convert($message);
+    $xi = new \Xively\Api(SOLAR_API_XIVELY_API_KEY);
+    $feed = $xi->feeds('625281756');
+    $r = $feed->update($xiMessage)->get();
+    error_log("result:");
+    error_log(print_r($r, true));
+    return $response->write("OK");
+});
+
+$app->get('/test/xively', function ($request, $response, $args) {
+    $xi = new \Xively\Api(SOLAR_API_XIVELY_API_KEY);
+    $feed = $xi->feeds('625281756');
+    $time = time();
+    $r = $feed->update(array(
+        'version'     => '1.0.0',
+        'datastreams' => array(
+            array(
+                'id'         => 'Current',
+                'datapoints' => array(
+                    array('at' => date('c', $time-6), 'value' => 2.0),
+                    array('at' => date('c', $time-4), 'value' => 2.1),
+                    array('at' => date('c', $time-2), 'value' => 2.2),
+                    array('at' => date('c', $time),   'value' => 2.3),
+                ),
+            ),
+            array(
+                'id'         => 'Voltage',
+                'datapoints' => array(
+                    array('at' => date('c', $time-6), 'value' => 12.0),
+                    array('at' => date('c', $time-4), 'value' => 12.1),
+                    array('at' => date('c', $time-2), 'value' => 12.2),
+                    array('at' => date('c', $time),   'value' => 12.3),
+                ),
+            ),
+        ),
+    ))->get();
+    error_log("result:");
+    error_log(print_r($r, true));
+
+    return $response->write("OK");
+});
+
+
 
 $app->post('/hook/data', function ($request, $response, $args) {
     error_log("POST /hook/data");
@@ -34,8 +95,44 @@ $app->post('/hook/data', function ($request, $response, $args) {
     #error_log("raw-print_r:");
     #error_log(print_r($raw, true));
     $parsedBody = $request->getParsedBody();
-    #error_log("parsedBody:");
-    #error_log(print_r($parsedBody, true));
+    error_log("parsedBody:");
+    error_log(print_r($parsedBody, true));
+
+    $data = $parsedBody['data'];
+    $factory = new SolarApi\MessageFactory();
+    $message = $factory->create($data);
+
+    error_log("message:");
+    error_log(print_r($message, true));
+
+    #error_log("data:");
+    #error_log(print_r($data, true));
+    #$parts  = explode("|", $data);
+    #error_log("parts:");
+    #error_log(print_r($parts, true)); 
+    
+    #$encoded = $parts[4];
+    #error_log("encoded:");
+    #error_log(print_r($encoded, true)); 
+    #error_log("message $parts[0] $parts[1] $parts[2] $parts[3] $parts[5] >");
+    #$values = Message::unpack($encoded);  ;
+    #error_log("values:");
+    #error_log(print_r($values, true)); 
+
+    #error_log(print_r( $request->getBody(), true ));
+    return $response->write("OK");
+});
+
+$app->post('/hook/dev', function ($request, $response, $args) {
+    error_log("POST /hook/data");
+    $raw = $request->getBody()->getContents();
+    #error_log("raw:");
+    #error_log($raw);
+    #error_log("raw-print_r:");
+    #error_log(print_r($raw, true));
+    $parsedBody = $request->getParsedBody();
+    error_log("parsedBody:");
+    error_log(print_r($parsedBody, true));
 
     $data = $parsedBody['data'];
     #error_log("data:");
@@ -44,11 +141,11 @@ $app->post('/hook/data', function ($request, $response, $args) {
     #error_log("parts:");
     #error_log(print_r($parts, true)); 
     
-    $encoded = $parts[3];
+    $encoded = $parts[4];
     #error_log("encoded:");
     #error_log(print_r($encoded, true)); 
-    error_log("message $parts[0] $parts[1] $parts[2] >");
-    $values = Message::unpack($encoded);  ;
+    error_log("message $parts[0] $parts[1] $parts[2] $parts[3] $parts[5] >");
+    $values = MessageFactory::unpack($encoded);
     error_log("values:");
     error_log(print_r($values, true)); 
 

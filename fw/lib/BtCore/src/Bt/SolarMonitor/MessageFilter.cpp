@@ -29,12 +29,19 @@ void Message::begin(size_t id, size_t i, size_t n) {
 }
 
 void Message::append(const Reading& pReading) {
+   if(mCount == 0) {
+      size_t length = strlen(mBuffer);
+      snprintf(mBuffer + length, MESSAGE_BUFFER_LENGHT - length, "%s|",  Time.format(TIME_FORMAT_ISO8601_FULL).c_str());
+   }
    append(scale(pReading.current()), scale(pReading.voltage()));
    mCount++;
+
 }
 
 void Message::end() {
    BT_CORE_LOG_INFO("Message: Message::end() %u", strlen(mBuffer));
+   size_t length = strlen(mBuffer);
+   snprintf(mBuffer + length, MESSAGE_BUFFER_LENGHT - length, "|%s",  Time.format(TIME_FORMAT_ISO8601_FULL).c_str());
 }
 
 bool Message::full() {

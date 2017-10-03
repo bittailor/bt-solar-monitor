@@ -9,8 +9,8 @@
 
 #include <stddef.h>
 
-
 #include <Bt/Core/Log.h>
+#include <Bt/Core/Sleep.h>
 
 namespace Bt {
 namespace SolarMonitor {
@@ -54,6 +54,12 @@ class PublishFilter
             bool ack = mCloud.publish("e/2/data", pMessages[msgCounter], WITH_ACK);
             BT_CORE_LOG_INFO(" ... mCloud.publish(%d) %d", strlen(pMessages[msgCounter]), ack);
             mCloud.process();
+            if(!ack) {
+               BT_CORE_LOG_WARN("sleep and try to re-send");
+               Bt::Core::msSleep(1000);
+               msgCounter--;
+            }
+
          }
 
          {

@@ -8,9 +8,9 @@
 #define INC__Bt_Sensors_SensorArray__h
 
 #include <array>
-#include <Particle.h>
-#include "Bt/Core/Log.h"
-#include "Bt/Core/Sleep.h"
+#include <Bt/Core/Platform.h>
+#include <Bt/Core/Log.h>
+#include <Bt/Core/Sleep.h>
 
 namespace Bt {
 namespace Sensors {

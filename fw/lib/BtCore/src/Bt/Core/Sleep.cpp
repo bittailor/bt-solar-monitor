@@ -6,8 +6,8 @@
 
 #include "Bt/Core/Sleep.h"
 
-#include <Particle.h>
-#include "Bt/Core/Log.h"
+#include <Bt/Core/Platform.h>
+#include <Bt/Core/Log.h>
 
 namespace Bt {
 namespace Core {

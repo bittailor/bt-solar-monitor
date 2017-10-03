@@ -19,6 +19,10 @@ constexpr int requiredEncodeBufferSize(size_t pSize)
    return (pSize * 5 / 4) + 1;
 }
 
+/**
+ * see https://rfc.zeromq.org/spec:32/Z85/
+ */
+
 bool encode(const uint8_t* pData, size_t pSize, char* buffer, size_t pMaxBufferSize);
 size_t decode(const char* pString, uint8_t* pBuffer, size_t pMaxBufferSize);
 
