@@ -24,9 +24,11 @@ date_default_timezone_set('Europe/Zurich');
 $app = new \Slim\App($config);
 
 $container = $app->getContainer();
-$container['WebHookController'] = function($c) {
+$container['SolarApi\WebHookController'] = function($c) {
     return new SolarApi\WebHookController(new SolarApi\MessageFactory(), new SolarApi\MessageToXivelyConverter());
 };
+
+$app->add(new SolarApi\EnsureApiKey(SOLAR_API_API_KEY));
 
 // Define app routes
 $app->get('/hello/{name}', function ($request, $response, $args) {
@@ -34,7 +36,12 @@ $app->get('/hello/{name}', function ($request, $response, $args) {
     return $response->write("Hello " . $args['name']);
 });
 
-$app->post('/hook/execute', SolarApi\HomeController::class . ':execute');
+// Define app routes
+$app->get('/info', function ($request, $response, $args) {
+    phpinfo();
+});
+
+$app->post('/hook/execute', SolarApi\WebHookController::class . ':execute');
 
 $app->post('/test/toxively', function ($request, $response, $args) {
     $raw = $request->getBody()->getContents();
