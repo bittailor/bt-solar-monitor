@@ -2,6 +2,7 @@
 
 .metadata
 .vscode
+*.generated.*
 
 node_modules/
 
