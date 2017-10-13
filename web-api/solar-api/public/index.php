@@ -1,244 +1,41 @@
 <?php
-if (PHP_SAPI == 'cli-server') {
-    // To help the built-in PHP dev server, check if the request was actually for
-    // something which should probably be served as a static file
-    $url  = parse_url($_SERVER['REQUEST_URI']);
-    $file = __DIR__ . $url['path'];
-    if (is_file($file)) {
-        return false;
-    }
-}
-
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../filestorage/configuration/configuration.php';
 
-use SolarApi\Message;
-
-// Create and configure Slim app
-$config = ['settings' => [
-    'addContentLengthHeader' => false,
-]];
-
 date_default_timezone_set('Europe/Zurich');
 
-$app = new \Slim\App($config);
+$app = new \Slim\App([
+    'settings' => [
+        'displayErrorDetails' => true
+    ]
+]);
 
+
+// -- Dependency Container
 $container = $app->getContainer();
 $container['SolarApi\WebHookController'] = function($c) {
     return new SolarApi\WebHookController(new SolarApi\MessageFactory(), new SolarApi\MessageToXivelyConverter());
 };
 
+// -- Middleware
 $app->add(new SolarApi\EnsureApiKey(SOLAR_API_API_KEY));
 
-// Define app routes
+// -- Routes
+$app->post('/hook/execute', SolarApi\WebHookController::class . ':execute');
+
 $app->get('/hello/{name}', function ($request, $response, $args) {
-    error_log("GET /hello/{$args['name']}");
-    return $response->write("Hello " . $args['name']);
+    error_log('just a test');
+    return $response->write("Hello " . $args['name'] . "  -- " . ini_get('error_log'));
 });
 
-// Define app routes
+$app->get('/env', function ($request, $response, $args) {
+    return $response->write(print_r($_SERVER, true));
+});
+
 $app->get('/info', function ($request, $response, $args) {
     phpinfo();
 });
 
-$app->post('/hook/execute', SolarApi\WebHookController::class . ':execute');
 
-$app->post('/test/toxively', function ($request, $response, $args) {
-    $raw = $request->getBody()->getContents();
-    $parsedBody = $request->getParsedBody();
-    $data = $parsedBody['data'];
-    $factory = new SolarApi\MessageFactory();
-    $converter = new SolarApi\MessageToXively();
-    $message = $factory->create($data);
-    $xiMessage = $converter->convert($message);
-    $xi = new \Xively\Api(SOLAR_API_XIVELY_API_KEY);
-    $feed = $xi->feeds('625281756');
-    $r = $feed->update($xiMessage)->get();
-    error_log("result:");
-    error_log(print_r($r, true));
-    return $response->write("OK");
-});
-
-$app->get('/test/xively', function ($request, $response, $args) {
-    $xi = new \Xively\Api(SOLAR_API_XIVELY_API_KEY);
-    $feed = $xi->feeds('625281756');
-    $time = time();
-    $r = $feed->update(array(
-        'version'     => '1.0.0',
-        'datastreams' => array(
-            array(
-                'id'         => 'Current',
-                'datapoints' => array(
-                    array('at' => date('c', $time-6), 'value' => 2.0),
-                    array('at' => date('c', $time-4), 'value' => 2.1),
-                    array('at' => date('c', $time-2), 'value' => 2.2),
-                    array('at' => date('c', $time),   'value' => 2.3),
-                ),
-            ),
-            array(
-                'id'         => 'Voltage',
-                'datapoints' => array(
-                    array('at' => date('c', $time-6), 'value' => 12.0),
-                    array('at' => date('c', $time-4), 'value' => 12.1),
-                    array('at' => date('c', $time-2), 'value' => 12.2),
-                    array('at' => date('c', $time),   'value' => 12.3),
-                ),
-            ),
-        ),
-    ))->get();
-    error_log("result:");
-    error_log(print_r($r, true));
-
-    return $response->write("OK");
-});
-
-
-
-$app->post('/hook/data', function ($request, $response, $args) {
-    error_log("POST /hook/data");
-    $raw = $request->getBody()->getContents();
-    #error_log("raw:");
-    #error_log($raw);
-    #error_log("raw-print_r:");
-    #error_log(print_r($raw, true));
-    $parsedBody = $request->getParsedBody();
-    error_log("parsedBody:");
-    error_log(print_r($parsedBody, true));
-
-    $data = $parsedBody['data'];
-    $factory = new SolarApi\MessageFactory();
-    $message = $factory->create($data);
-
-    error_log("message:");
-    error_log(print_r($message, true));
-
-    #error_log("data:");
-    #error_log(print_r($data, true));
-    #$parts  = explode("|", $data);
-    #error_log("parts:");
-    #error_log(print_r($parts, true)); 
-    
-    #$encoded = $parts[4];
-    #error_log("encoded:");
-    #error_log(print_r($encoded, true)); 
-    #error_log("message $parts[0] $parts[1] $parts[2] $parts[3] $parts[5] >");
-    #$values = Message::unpack($encoded);  ;
-    #error_log("values:");
-    #error_log(print_r($values, true)); 
-
-    #error_log(print_r( $request->getBody(), true ));
-    return $response->write("OK");
-});
-
-$app->post('/hook/dev', function ($request, $response, $args) {
-    error_log("POST /hook/data");
-    $raw = $request->getBody()->getContents();
-    #error_log("raw:");
-    #error_log($raw);
-    #error_log("raw-print_r:");
-    #error_log(print_r($raw, true));
-    $parsedBody = $request->getParsedBody();
-    error_log("parsedBody:");
-    error_log(print_r($parsedBody, true));
-
-    $data = $parsedBody['data'];
-    #error_log("data:");
-    #error_log(print_r($data, true));
-    $parts  = explode("|", $data);
-    #error_log("parts:");
-    #error_log(print_r($parts, true)); 
-    
-    $encoded = $parts[4];
-    #error_log("encoded:");
-    #error_log(print_r($encoded, true)); 
-    error_log("message $parts[0] $parts[1] $parts[2] $parts[3] $parts[5] >");
-    $values = MessageFactory::unpack($encoded);
-    error_log("values:");
-    error_log(print_r($values, true)); 
-
-    #error_log(print_r( $request->getBody(), true ));
-    return $response->write("OK");
-});
-
-$app->post('/binary/test', function ($request, $response, $args) {
-    error_log("POST /binary/test");
-    $raw = $request->getBody()->getContents();
-    error_log($raw);
-    error_log(print_r(unpack('na/nb',$raw), true));
-    error_log(print_r(unpack('n*',$raw), true));
-    #error_log(print_r( $request->getBody(), true ));
-    return $response->write("OK");
-});
-
-// Run app
+// -- Run app
 $app->run();
-
-$encoder = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:+=^!/*?&<>()[]{}@%$#";
-    $decoder = array(
-        0x00, 0x44, 0x00, 0x54, 0x53, 0x52, 0x48, 0x00,
-        0x4B, 0x4C, 0x46, 0x41, 0x00, 0x3F, 0x3E, 0x45,
-        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-        0x08, 0x09, 0x40, 0x00, 0x49, 0x42, 0x4A, 0x47,
-        0x51, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A,
-        0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32,
-        0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A,
-        0x3B, 0x3C, 0x3D, 0x4D, 0x00, 0x4E, 0x43, 0x00,
-        0x00, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
-        0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
-        0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20,
-        0x21, 0x22, 0x23, 0x4F, 0x00, 0x50, 0x00, 0x00
-    );
-    function z85_encode ($data) {
-        global $encoder, $decoder;
-        if( !is_array($data) ) {
-            $data = str_split($data);
-        }
-        if ((count($data) % 4) !== 0) {
-            return null;
-        }
-        $str = "";
-        $byte_nbr = 0;
-        $size = count( $data );
-        $value = 0;
-        while ($byte_nbr < $size) {
-            $characterCode = ord($data[$byte_nbr++]);
-            $value = ($value * 256) + $characterCode;
-            if (($byte_nbr % 4) === 0) {
-                $divisor = 85 * 85 * 85 * 85;
-                while ($divisor >= 1) {
-                    $idx =  bcmod(floor($value / $divisor), 85);
-                    $str = $str . $encoder[$idx];
-                    $divisor /= 85;
-                }
-                $value = 0;
-            }
-        }
-        return $str;
-    };
-    function z85_decode($string) {
-        global $encoder, $decoder;
-        if ((strlen( $string ) % 5) !== 0) {
-            return null;
-        }
-        $dest = array();
-        $byte_nbr = 0;
-        $char_nbr = 0;
-        $string_len = strlen( $string );
-        $value = 0;
-        while ($char_nbr < $string_len) {
-            $idx = ord($string[$char_nbr++]) - 32;
-            if (($idx < 0) || ($idx >= count( $decoder ))) {
-                return;
-            }
-            $value = ($value * 85) + $decoder[$idx];
-            if (($char_nbr % 5) == 0) {
-                $divisor = 256 * 256 * 256;
-                while ($divisor >= 1) {
-                    $dest[$byte_nbr++] = ($value / $divisor) % 256;
-                    $divisor /= 256;
-                }
-                $value = 0;
-            }
-        }
-        return $dest;
-    }
