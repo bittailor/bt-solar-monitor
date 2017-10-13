@@ -67,6 +67,22 @@ gulp.task('install-ext', function(){
 
 gulp.task('install',['install-ext']);
 
+
+//----
+
+gulp.task('bs:secrets',() => {
+    return gulp
+        .src("./**/*.mustache.*")
+        .pipe(plugins.mustache('./secrets.json',{tags: ['{${', '}$}']}))
+        .pipe(plugins.debug({title: 'mustache-in:'}))
+        .pipe(plugins.simpleRename((path) => {
+            return path.replace(/\.mustache\./, '.generated.');
+        }))
+        .pipe(plugins.debug({title: 'mustache-out:'}))
+        .pipe(gulp.dest("."))
+        ;    
+});
+
 //----
 
 gulp.task('fw:host:test', () => {
@@ -181,5 +197,5 @@ gulp.task('flash-online', function(cb){
 
 
 gulp.task('build',['compile-local','fw:host:test']);
-gulp.task('travis', plugins.sequence('install-ext', [ 'compile-online', 'fw:host:test']));
+gulp.task('travis', plugins.sequence('install-ext', 'bs:secrets', [ 'compile-online', 'fw:host:test']));
 gulp.task('default', ['build']);
