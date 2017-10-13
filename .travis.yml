@@ -7,12 +7,13 @@ addons:
     - gcc
     - make
     - cmake
+    - git-crypt
 before_install:
 - openssl aes-256-cbc -K $encrypted_9b2a275b7417_key -iv $encrypted_9b2a275b7417_iv -in git-crypt-key.key.enc -out git-crypt-key.key -d
 before_script:
 - npm install -g gulp particle-cli
 - particle login $PARTICLE_USER $PARTICLE_PWD
-- git-crypt unlock git-crypt-key.key
+- git crypt unlock git-crypt-key.key
 script: gulp travis
 env:
   global:
