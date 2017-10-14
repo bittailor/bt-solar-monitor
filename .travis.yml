@@ -1,10 +1,10 @@
-dist: precise
 language: node_js
 node_js:
 - 6
 addons:
   apt:
     sources:
+    - lucid
     - debian-sid
     packages:
     - gcc
