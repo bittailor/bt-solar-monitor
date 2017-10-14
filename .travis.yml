@@ -4,7 +4,6 @@ node_js:
 addons:
   apt:
     sources:
-    - lucid
     - debian-sid
     packages:
     - gcc
