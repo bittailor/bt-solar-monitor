@@ -12,7 +12,6 @@ before_install:
 before_script:
 - npm install -g gulp particle-cli
 - particle login $PARTICLE_USER $PARTICLE_PWD
-- git crypt unlock git-crypt-key.key
 script: gulp travis
 env:
   global:
