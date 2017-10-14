@@ -15,7 +15,9 @@ before_script:
 - particle login $PARTICLE_USER $PARTICLE_PWD
 - wget https://www.agwa.name/projects/git-crypt/downloads/git-crypt-0.5.0.tar.gz
 - tar -xzf git-crypt-0.5.0.tar.gz
-- cd git-crypt-0.5.0 && make && ls -la && cd ..
+- cd git-crypt-0.5.0 && make && ls -la && export PATH=$PATH:$(pwd) && cd ..
+- git-crypt --version
+- git-crypt unlock git-crypt-key.key
 script: gulp travis
 env:
   global:
