@@ -3,38 +3,66 @@ namespace SolarApi;
 
 class WebHookController
 {
+    private $pdo;
     private $messageFactory;
     private $converter;
     
-    public function __construct(MessageFactory $messageFactory, MessageToXivelyConverter $converter) {
+    public function __construct(\PDO $pdo,
+                                MessageFactory $messageFactory, 
+                                MessageToXivelyConverter $converter) {
+        $this->pdo = $pdo;
         $this->messageFactory = $messageFactory;
         $this->converter = $converter;
     }
 
     public function execute($request, $response, $args) {  
         $rawMessage = $request->getBody()->getContents();
+        $this->storeRaw($rawMessage);
+
+        $parsedBody = $request->getParsedBody();
+        $data = $parsedBody['data'];
+        $message = $this->messageFactory->create($data);
+
+        $this->storeMessage($message);
         
-        $mysqli = new \mysqli(
-            ini_get("mysqli.default_host"),
-            ini_get("mysqli.default_user"),
-            ini_get("mysqli.default_pw"),
-            SOLAR_API_DB);
-        if ($mysqli->connect_errno) {
-            return $response->write("Failed to connect to MySQL: (" . $mysqli->connect_errno . ") " . $mysqli->connect_error);
-        }
-        if (!$mysqli->set_charset("utf8")) {
-            return $response->write("set_charset utf8 failed: (" . $mysqli->errno . ") " . $mysqli->error);
-        }
-        if (!($stmt = $mysqli->prepare("INSERT INTO RawMessages(message) VALUES (?)"))) {
-            return $response->write("Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error);
-        }
-        if (!$stmt->bind_param("s", $rawMessage)) {
-            return $response->write("Binding parameters failed: (" . $stmt->errno . ") " . $stmt->error);
-        }
-        if (!$stmt->execute()) {
-            return $response->write("Execute failed: (" . $stmt->errno . ") " . $stmt->error);
-        }
+           
         return $response->write("OK");   
+    }
+
+    private function storeRaw($rawMessage) {
+        $stmt = $this->pdo->prepare("INSERT INTO RawMessages(message) VALUES (:message)");
+        $stmt->bindValue(':message', $rawMessage, \PDO::PARAM_STR);
+        $stmt->execute(); 
+    }
+
+    private function storeMessage($message) {
+        $sensors = array(
+            'panel_a',
+            'panel_b',
+            'battery_a',
+            'battery_b',
+            'load',
+            'controller'
+        );
+        $columns = array('ts');
+        foreach ($sensors as $sensor) {
+            $columns[] = $sensor . '_i';
+            $columns[] = $sensor . '_v';
+        }
+        $values = array_map(function($c) { return ':'.$c; }, $columns);
+        
+        $sql = 'INSERT INTO Measurements(' . implode(",", $columns). ') VALUES (' . implode(",", $values) .')';
+        $stmt = $this->pdo->prepare($sql);
+        
+        foreach($message->measurements as $measurement) {  
+            $stmt->bindValue(':ts', date('c', $measurement->timestamp->getTimestamp()), \PDO::PARAM_STR);
+            foreach ($measurement->readings as $i => $reading) {
+                $index = $i * 2;
+                $stmt->bindValue(':' . $sensors[$i] . '_i' , strval($reading->current), \PDO::PARAM_STR);
+                $stmt->bindValue(':' . $sensors[$i] . '_v' , strval($reading->voltage), \PDO::PARAM_STR);   
+            }
+            $stmt->execute();           
+        }
     }
 
     public function executeOld($request, $response, $args) {  

@@ -1,9 +1,9 @@
 {
-    "eventName": "e/2/data",
+    "eventName": "solar/data",
     "url": "http://solar.bockmattli.ch/hook/execute",
     "headers": {
       "Content-Type": "application/json",
-      "x-api-key": "{${webapi.token}$}"
+      "x-api-key": "{${solar.webapi.token}$}"
     },
     "json": {
         "value": "{{PARTICLE_EVENT_VALUE}}"

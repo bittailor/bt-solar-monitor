@@ -5,6 +5,11 @@ use SolarApi\MessageFactory;
 
 class MessageFactoryTest extends TestCase
 {
+    protected function setUp()
+    {
+        date_default_timezone_set('Europe/Zurich');
+    }
+
     public function testUnpack_int16_t_positive()
     {
         $messageString = "5.vUd";
@@ -39,14 +44,13 @@ class MessageFactoryTest extends TestCase
         $this->assertEquals(2*6*6, count( $values));
     }
 
-
     public function testCreate_Timestamps()
     {
         $rawData = "0|0|1|2017-10-01T13:14:15Z|1KnXT1KnXT1KnXT1KnXT1KnXT1KnXT2{--z2{--z2{--z2{--z2{--z2{--z4si^f4si^f4si^f4si^f4si^f4si^f|2017-10-01T13:34:15Z";
         $factory = new MessageFactory();
         $message = $factory->create($rawData);
-        $this->assertEquals(new DateTime('2017-10-01T13:14:15Z'), $message->startTime);
-        $this->assertEquals(new DateTime('2017-10-01T13:34:15Z'), $message->endTime);
+        $this->assertEquals(new DateTime('2017-10-01T15:14:15CEST'), $message->startTime);
+        $this->assertEquals(new DateTime('2017-10-01T15:34:15CEST'), $message->endTime);
     }
 
     public function testCreate_Measurents()
@@ -56,5 +60,6 @@ class MessageFactoryTest extends TestCase
         $message = $factory->create($rawData);
         $this->assertEquals(3, count($message->measurements));
     }
+
 }
 ?>

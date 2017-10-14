@@ -1,10 +1,14 @@
+var os = require('os');
 var path = require('path');
+var globby = require('globby')
 var spawn = require('child_process').spawn;
 var fs = require('fs-extra')
 var del = require('del');
 var gulp = require('gulp');
 var plugins = require('gulp-load-plugins')();
 var Q = require('q');
+var Particle = require('particle-api-js');
+var particle = new Particle();
 
 var pwd = process.cwd();
 
@@ -24,11 +28,18 @@ var conf = {
 
 //----
 
-function sh(cmd, args, cwd) {
+function getParticleAccessToken() {
+    var json = JSON.parse(fs.readFileSync(path.join(os.homedir(),'.particle/particle.config.json')));
+    return json.access_token;
+}
+
+//----
+
+function sh(cmd, args, cwd, stdio = 'inherit' ) {
     var deferred = Q.defer();
-    plugins.util.log(cmd , args.join(" "))
+    plugins.util.log(plugins.util.colors.gray('$', cmd , args.join(" ")));
     var options = {
-        stdio: 'inherit',
+        stdio: stdio,
         cwd: cwd,
     }
     spawn(cmd, args, options).on('exit', (code) => {
@@ -52,9 +63,57 @@ function installGit(url , branch) {
         args.push(branch);    
     }
     args.push(url);    
-    return sh('git', args,conf.fw.ext)
+    return sh('git', args, conf.fw.ext)
 }
-    
+
+//----
+
+//----
+
+function deleteSolarWebHooks() {
+    return particle
+        .listWebhooks({auth: getParticleAccessToken()})
+        .then((data) => {
+            var hooks = data.body;
+            solarHooks = hooks.filter(hook => hook.event.startsWith('solar/'));
+            plugins.util.log(`Found ${solarHooks.length} solar hooks`);
+            deletes = solarHooks.map((hook) => {
+                return particle.deleteWebhook({
+                    auth: getParticleAccessToken(),
+                    hookId: hook.id   
+                })
+                .then((data) => {
+                    plugins.util.log("delete : ",data);
+                });
+            });
+            return Promise.all(deletes);
+        });   
+}
+
+function createSolarWebHooks() {
+    return globby(['web-hooks/**/*.json', '!web-hooks/**/*.mustache.json'])
+        .then((files)=>{
+            //plugins.util.log('hook files',files); 
+            creates = files.map((file)=>{
+                return sh('particle',['webhook', 'create', file], null, [process.stdin, 'ignore', process.stderr]);
+            });
+            return Promise.all(creates);
+        })
+        ; 
+}
+
+//----
+
+gulp.task('web::hooks::deleteAll', () => {
+    return deleteSolarWebHooks();
+});
+
+gulp.task('web::hooks::createAll',['web::hooks::deleteAll','bs:secrets'] , () => {
+    return createSolarWebHooks();
+});
+
+gulp.task('web::hooks',['web::hooks::createAll']);
+
 //----
 
 gulp.task('install-ext', function(){    
@@ -109,7 +168,6 @@ gulp.task('web:api:serve', () => {
 });
 
 //----
-
 
 gulp.task('clean-make', function(cb) {
     spawn('make', ['clean', 'PLATFORM=' + conf.platform, 'APPDIR=' + path.join(pwd, 'fw')],{

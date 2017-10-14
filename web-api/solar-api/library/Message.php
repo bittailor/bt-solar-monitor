@@ -6,8 +6,8 @@ use SolarApi\Z85;
 class Message
 {
     function __construct($startTime, $endTime, $data) {
-        $this->startTime = \DateTime::createFromFormat('Y-m-d\TH:i:s+', $startTime);
-        $this->endTime = \DateTime::createFromFormat('Y-m-d\TH:i:s+', $endTime);
+		$this->startTime = \DateTime::createFromFormat('Y-m-d\TH:i:sP', $startTime);
+		$this->endTime = \DateTime::createFromFormat('Y-m-d\TH:i:sP', $endTime);
 		
 		if (count($data) % 2 != 0 ) { throw new Exception('Message - data must be a multiple of 2'); }		
 		$readings = array(); 

@@ -13,8 +13,18 @@ $app = new \Slim\App([
 
 // -- Dependency Container
 $container = $app->getContainer();
+$container['pdo'] = function($c) {
+    $pdo = new PDO(
+        SOLAR_API_PDO_DNS, 
+        SOLAR_API_PDO_USER, 
+        SOLAR_API_PDO_PW,
+        array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    return $pdo;
+};
+
 $container['SolarApi\WebHookController'] = function($c) {
-    return new SolarApi\WebHookController(new SolarApi\MessageFactory(), new SolarApi\MessageToXivelyConverter());
+    return new SolarApi\WebHookController($c['pdo'] ,new SolarApi\MessageFactory(), new SolarApi\MessageToXivelyConverter());
 };
 
 // -- Middleware

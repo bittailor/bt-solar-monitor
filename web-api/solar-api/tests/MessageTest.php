@@ -5,6 +5,11 @@ use SolarApi\Message;
 
 class MessageTest extends TestCase
 {
+    protected function setUp()
+    {
+        date_default_timezone_set('Europe/Zurich');
+    }
+
     public function testMessage_MeasurementsCount()
     {
         $message = $this->createExampleMessageWithThreeMeasurements();
@@ -14,9 +19,9 @@ class MessageTest extends TestCase
     public function testMessage_MeasurementDates()
     {
         $message = $this->createExampleMessageWithThreeMeasurements();
-        $this->assertEquals(new DateTime('2017-10-01T13:14:15Z'), $message->measurements[0]->timestamp);
-        $this->assertEquals(new DateTime('2017-10-01T13:24:15Z'), $message->measurements[1]->timestamp);
-        $this->assertEquals(new DateTime('2017-10-01T13:34:15Z'), $message->measurements[2]->timestamp);
+        $this->assertEquals(new DateTime('2017-10-01T15:14:15CEST'), $message->measurements[0]->timestamp);
+        $this->assertEquals(new DateTime('2017-10-01T13:24:15Z'),    $message->measurements[1]->timestamp);
+        $this->assertEquals(new DateTime('2017-10-01T14:34:15+0100'), $message->measurements[2]->timestamp);
     }
 
     public function testMessage_MeasurementReadings()
