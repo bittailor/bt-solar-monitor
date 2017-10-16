@@ -33,7 +33,7 @@ class SensorArray
          for (Sensor& sensor : mSensors) {
             sensor.powerUp();
          }
-         BT_CORE_LOG_DEBUG("SensorArray - up [%d]");
+         BT_CORE_LOG_DEBUG("SensorArray - up");
          if(sCounter % 2 == 1) {
             Bt::Core::msSleep(mPowerUpDelayInMs);
          } else {

@@ -59,6 +59,7 @@
 									<listOptionValue builtIn="false" value="SPARK=1"/>
 									<listOptionValue builtIn="false" value="retained"/>
 									<listOptionValue builtIn="false" value="SPARK_PLATFORM"/>
+									<listOptionValue builtIn="false" value="PLATFORM_ID=10"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1251389029" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -92,6 +93,7 @@
 									<listOptionValue builtIn="false" value="SPARK=1"/>
 									<listOptionValue builtIn="false" value="retained"/>
 									<listOptionValue builtIn="false" value="SPARK_PLATFORM"/>
+									<listOptionValue builtIn="false" value="PLATFORM_ID=10"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.429339185" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>

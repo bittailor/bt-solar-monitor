@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/../filestorage/configuration/configuration.php';
+require __DIR__ . '/../configuration/configuration.generated.php';
 
 date_default_timezone_set('Europe/Zurich');
 
@@ -10,25 +10,45 @@ $app = new \Slim\App([
     ]
 ]);
 
+$configuration = SolarApiConfiguration::get();
 
 // -- Dependency Container
 $container = $app->getContainer();
-$container['pdo'] = function($c) {
+$container['pdo'] = function($c) use($configuration) {
+    $cfg = $configuration->db;
     $pdo = new PDO(
-        SOLAR_API_PDO_DNS, 
-        SOLAR_API_PDO_USER, 
-        SOLAR_API_PDO_PW,
+        $cfg->dns, 
+        $cfg->user, 
+        $cfg->pw,
         array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'));
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     return $pdo;
 };
 
+$container['SolarApi\AdafruitIoPublisher'] = function($c) use($configuration) {
+    $cfg = $configuration->adafruit;
+    $httpClient = new GuzzleHttp\Client([
+        'base_uri' => 'https://io.adafruit.com/api/v2/',
+        'headers' => ['X-AIO-Key' => $cfg->aioKey]
+    ]);
+    return new SolarApi\AdafruitIoPublisher($cfg, $httpClient) ;
+};
+
+$container['publishers'] = function($c) use($configuration) {
+    return [
+        $c['SolarApi\AdafruitIoPublisher']    
+    ];
+};
+
 $container['SolarApi\WebHookController'] = function($c) {
-    return new SolarApi\WebHookController($c['pdo'] ,new SolarApi\MessageFactory(), new SolarApi\MessageToXivelyConverter());
+    return new SolarApi\WebHookController(
+        $c['pdo'] ,
+        new SolarApi\MessageFactory(), 
+        $c['publishers']);
 };
 
 // -- Middleware
-$app->add(new SolarApi\EnsureApiKey(SOLAR_API_API_KEY));
+$app->add(new SolarApi\EnsureApiKey($configuration->solarApi->token));
 
 // -- Routes
 $app->post('/hook/execute', SolarApi\WebHookController::class . ':execute');

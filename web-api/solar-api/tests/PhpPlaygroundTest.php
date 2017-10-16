@@ -44,9 +44,5 @@ class PhpPlaygroundTest extends TestCase
         $this->assertEquals('2017-10-13T17:19:48+02:00', $s);
     }
 
-
-    
-
-
 }
 ?>

@@ -1,0 +1,15 @@
+{
+    "eventName": "solar/",
+    "url": "https://broker.shiftr.io/device/{{PARTICLE_EVENT_NAME}}",
+    "auth": {
+      "username": "{${solar.shiftrIo.username}$}",
+      "password": "{${solar.shiftrIo.password}$}"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "json": {
+        "value": "{{PARTICLE_EVENT_VALUE}}"
+    }
+  }
+  

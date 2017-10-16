@@ -55,7 +55,6 @@ function sh(cmd, args, cwd, stdio = 'inherit' ) {
 //----
 
 function installGit(url , branch) {
-    var deferred = Q.defer();
     plugins.util.log(`** install git ${url} ${branch} **`);    
     var args = ['clone'];
     if (branch) {
@@ -70,14 +69,23 @@ function installGit(url , branch) {
 
 //----
 
+function debugSolarWebHooks() {
+    return particle
+        .listWebhooks({auth: getParticleAccessToken()})
+        .then((data) => {
+            var hooks = data.body;         
+            plugins.util.log(`hooks :`, hooks);
+        });   
+}
+
 function deleteSolarWebHooks() {
     return particle
         .listWebhooks({auth: getParticleAccessToken()})
         .then((data) => {
             var hooks = data.body;
-            solarHooks = hooks.filter(hook => hook.event.startsWith('solar/'));
+            var solarHooks = hooks.filter(hook => hook.event.startsWith('solar/'));
             plugins.util.log(`Found ${solarHooks.length} solar hooks`);
-            deletes = solarHooks.map((hook) => {
+            var deletes = solarHooks.map((hook) => {
                 return particle.deleteWebhook({
                     auth: getParticleAccessToken(),
                     hookId: hook.id   
@@ -94,7 +102,7 @@ function createSolarWebHooks() {
     return globby(['web-hooks/**/*.json', '!web-hooks/**/*.mustache.json'])
         .then((files)=>{
             //plugins.util.log('hook files',files); 
-            creates = files.map((file)=>{
+            var creates = files.map((file)=>{
                 return sh('particle',['webhook', 'create', file], null, [process.stdin, 'ignore', process.stderr]);
             });
             return Promise.all(creates);
@@ -103,6 +111,10 @@ function createSolarWebHooks() {
 }
 
 //----
+
+gulp.task('web::hooks::debug', () => {
+    return debugSolarWebHooks();
+});
 
 gulp.task('web::hooks::deleteAll', () => {
     return deleteSolarWebHooks();
@@ -157,9 +169,18 @@ gulp.task('fw:host:test', () => {
 
 //----
 
+// xdebug.remote_enable = 1
+// xdebug.remote_autostart = 1
+
 gulp.task('web:api:test', () => {
     var cwd = conf.web.api;
-    return sh('vendor/bin/phpunit', ['tests'], cwd);
+    return sh('php',[
+        '-d', 'xdebug.remote_enable=1',
+        '-d', 'xdebug.remote_enable=1',
+        'vendor/bin/phpunit',
+        'tests'
+    ],cwd);
+    //return sh('vendor/bin/phpunit', ['tests'], cwd);
 });
 
 gulp.task('web:api:serve', () => {
@@ -207,7 +228,7 @@ gulp.task('compile-local', function(cb){
 });
 
 gulp.task('compile-online', function(cb){
-    fs.mkdirs(conf.fw.out,function(err){
+    fs.mkdirs(conf.fw.out,function(){
         spawn('particle', ['compile', conf.platform, '.' ,  '--saveTo' ,  path.join('target' , 'fw.bin')],{
             stdio: 'inherit',
             cwd:'./fw'
@@ -254,6 +275,6 @@ gulp.task('flash-online', function(cb){
 });
 
 
-gulp.task('build',['compile-local','fw:host:test']);
-gulp.task('travis', plugins.sequence('install-ext','bs:secrets', [ 'compile-online', 'fw:host:test']));
+gulp.task('build',  plugins.sequence('fw:host:test','compile-local'));
+gulp.task('travis', plugins.sequence('install-ext','bs:secrets', 'fw:host:test', 'compile-online'));
 gulp.task('default', ['build']);

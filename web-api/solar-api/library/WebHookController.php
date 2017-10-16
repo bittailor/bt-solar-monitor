@@ -5,28 +5,46 @@ class WebHookController
 {
     private $pdo;
     private $messageFactory;
-    private $converter;
+    private $publishers;
     
-    public function __construct(\PDO $pdo,
-                                MessageFactory $messageFactory, 
-                                MessageToXivelyConverter $converter) {
+    public function __construct($pdo,
+                                $messageFactory, 
+                                $publishers) {
         $this->pdo = $pdo;
         $this->messageFactory = $messageFactory;
-        $this->converter = $converter;
+        $this->publishers = $publishers;
     }
 
     public function execute($request, $response, $args) {  
-        $rawMessage = $request->getBody()->getContents();
-        $this->storeRaw($rawMessage);
+        $stopWatch = new StopWatch();
 
-        $parsedBody = $request->getParsedBody();
-        $data = $parsedBody['data'];
-        $message = $this->messageFactory->create($data);
+        try {
+            $rawMessage = $request->getBody()->getContents();
+            $this->storeRaw($rawMessage);
+            $response->write("store raw  [" . $stopWatch->lapStr() . "ms] => OK\n");
+        } catch (Exception $e) {
+            $response->write("store raw [" . $stopWatch->lapStr() . "ms] => FAILED: " . $e->getMessage() . "\n");        
+        }
 
-        $this->storeMessage($message);
-        
-           
-        return $response->write("OK");   
+        try {
+            $parsedBody = $request->getParsedBody();
+            $data = $parsedBody['data'];
+            $message = $this->messageFactory->create($data);
+            $this->storeMessage($message);
+            $response->write("store message [" . $stopWatch->lapStr() . "ms] => OK\n");
+        } catch (Exception $e) {
+            $response->write("store message [" . $stopWatch->lapStr() . "ms] => FAILED: " . $e->getMessage() . "\n");        
+        }
+
+        foreach ($this->publishers as $publisher) {
+            try {
+                $publisher->publish($message);
+                $response->write("publish " . get_class($publisher) . " [" . $stopWatch->lapStr() . "ms] => OK\n");
+            } catch (Exception $e) {
+                $response->write("publish " . get_class($publisher) . " [" . $stopWatch->lapStr() . "ms] => FAILED: " . $e->getMessage() . "\n");        
+            }
+        }
+        return $response->write("response => OK");   
     }
 
     private function storeRaw($rawMessage) {
@@ -65,6 +83,18 @@ class WebHookController
         }
     }
 
+    function sendToXively($message) {
+        
+        $client = new \GuzzleHttp\Client(['base_uri' => 'https://api.xively.com']);
+        $xivelyMessage = $this->converter->convert($message);
+        $response = $client->request('PUT', '/v2/feeds/'.SOLAR_API_XIVELY_FEED, [
+            'headers' => ['X-ApiKey' => SOLAR_API_XIVELY_API_KEY],
+            'json' => $xivelyMessage
+        ]);
+        var_dump($response);
+        
+    }
+
     public function executeOld($request, $response, $args) {  
         $parsedBody = $request->getParsedBody();
         $data = $parsedBody['data'];
@@ -79,4 +109,8 @@ class WebHookController
             return $response->write("FAILED");    
         }     
     }
+
+    private function micros(& $start ) {
+
+    } 
 }

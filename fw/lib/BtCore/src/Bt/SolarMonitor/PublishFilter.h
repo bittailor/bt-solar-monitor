@@ -15,92 +15,46 @@
 namespace Bt {
 namespace SolarMonitor {
 
-template<typename Radio, typename Cloud>
+template<typename TCloud>
 class PublishFilter
 {
    public:
       typedef const char* MessageString;
 
-      PublishFilter(Radio& pRadio, Cloud& pCloud): mRadio(pRadio), mCloud(pCloud) {
+      PublishFilter(TCloud& pCloud, const char* pEventName): mCloud(pCloud), mEventName(pEventName) {
       }
       PublishFilter(const PublishFilter&) = delete;
       PublishFilter& operator=(const PublishFilter&) = delete;
 
       void consume(const MessageString* pMessages, size_t pSize) {
-         unsigned long timer = millis();
-         BT_CORE_LOG_INFO("mRadio.on() ...");
-         mRadio.on();
-         BT_CORE_LOG_INFO("... mRadio.on() DONE");
-         BT_CORE_LOG_INFO("mRadio.connect() ...");
-         mRadio.connect();
-         BT_CORE_LOG_INFO("... mRadio.connect() DONE");
-         while(! mRadio.ready() &&  mRadio.connecting()) {
-            BT_CORE_LOG_INFO("Check - mRadio.ready()");
-            mCloud.process();
-         }
-         mCloud.process();
-
-         BT_CORE_LOG_INFO("mRadio.connect() ...");
-         mCloud.connect();
-         BT_CORE_LOG_INFO("... mRadio.connect() DONE");
-
-         BT_CORE_LOG_INFO("while(!mCloud.connected() ...");
-         while(!mCloud.connected()) {
-            mCloud.process();
-         }
-         BT_CORE_LOG_INFO("... while(!mCloud.connected() DONE");
-
-         for (size_t msgCounter = 0; msgCounter < pSize; ++msgCounter) {
-            bool ack = mCloud.publish("e/2/data", pMessages[msgCounter], WITH_ACK);
-            BT_CORE_LOG_INFO(" ... mCloud.publish(%d) %d", strlen(pMessages[msgCounter]), ack);
-            mCloud.process();
-            if(!ack) {
-               BT_CORE_LOG_WARN("sleep and try to re-send");
-               Bt::Core::msSleep(1000);
-               msgCounter--;
+         mCloud.executeConnected([&] (typename TCloud::Client& client) {
+            int republishLimit = 10;
+            for (size_t msgCounter = 0; msgCounter < pSize; ++msgCounter) {
+               bool ack = client.publish(mEventName, pMessages[msgCounter], WITH_ACK);
+               BT_CORE_LOG_INFO("cloud.publish(%d) => %d", strlen(pMessages[msgCounter]), ack);
+               client.process();
+               if(!ack) {
+                  republishLimit--;
+                  if(republishLimit > 0) {
+                     BT_CORE_LOG_WARN("publish failed => sleep and try to re-publish");
+                     client.process();
+                     Bt::Core::msSleep(1000);
+                     client.process();
+                     msgCounter--;
+                  } else {
+                     BT_CORE_LOG_WARN("republish limit reached => skip all!");
+                     return;
+                  }
+               } else {
+                  republishLimit = 10;
+               }
             }
-
-         }
-
-         {
-            unsigned long start = millis();
-            while(millis() - start <  10000) {
-               mCloud.process();;
-            }
-         }
-
-         BT_CORE_LOG_INFO("mRadio.disconnect() ...");
-         mCloud.disconnect();
-         BT_CORE_LOG_INFO("... mRadio.disconnect() DONE");
-
-         BT_CORE_LOG_INFO("while(mCloud.connected() ...");
-         while(mCloud.connected()) {
-            mCloud.process();
-         }
-         BT_CORE_LOG_INFO("... while(mCloud.connected() DONE");
-
-         {
-            unsigned long start = millis();
-            while(millis() - start <  1000) {
-               mCloud.process();;
-            }
-         }
-
-         BT_CORE_LOG_INFO("mRadio.disconnect() ...");
-         mRadio.disconnect();
-         BT_CORE_LOG_INFO("... mRadio.disconnect() DONE");
-         BT_CORE_LOG_INFO("mRadio.off() ...");
-         mRadio.off();
-         BT_CORE_LOG_INFO("... mRadio.off() DONE");
-         timer = millis() - timer;
-
-         BT_CORE_LOG_INFO("publish took %lu ms",timer);
-         BT_CORE_LOG_INFO("free memory: %lu", System.freeMemory());
+         });
       }
 
    private:
-      Radio& mRadio;
-      Cloud& mCloud;
+      TCloud& mCloud;
+      const char* mEventName;
 
 };
 
