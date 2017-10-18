@@ -12,7 +12,7 @@ function createFeed($client, $cfg, $name) {
 function createFeeds() {
     $cfg = SolarApiConfiguration::get()->xively;  
     $client = new GuzzleHttp\Client([
-        //'base_uri' => 'https://api.xively.com/api/v2/',
+        'base_uri' => 'https://api.xively.com/api/v2/',
         'headers' => ['X-ApiKey' => $cfg->apiKey ]
     ]);
 

@@ -22,7 +22,7 @@ class WebHookController
             $rawMessage = $request->getBody()->getContents();
             $this->storeRaw($rawMessage);
             $response->write("store raw  [" . $stopWatch->lapStr() . "ms] => OK\n");
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $response->write("store raw [" . $stopWatch->lapStr() . "ms] => FAILED: " . $e->getMessage() . "\n");        
         }
 
@@ -32,7 +32,7 @@ class WebHookController
             $message = $this->messageFactory->create($data);
             $this->storeMessage($message);
             $response->write("store message [" . $stopWatch->lapStr() . "ms] => OK\n");
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $response->write("store message [" . $stopWatch->lapStr() . "ms] => FAILED: " . $e->getMessage() . "\n");        
         }
 
@@ -40,7 +40,7 @@ class WebHookController
             try {
                 $publisher->publish($message);
                 $response->write("publish " . get_class($publisher) . " [" . $stopWatch->lapStr() . "ms] => OK\n");
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $response->write("publish " . get_class($publisher) . " [" . $stopWatch->lapStr() . "ms] => FAILED: " . $e->getMessage() . "\n");        
             }
         }

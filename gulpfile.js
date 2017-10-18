@@ -10,6 +10,8 @@ var Q = require('q');
 var Particle = require('particle-api-js');
 var particle = new Particle();
 
+var secrets = require('./secrets');
+
 var pwd = process.cwd();
 
 var conf = {
@@ -186,6 +188,10 @@ gulp.task('web:api:test', () => {
 gulp.task('web:api:serve', () => {
     var cwd = path.join(conf.web.api,'public');
     return sh('php', ['-S', 'localhost:8080'], cwd);
+});
+
+gulp.task('web:api:deploy', () => {
+    return sh('lftp', [ '-u', `${secrets.solar.hosting.user},${secrets.solar.hosting.pw}`, '-e', `set ftp:ssl-allow no; mirror --no-symlinks --reverse ${path.join(pwd,'web-api/solar-api')} /solar; exit`, 'ftp.bockmattli.ch' ]);
 });
 
 //----

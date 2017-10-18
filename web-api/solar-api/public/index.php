@@ -34,9 +34,15 @@ $container['SolarApi\AdafruitIoPublisher'] = function($c) use($configuration) {
     return new SolarApi\AdafruitIoPublisher($cfg, $httpClient) ;
 };
 
+$container['SolarApi\BeebottePublisher'] = function($c) use($configuration) {
+    $cfg = $configuration->beebotte;
+    $httpClient = new GuzzleHttp\Client([]);
+    return new SolarApi\BeebottePublisher($cfg, $httpClient) ;
+};
+
 $container['publishers'] = function($c) use($configuration) {
     return [
-        $c['SolarApi\AdafruitIoPublisher']    
+        $c['SolarApi\BeebottePublisher']    
     ];
 };
 

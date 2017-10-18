@@ -25,6 +25,10 @@ class SolarApiConfiguration {
             'adafruit' => [
                 'aioKey' => '{${solar.adafruit.aioKey}$}',
                 'user' => '{${solar.adafruit.user}$}'      
+            ],
+            'beebotte' => [
+                'keyId' => '{${solar.beebotte.keyId}$}',
+                'secretKey' => '{${solar.beebotte.secretKey}$}'
             ]     
         ];
 
