@@ -7,10 +7,12 @@
 #include <array>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <Bt/TestLogger.h>
+
 
 #include "Bt/Core/Utility.h"
-
 #include "Bt/Encoding/Z85.h"
+
 
 namespace Bt {
 namespace Encoding {
@@ -61,13 +63,13 @@ TEST(Z85Test, roundtrip_int16_t) {
    uint8_t outputArray[sizeOfArry(inputArray)];
 
    encode(inputArray, sizeOfArry(inputArray), buffer, BUFFER_SIZE);
-   std::cout << std::endl << "******" << std::endl << (const char*)buffer << std::endl << "******" << std::endl;
+   log() << std::endl << "******" << std::endl << (const char*)buffer << std::endl << "******" << std::endl;
    size_t lenght = decode(buffer, outputArray, sizeOfArry(outputArray));
-   std::cout << std::endl << "******" << std::endl;
+   log() << std::endl << "******" << std::endl;
    for(int i : outputArray) {
-      std::cout << i << std::endl;
+      log() << i << std::endl;
    }
-   std::cout << "******" << std::endl;
+   log() << "******" << std::endl;
    int16_t output1 = Bt::Core::binaryRead<int16_t>(outputArray);
    int16_t output2 = Bt::Core::binaryRead<int16_t>(outputArray+sizeof(int16_t));
    EXPECT_EQ(output1, input1);
@@ -86,13 +88,13 @@ TEST(Z85Test, roundtrip_negative_int16_t) {
    uint8_t outputArray[sizeOfArry(inputArray)];
 
    encode(inputArray, sizeOfArry(inputArray), buffer, BUFFER_SIZE);
-   std::cout << std::endl << "******" <<  strlen((const char*)buffer)  << std::endl << (const char*)buffer << std::endl << "******" << std::endl;
+   log() << std::endl << "******" <<  strlen((const char*)buffer)  << std::endl << (const char*)buffer << std::endl << "******" << std::endl;
    size_t lenght = decode(buffer, outputArray, sizeOfArry(outputArray));
-   std::cout << std::endl << "******" << std::endl;
+   log() << std::endl << "******" << std::endl;
    for(int i : outputArray) {
-      std::cout << i << std::endl;
+      log() << i << std::endl;
    }
-   std::cout << "******" << std::endl;
+   log() << "******" << std::endl;
    int16_t output1 = Bt::Core::binaryRead<int16_t>(outputArray);
    int16_t output2 = Bt::Core::binaryRead<int16_t>(outputArray+sizeof(int16_t));
    EXPECT_EQ(output1, input1);
@@ -114,13 +116,13 @@ TEST(Z85Test, roundtrip_negative_int16_t_borders) {
 
    uint8_t outputArray[sizeof(inputs)];
    encode(inputArray, sizeOfArry(inputArray), buffer, BUFFER_SIZE);
-   std::cout << std::endl << "******" <<  strlen((const char*)buffer) << std::endl << (const char*)buffer << std::endl << "******" << std::endl;
+   log() << std::endl << "******" <<  strlen((const char*)buffer) << std::endl << (const char*)buffer << std::endl << "******" << std::endl;
    size_t lenght = decode(buffer, outputArray, sizeOfArry(outputArray));
-   std::cout << std::endl << "******" << lenght << std::endl;
+   log() << std::endl << "******" << lenght << std::endl;
    for(int i : outputArray) {
-      std::cout << i << std::endl;
+      log() << i << std::endl;
    }
-   std::cout << "******" << std::endl;
+   log() << "******" << std::endl;
 
    for (int i = 0; i < sizeOfArry(outputs); ++i) {
       outputs[i] = Bt::Core::binaryRead<int16_t>(outputArray + i * sizeof(int16_t));

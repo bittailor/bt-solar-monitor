@@ -31,7 +31,7 @@ function run() {
     echo date('c',  $now->getTimestamp()) . "\n";
     echo date('c',  $t1->getTimestamp()) . "\n";
     
-    for ($i=0; $i < 120; $i++) { 
+    for ($i=0; $i < 55; $i++) { 
         $json1['data'][] = [
             'created_at'=> date('c', $t1->getTimestamp()), 
             'value'=> $i
@@ -39,7 +39,7 @@ function run() {
         $t1->modify("+1 minute");
     }
 
-    for ($i=120; $i < 240; $i++) { 
+    for ($i=55; $i < 65; $i++) { 
         $json2['data'][] = [
             'created_at'=> date('c', $t1->getTimestamp()), 
             'value'=> $i
@@ -66,7 +66,7 @@ function run() {
             'POST', 
             "$user/feeds/test.batchupload/data/batch",
             [
-                'json' => $json1
+                'json' => $json2
             ] 
         );
 
@@ -75,8 +75,6 @@ function run() {
         echo "publish2 FAILED: " . $e->getMessage() . "\n";       
     }
     
-    var_dump($response2);
-
 }
 
 run();

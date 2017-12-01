@@ -58,9 +58,9 @@ class MessageFilter
             message.append(reading);
          }
          mNumerOfStoredMeasurementRecords++;
-         BT_CORE_LOG_INFO("MessageFilter: append MeasurementRecord %u of %u to Message %u of %u :", mNumerOfStoredMeasurementRecords, C , mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
+         BT_CORE_LOG_INFO("MessageFilter: append MeasurementRecord %zu of %zu to Message %zu of %zu :", mNumerOfStoredMeasurementRecords, C , mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
          if(message.full() || mNumerOfStoredMeasurementRecords >= C) {
-            BT_CORE_LOG_INFO("MessageFilter: message %u of %u ready :", mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
+            BT_CORE_LOG_INFO("MessageFilter: message %zu of %zu ready :", mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
             message.end();
             mCurrentMessageToAppend++;
             if(mCurrentMessageToAppend >= NUMBER_OF_MESSAGES) {
@@ -69,9 +69,9 @@ class MessageFilter
                   for (size_t i = 0; i < NUMBER_OF_MESSAGES; ++i) {
                      messages[i] = mMessages[i].raw();
                   }
-                  BT_CORE_LOG_INFO("MessageFilter: new messages [%u] ready:", NUMBER_OF_MESSAGES);
+                  BT_CORE_LOG_INFO("MessageFilter: new messages [%zu] ready:", NUMBER_OF_MESSAGES);
                   for (size_t i = 0; i < NUMBER_OF_MESSAGES; ++i) {
-                     BT_CORE_LOG_DEBUG("  - [%u]: %u", i, strlen(messages[i]));
+                     BT_CORE_LOG_DEBUG("  - [%zu]: %zu", i, strlen(messages[i]));
                   }
                   mConsumer(messages, NUMBER_OF_MESSAGES);
                }

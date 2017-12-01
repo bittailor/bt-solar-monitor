@@ -5,8 +5,8 @@
 //*************************************************************************************************
 
 #include <functional>
-
 #include <gtest/gtest.h>
+#include <Bt/TestLogger.h>
 
 #include "Bt/SolarMonitor/MessageFilter.h"
 
@@ -34,7 +34,7 @@ class MessageFilterTest : public ::testing::Test {
 
       void comsume(const MessageFilter<6,3>::MessageString* messages, size_t size) {
          for(int i = 0 ; i < size ; i++) {
-            std::cout << i << ": " << messages[i] << std::endl;
+            log() << i << ": " << messages[i] << std::endl;
          }
          mConsumed = true;
       }
