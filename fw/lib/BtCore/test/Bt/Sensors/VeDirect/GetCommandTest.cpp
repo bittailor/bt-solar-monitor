@@ -8,6 +8,7 @@
 
 #include "Bt/Sensors/VeDirect/GetCommand.h"
 #include "Bt/Sensors/VeDirect/Register.h"
+#include "Bt/Sensors/VeDirect/Registers.h"
 
 namespace Bt {
 namespace Sensors {
@@ -17,41 +18,101 @@ using ::testing::InSequence;
 using ::testing::Return;
 using ::testing::StrEq;
 
-TEST(GetCommandTest, getBatteryMaximumCurrent) {
-   StreamMock stream;
+void setupCommandResponse(StreamMock& pStreamMock, const char* pCommand, const char* pResponse) {
    {
       InSequence seq;
-      EXPECT_CALL(stream, available())
+      EXPECT_CALL(pStreamMock, available())
          .WillRepeatedly(Return(false));
-      EXPECT_CALL(stream, read())
+      EXPECT_CALL(pStreamMock, read())
          .WillRepeatedly(Return(-1));
-      EXPECT_CALL(stream, println(StrEq(":7F0ED0071")));
-      EXPECT_CALL(stream, available())
+      EXPECT_CALL(pStreamMock, println(StrEq(pCommand)));
+      EXPECT_CALL(pStreamMock, available())
          .WillRepeatedly(Return(true));
-      // :7F0ED009600DB
-      EXPECT_CALL(stream, read())
-         .WillOnce(Return(':'))
-         .WillOnce(Return('7'))
-         .WillOnce(Return('F'))
-         .WillOnce(Return('0'))
-         .WillOnce(Return('E'))
-         .WillOnce(Return('D'))
-         .WillOnce(Return('0'))
-         .WillOnce(Return('0'))
-         .WillOnce(Return('9'))
-         .WillOnce(Return('6'))
-         .WillOnce(Return('0'))
-         .WillOnce(Return('0'))
-         .WillOnce(Return('D'))
-         .WillOnce(Return('B'))
-         .WillOnce(Return('\n'));
+      for(const char* it = pResponse; *it; ++it) {
+         EXPECT_CALL(pStreamMock, read()).WillOnce(Return(*it));
+      };
+      EXPECT_CALL(pStreamMock, read()).WillOnce(Return('\n'));
    }
+}
 
-   GetCommand getCommand{Register::BatteryMaximumCurrent};
-   std::pair<bool,int16_t> result = getCommand.execute(stream);
+TEST(GetCommandTest, getBatteryMaximumCurrent_150) {
+   StreamMock stream;
+   setupCommandResponse(stream, ":7F0ED0071", ":7F0ED009600DB");
 
-   EXPECT_TRUE(result.first);
-   EXPECT_EQ(150,result.second);
+   Core::Result<uint16_t> result = Registers::batteryMaximumCurrent().get(stream);
+
+   EXPECT_TRUE(result);
+   EXPECT_EQ(150, result.value());
+}
+
+TEST(GetCommandTest, getBatteryMaximumCurrent_30259) {
+   StreamMock stream;
+   setupCommandResponse(stream, ":7F0ED0071", ":7F0ED003376C8");
+
+   Core::Result<uint16_t> result = Registers::batteryMaximumCurrent().get(stream);
+
+   EXPECT_TRUE(result);
+   EXPECT_EQ(30259, result.value());
+}
+
+TEST(GetCommandTest, getPanelPower_0) {
+   StreamMock stream;
+   setupCommandResponse(stream, ":7BCED00A5", ":7BCED0000000000A5");
+
+   Core::Result<uint32_t> result = Registers::panelPower().get(stream);
+
+   EXPECT_TRUE(result);
+   EXPECT_EQ(0, result.value());
+}
+
+TEST(GetCommandTest, getPanelPower_4294967295) {
+   StreamMock stream;
+   setupCommandResponse(stream, ":7BCED00A5", ":7BCED00FFFFFFFFA9");
+
+   Core::Result<uint32_t> result = Registers::panelPower().get(stream);
+
+   EXPECT_TRUE(result);
+   EXPECT_EQ(4294967295, result.value());
+}
+
+TEST(GetCommandTest, getPanelPower_1732584193) {
+   StreamMock stream;
+   setupCommandResponse(stream, ":7BCED00A5", ":7BCED0001234567D5");
+
+   Core::Result<uint32_t> result = Registers::panelPower().get(stream);
+
+   EXPECT_TRUE(result);
+   EXPECT_EQ(1732584193, result.value());
+}
+
+TEST(GetCommandTest, getPanelPower_4275878552) {
+   StreamMock stream;
+   setupCommandResponse(stream, ":7BCED00A5", ":7BCED0098BADCFE79");
+
+   Core::Result<uint32_t> result = Registers::panelPower().get(stream);
+
+   EXPECT_TRUE(result);
+   EXPECT_EQ(4275878552, result.value());
+}
+
+TEST(GetCommandTest, getLoadOutputState_True) {
+   StreamMock stream;
+   setupCommandResponse(stream, ":7A8ED00B9", ":7A8ED0001B8");
+
+   Core::Result<bool> result = Registers::loadOutputState().get(stream);
+
+   EXPECT_TRUE(result);
+   EXPECT_EQ(true, result.value());
+}
+
+TEST(GetCommandTest, getLoadOutputState_False) {
+   StreamMock stream;
+   setupCommandResponse(stream, ":7A8ED00B9", ":7A8ED0000B9");
+
+   Core::Result<bool> result = Registers::loadOutputState().get(stream);
+
+   EXPECT_TRUE(result);
+   EXPECT_EQ(false, result.value());
 }
 
 TEST(GetCommandTest, getBatteryMaximumCurrentWithDelays) {
@@ -94,11 +155,10 @@ TEST(GetCommandTest, getBatteryMaximumCurrentWithDelays) {
          .WillOnce(Return('\n'));
    }
 
-   GetCommand getCommand{Register::BatteryMaximumCurrent};
-   std::pair<bool,int16_t> result = getCommand.execute(stream);
+   Core::Result<uint16_t> result = Registers::batteryMaximumCurrent().get(stream);
 
-   EXPECT_TRUE(result.first);
-   EXPECT_EQ(150,result.second);
+   EXPECT_TRUE(result);
+   EXPECT_EQ(150, result.value());
 }
 
 TEST(GetCommandTest, getBatteryMaximumCurrentWithAsyncNoise) {
@@ -145,11 +205,10 @@ TEST(GetCommandTest, getBatteryMaximumCurrentWithAsyncNoise) {
          .WillOnce(Return('\n'));
    }
 
-   GetCommand getCommand{Register::BatteryMaximumCurrent};
-   std::pair<bool,int16_t> result = getCommand.execute(stream);
+   Core::Result<uint16_t> result = Registers::batteryMaximumCurrent().get(stream);
 
-   EXPECT_TRUE(result.first);
-   EXPECT_EQ(150,result.second);
+   EXPECT_TRUE(result);
+   EXPECT_EQ(150, result.value());
 }
 
 TEST(GetCommandTest, getBatteryMaximumCurrentWithNoiseToFlush) {
@@ -188,11 +247,10 @@ TEST(GetCommandTest, getBatteryMaximumCurrentWithNoiseToFlush) {
          .WillOnce(Return('\n'));
    }
 
-   GetCommand getCommand{Register::BatteryMaximumCurrent};
-   std::pair<bool,int16_t> result = getCommand.execute(stream);
+   Core::Result<uint16_t> result = Registers::batteryMaximumCurrent().get(stream);
 
-   EXPECT_TRUE(result.first);
-   EXPECT_EQ(150,result.second);
+   EXPECT_TRUE(result);
+   EXPECT_EQ(150, result.value());
 }
 
 TEST(GetCommandTest, getBatteryMaximumCurrentWithWrongCheckSum) {
@@ -225,10 +283,9 @@ TEST(GetCommandTest, getBatteryMaximumCurrentWithWrongCheckSum) {
          .WillOnce(Return('\n'));
    }
 
-   GetCommand getCommand{Register::BatteryMaximumCurrent};
-   std::pair<bool,int16_t> result = getCommand.execute(stream);
+   Core::Result<uint16_t> result = Registers::batteryMaximumCurrent().get(stream);
 
-   EXPECT_FALSE(result.first);
+   EXPECT_FALSE(result);
 }
 
 TEST(GetCommandTest, getBatteryMaximumCurrentWithNoEnd) {
@@ -248,10 +305,9 @@ TEST(GetCommandTest, getBatteryMaximumCurrentWithNoEnd) {
          .WillRepeatedly(Return('7'));
    }
 
-   GetCommand getCommand{Register::BatteryMaximumCurrent};
-   std::pair<bool,int16_t> result = getCommand.execute(stream);
+   Core::Result<uint16_t> result = Registers::batteryMaximumCurrent().get(stream);
 
-   EXPECT_FALSE(result.first);
+   EXPECT_FALSE(result);
 }
 
 } // namespace VeDirect

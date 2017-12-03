@@ -9,23 +9,30 @@
 
 #include <stdint.h>
 
+#include <Bt/Core/Platform.h>
+
+#include <Bt/Core/Result.h>
+
+#include "Bt/Sensors/VeDirect/GetCommand.h"
+
 namespace Bt {
 namespace Sensors {
 namespace VeDirect {
 
-enum class Register : uint16_t {
-   ChargerCurrent = 0xEDD7,
-   ChargerVoltage = 0xEDD5,
+template<typename T>
+class Register {
+   public:
+      Register(uint16_t pRegister):mGetCommand(pRegister){
+      }
 
-   PanelPower = 0xEDBC,
-   PanelVoltage = 0xEDBB,
+      Core::Result<T> get(Stream& pStream) {
+         return mGetCommand.execute(pStream);
+      }
 
-   LoadCurrent = 0xEDAD,
-   LoadOutputState = 0xEDA8,
-
-   BatteryMaximumCurrent = 0xEDF0,
-
+   private:
+      GetCommand<T> mGetCommand;
 };
+
 
 } // namespace VeDirect
 } // namespace Sensors
