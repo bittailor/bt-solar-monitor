@@ -283,5 +283,5 @@ gulp.task('flash-online', function(cb){
 //gulp.task('build',  plugins.sequence('fw:host:test'));
 //gulp.task('build',  plugins.sequence('compile-local'));
 gulp.task('build',  plugins.sequence('fw:host:test','compile-local'));
-gulp.task('travis', plugins.sequence('install-ext','bs:secrets', 'fw:host:test', 'compile-online'));
+gulp.task('travis', plugins.sequence('install-ext','bs:secrets', 'fw:host:test', 'compile-online', 'web:api:test'));
 gulp.task('default', ['build']);
