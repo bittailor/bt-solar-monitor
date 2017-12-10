@@ -142,7 +142,7 @@ gulp.task('install-composer', function(){
     return sh('composer',['install'],conf.web.api) 
 });
 
-gulp.task('install',['install-ext']);
+gulp.task('install',['install-ext', 'install-composer']);
 
 
 //----
