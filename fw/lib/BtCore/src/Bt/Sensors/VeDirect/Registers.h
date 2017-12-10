@@ -16,17 +16,17 @@ namespace VeDirect {
 class Registers
 {
    public:
-      static Register<uint32_t> panelPower() {return Register<uint32_t>(0xEDBC);}
-      static Register<uint16_t> panelVoltage() {return Register<uint16_t>(0xEDBB);}
+      static Register<uint32_t> panelPower() {return Register<uint32_t>(0xEDBC, 100);}
+      static Register<uint16_t> panelVoltage() {return Register<uint16_t>(0xEDBB, 100);}
 
-      static Register<uint16_t> chargerCurrent() {return Register<uint16_t>(0xEDD7);}
-      static Register<uint16_t> chargerVoltage() {return Register<uint16_t>(0xEDD5);}
+      static Register<uint16_t> chargerCurrent() {return Register<uint16_t>(0xEDD7, 10);}
+      static Register<uint16_t> chargerVoltage() {return Register<uint16_t>(0xEDD5, 100);}
 
 
-      static Register<uint16_t> loadCurrent() {return Register<uint16_t>(0xEDAD);}
-      static Register<bool> loadOutputState() {return Register<bool>(0xEDA8);}
+      static Register<uint16_t> loadCurrent() {return Register<uint16_t>(0xEDAD, 10);}
+      static Register<bool> loadOutputState() {return Register<bool>(0xEDA8, 0);}
 
-      static Register<uint16_t> batteryMaximumCurrent() {return Register<uint16_t>(0xEDF0);}
+      static Register<uint16_t> batteryMaximumCurrent() {return Register<uint16_t>(0xEDF0,10);}
 
 };
 

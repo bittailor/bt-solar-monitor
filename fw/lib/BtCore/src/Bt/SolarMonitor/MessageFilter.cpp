@@ -28,16 +28,6 @@ void Message::begin(size_t id, size_t i, size_t n) {
    snprintf(mBuffer, MESSAGE_BUFFER_LENGHT, "%zu|%zu|%zu|", id, i, n);
 }
 
-void Message::append(const Reading& pReading) {
-   if(mCount == 0) {
-      size_t length = strlen(mBuffer);
-      snprintf(mBuffer + length, MESSAGE_BUFFER_LENGHT - length, "%s|",  Time.format(TIME_FORMAT_ISO8601_FULL).c_str());
-   }
-   append(scale(pReading.current()), scale(pReading.voltage()));
-   mCount++;
-
-}
-
 void Message::end() {
    BT_CORE_LOG_INFO("Message: Message::end() %zu", strlen(mBuffer));
    size_t length = strlen(mBuffer);
@@ -52,13 +42,17 @@ const char* Message::raw() {
    return mBuffer;
 }
 
-void Message::append(int16_t pCurrent , int16_t pVolatge) {
+void Message::append(float pFirst , float pSecond) {
+   append(scale(pFirst), scale(pSecond));
+}
+
+void Message::append(int16_t pFirst , int16_t pSecond) {
    const size_t BUFFER_SIZE = 4;
    uint8_t buffer[BUFFER_SIZE];
-   buffer[0] = (pCurrent >> 8) & 0xff;
-   buffer[1] = pCurrent & 0xff;
-   buffer[2] = (pVolatge >> 8) & 0xff;
-   buffer[3] = pVolatge & 0xff;
+   buffer[0] = (pFirst >> 8) & 0xff;
+   buffer[1] = pFirst & 0xff;
+   buffer[2] = (pSecond >> 8) & 0xff;
+   buffer[3] = pSecond & 0xff;
    size_t length = strlen(mBuffer);
    Bt::Encoding::Z85::encode(buffer, BUFFER_SIZE, mBuffer + length, MESSAGE_BUFFER_LENGHT - length);
 }

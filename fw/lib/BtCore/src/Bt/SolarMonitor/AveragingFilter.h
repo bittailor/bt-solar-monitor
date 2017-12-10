@@ -15,11 +15,11 @@
 namespace Bt {
 namespace SolarMonitor {
 
-template<size_t N>
+template<typename T>
 class AveragingFilter
 {
    public:
-      typedef std::function<void(const MeasurementRecord<N>&)> Consumer;
+      typedef std::function<void(const T&)> Consumer;
 
       AveragingFilter(size_t pCount, const Consumer& pConsumer = Consumer())
       : mCount(pCount), mConsumer(pConsumer){
@@ -27,13 +27,13 @@ class AveragingFilter
       AveragingFilter(const AveragingFilter&) = delete;
       AveragingFilter& operator=(const AveragingFilter&) = delete;
 
-      void consume(const MeasurementRecord<N>& pMeasurementRecord) {
-         mAveraging = mAveraging + pMeasurementRecord;
+      void consume(const T& pValues) {
+         mAveraging = mAveraging + pValues;
          if (mAveraging.count() >= mCount) {
-            MeasurementRecord<N> average = mAveraging.average();
-            mAveraging = Averaging<MeasurementRecord<N>>();
+            T average = mAveraging.average();
+            mAveraging = Averaging<T>();
             if (mConsumer) {
-               BT_CORE_LOG_INFO("AveragingFilter: new averaged reading");
+               BT_CORE_LOG_INFO("AveragingFilter: new averaged values");
                mConsumer(average);
             }
          }
@@ -45,7 +45,7 @@ class AveragingFilter
 
    private:
       size_t mCount;
-      Averaging<MeasurementRecord<N>> mAveraging;
+      Averaging<T> mAveraging;
       Consumer mConsumer;
       
 

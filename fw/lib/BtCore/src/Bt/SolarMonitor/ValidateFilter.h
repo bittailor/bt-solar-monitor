@@ -13,44 +13,41 @@
 #include <algorithm>
 
 #include <Bt/Core/Log.h>
-#include <Bt/Sensors/INA219.h>
+#include <Bt/Core/Result.h>
 #include <Bt/SolarMonitor/FilterBase.h>
-#include <Bt/SolarMonitor/Reading.h>
 
 
 namespace Bt {
 namespace SolarMonitor {
 
-template<size_t N>
+template<typename T, size_t N>
 class ValidateFilter
 {
    public:
-      typedef std::function<void(const std::array<Bt::SolarMonitor::Reading, N>&)> Consumer;
+      typedef std::function<void(const std::array<T, N>&)> Consumer;
 
       ValidateFilter(const Consumer& pConsumer): mConsumer(pConsumer) {
       }
       ValidateFilter(const ValidateFilter&) = delete;
       ValidateFilter& operator=(const ValidateFilter&) = delete;
 
-      void consume(const std::array<Bt::Sensors::INA219Reading, N>& pReadings) {
-         bool allValid = std::accumulate(pReadings.begin(), pReadings.end(),
+      void consume(const std::array<Bt::Core::Result<T>, N>& pResults) {
+         bool allValid = std::accumulate(pResults.begin(), pResults.end(),
                                          true,
-                                         [](bool valid,const Bt::Sensors::INA219Reading& reading) {
-                                            return valid && reading.valid;
+                                         [](bool valid, const Bt::Core::Result<T>& result) {
+                                            return valid && result;
                                          });
 
          if(allValid) {
             if (mConsumer) {
-               std::array<Bt::SolarMonitor::Reading, N> measurements;
-               std::transform(pReadings.begin(),pReadings.end(),
-                              measurements.begin(),
-                              [](const Sensors::INA219Reading& reading) -> Reading {
-                                 return Reading{reading.current, reading.busVoltage};
-                              });
-               mConsumer(measurements);
+               std::array<T, N> values;
+               std::transform(pResults.begin(),pResults.end(),
+                              values.begin(),
+                              [](const Bt::Core::Result<T>& r) -> T {return r.value();});
+               mConsumer(values);
             }
          } else {
-            BT_CORE_LOG_WARN("ValidateFilter: At least one INA219Reading was invalid");
+            BT_CORE_LOG_WARN("ValidateFilter: At least one result was invalid");
          }
       }
 

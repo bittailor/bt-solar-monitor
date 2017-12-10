@@ -1,5 +1,6 @@
 #include <functional>
 #include <Particle.h>
+#include <Serial4/Serial4.h>
 
 #if PLATFORM_ID == 10
 #include <cellular_hal.h>
@@ -8,8 +9,6 @@
 #include <nokia-5110-lcd.h>
 #include <Bt/Core/Log.h>
 #include <Bt/Core/Cloud.h>
-#include <Bt/Sensors/INA219.h>
-#include <Bt/Sensors/SensorArray.h>
 #include <Bt/SolarMonitor/AveragingFilter.h>
 #include <Bt/SolarMonitor/StorageFilter.h>
 #include <Bt/SolarMonitor/MessageFilter.h>
@@ -17,6 +16,7 @@
 #include <Bt/SolarMonitor/DisplayFilter.h>
 #include <Bt/SolarMonitor/ValidateFilter.h>
 #include <Bt/SolarMonitor/PublishFilter.h>
+#include <Bt/SolarMonitor/Reader.h>
 
 // ==== <Configuration> ==========
 
@@ -64,28 +64,8 @@ uint32_t sLoopCounter = 0;
 
 int sBlueLed = 7;
 
-
-uint8_t sAddresses[] = {
-         0x40,
-         0x44,
-         0x41,
-         0x45,
-         0x4C,
-         0x48
-};
-
-static const size_t NUMBER_OF_SENSORS = sizeof(sAddresses)/sizeof(sAddresses[0]);
-
-std::array<Bt::Sensors::INA219, NUMBER_OF_SENSORS> sSensors{{
-   {Wire, sAddresses[0], Bt::Sensors::INA219::Gain::GAIN_40MV, 32768,250},
-   {Wire, sAddresses[1], Bt::Sensors::INA219::Gain::GAIN_40MV, 32768,250},
-   {Wire, sAddresses[2], Bt::Sensors::INA219::Gain::GAIN_80MV, 16384,500},
-   {Wire, sAddresses[3], Bt::Sensors::INA219::Gain::GAIN_80MV, 16384,500},
-   {Wire, sAddresses[4], Bt::Sensors::INA219::Gain::GAIN_80MV, 16384,500},
-   {Wire, sAddresses[5], Bt::Sensors::INA219::Gain::GAIN_80MV,  8192, 50}
-}};
-
-Bt::Sensors::SensorArray<Bt::Sensors::INA219,Bt::Sensors::INA219Reading,NUMBER_OF_SENSORS> sSensorArray{sSensors,1};
+typedef Bt::SolarMonitor::Reader Reader;
+Reader sReader(Serial4,Serial4);
 
 // CE
 // RST
@@ -97,11 +77,11 @@ static const size_t STORAGE_SIZE = (STOARGE_SECONDS/AVERAGE_SECONDS);
 
 typedef Bt::Core::Cloud<decltype(Radio),decltype(Particle)> Cloud;
 typedef Bt::SolarMonitor::PublishFilter<Cloud> PublishFilter;
-typedef Bt::SolarMonitor::MessageFilter<NUMBER_OF_SENSORS,STORAGE_SIZE> MessageFilter;
-typedef Bt::SolarMonitor::DisplayFilter<NUMBER_OF_SENSORS> DisplayFilter;
-typedef Bt::SolarMonitor::ValidateFilter<NUMBER_OF_SENSORS> ValidateFilter;
-typedef Bt::SolarMonitor::AveragingFilter<NUMBER_OF_SENSORS> AveragingFilter;
-typedef Bt::SolarMonitor::ForkFilter<std::array<Bt::Sensors::INA219Reading, NUMBER_OF_SENSORS>,2> ForkFilter;
+typedef Bt::SolarMonitor::MessageFilter<Reader::NUMBER_OF_VALUES,STORAGE_SIZE> MessageFilter;
+typedef Bt::SolarMonitor::DisplayFilter<Reader::NUMBER_OF_VALUES> DisplayFilter;
+typedef Bt::SolarMonitor::ValidateFilter<float, Reader::NUMBER_OF_VALUES> ValidateFilter;
+typedef Bt::SolarMonitor::AveragingFilter<std::array<float, Reader::NUMBER_OF_VALUES>> AveragingFilter;
+typedef Bt::SolarMonitor::ForkFilter<Reader::Readings,2> ForkFilter;
 
 Cloud sCloud(Radio, Particle, EVENT_NAME_STATUS);
 PublishFilter sPublishFilter(sCloud, EVENT_NAME_DATA);
@@ -133,6 +113,8 @@ void setup() {
    sDisplay.setContrast(55); // Pretty good value, play around with it
    sDisplay.updateDisplay(); // with displayMap untouched, SFE logo
 
+   Serial4.begin(19200);
+
 #if PLATFORM_ID == 10
    BT_CORE_LOG_INFO("!!! FuelGauge.sleep()  !!!");
    FuelGauge().sleep();
@@ -143,11 +125,6 @@ void setup() {
       bool ack = client.publish(EVENT_NAME_STATUS, "startup", WITH_ACK);
       BT_CORE_LOG_INFO(" ... cloud.publish(\"startup\") %d", ack);
    });
-
-
-   for (Bt::Sensors::INA219& sensor : sSensors) {
-      sensor.begin();
-   }
 }
 
 void loop() {
@@ -155,11 +132,11 @@ void loop() {
    unsigned long timer = millis();
    sLoopCounter++;
    //BT_CORE_LOG_INFO("loop a %u [" __DATE__ " " __TIME__ "]", sLoopCounter );
-   auto readings = sSensorArray.readAll();
+   auto readings = sReader.read();
    sForkFilter.consume(readings);
    timer = millis() - timer;
    //BT_CORE_LOG_INFO("go to sleep after loop %u took %d ms", sLoopCounter, timer);
-   //BT_CORE_LOG_WARN("%lu ms",timer);
+   BT_CORE_LOG_WARN("%lu ms",timer);
    Serial1.flush();
    digitalWrite(sBlueLed, LOW);
    //delay(MEASURE_SLEEP * 1000);

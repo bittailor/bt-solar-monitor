@@ -11,6 +11,7 @@
 #include <functional>
 #include <nokia-5110-lcd.h>
 #include <Bt/Core/Log.h>
+#include <Bt/Core/Result.h>
 #include <Bt/Sensors/INA219.h>
 
 namespace Bt {
@@ -29,23 +30,22 @@ class DisplayFilter
       ~DisplayFilter() {
       }
 
-      void consume(const std::array<Bt::Sensors::INA219Reading, N>& pReadings) {
+      void consume(const std::array<Bt::Core::Result<float>, N>& pReadings) {
          const size_t BUFFER_SIZE = 50;
          char buffer[BUFFER_SIZE] = {0};
          mLoopCounter++;
          mDisplay.clearDisplay();
          snprintf(buffer, BUFFER_SIZE, "Loop %lu", mLoopCounter);
          mDisplay.setStr(buffer, 0, 0, BLACK);
-         for(std::size_t i = 0 ; i < pReadings.size() ; i++) {
-            const Bt::Sensors::INA219Reading& reading = pReadings[i];
+         for(size_t i = 0 ; i < pReadings.size() ; i++) {
             buffer[0] = 0;
-            if(reading.valid) {
-               snprintf(buffer, BUFFER_SIZE, "%.2f %.3f", reading.busVoltage, reading.current);
+            if(pReadings[i]) {
+               snprintf(buffer, BUFFER_SIZE, "%.2f", pReadings[i].value());
             } else {
                snprintf(buffer, BUFFER_SIZE, "--!--");
             }
-            mDisplay.setStr(buffer, 0, (i+1)*8, BLACK);
-            BT_CORE_LOG_DEBUG("Reading - [%s] U = %f I = %f", reading.valid ? "valid" : "invalid"  ,reading.busVoltage, reading.current);
+            mDisplay.setStr(buffer, (i%2)*42, ((i/2)+1)*8, BLACK);
+            BT_CORE_LOG_DEBUG("value - [%s] v = %f", pReadings[i] ? "valid" : "invalid"  ,pReadings[i].value());
          }
          mDisplay.updateDisplay();
       }

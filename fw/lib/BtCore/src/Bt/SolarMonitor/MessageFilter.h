@@ -9,6 +9,7 @@
 
 #include <array>
 #include <functional>
+#include <iterator>
 #include <math.h>
 #include "Bt/Core/Log.h"
 #include "Bt/Encoding/Z85.h"
@@ -23,13 +24,27 @@ class Message {
 
       Message();
       void begin(size_t id, size_t i, size_t n);
-      void append(const Reading& pReading);
+
+      template<size_t N>
+      void append(std::array<float,N> pValues) {
+         static_assert(N%2 == 0, "N must be even");
+         if(mCount == 0) {
+            size_t length = strlen(mBuffer);
+            snprintf(mBuffer + length, MESSAGE_BUFFER_LENGHT - length, "%s|",  Time.format(TIME_FORMAT_ISO8601_FULL).c_str());
+         }
+         for (size_t i = 0; i < N; i+=2) {
+            append(pValues[i], pValues[i]+1);
+         }
+         mCount++;
+      }
+
       void end();
       bool full();
       const char* raw();
 
    private:
-      void append(int16_t pCurrent , int16_t pVolatge);
+      void append(float pFirst , float pSecond);
+      void append(int16_t pFirst , int16_t pSecond);
 
       size_t mCount;
       char mBuffer[MESSAGE_BUFFER_LENGHT];
@@ -52,11 +67,9 @@ class MessageFilter
       MessageFilter& operator=(const MessageFilter&) = delete;
       ~MessageFilter(){}
 
-      void consume(const MeasurementRecord<N>& pRecords) {
+      void consume(const std::array<float,N>& pValues) {
          Message& message = mMessages[mCurrentMessageToAppend];
-         for(const Reading& reading : pRecords) {
-            message.append(reading);
-         }
+         message.append(pValues);
          mNumerOfStoredMeasurementRecords++;
          BT_CORE_LOG_INFO("MessageFilter: append MeasurementRecord %zu of %zu to Message %zu of %zu :", mNumerOfStoredMeasurementRecords, C , mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
          if(message.full() || mNumerOfStoredMeasurementRecords >= C) {
