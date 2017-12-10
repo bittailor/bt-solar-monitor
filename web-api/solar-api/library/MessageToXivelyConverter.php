@@ -5,27 +5,19 @@ namespace SolarApi;
 class MessageToXivelyConverter
 {
     function convert(Message $message) {
-        $sensors = array(
-            'panel_a',
-            'panel_b',
-            'battery_a',
-            'battery_b',
-            'load',
-            'controller'
-        );
+        $info = Sensors::info(); 
         $values = array();
-        foreach ($sensors as $sensor) {
-            $values[] = $sensor . '_i';
-            $values[] = $sensor . '_v';
+        foreach($info->controllers as $controller) {
+            foreach($info->values as $value) {
+                $values[] = $controller . '_' . $value;
+            }
         }
-        
-        
+      
         $data = array(
             'version'     => '1.0.0',
             'datastreams' => array(
             ),
         );
-
         $datastreams = &$data['datastreams'];
 
         foreach($values as $value) {
@@ -37,10 +29,8 @@ class MessageToXivelyConverter
         }        
         
         foreach($message->measurements as $measurement) {  
-            foreach ($measurement->readings as $i => $reading) {
-                $index = $i * 2; 
-                $datastreams[$index]['datapoints'][] = array('at' => date('c', $measurement->timestamp->getTimestamp()), 'value' => $reading->current);
-                $datastreams[$index+1]['datapoints'][] = array('at' => date('c', $measurement->timestamp->getTimestamp()), 'value' => $reading->voltage);    
+            foreach ($measurement->values as $i => $value) {
+                $datastreams[$i]['datapoints'][] = array('at' => date('c', $measurement->timestamp->getTimestamp()), 'value' => $value);    
             }           
         }
         //return $data;

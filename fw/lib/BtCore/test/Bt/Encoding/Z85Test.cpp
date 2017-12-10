@@ -30,6 +30,26 @@ TEST(Z85Test, encode) {
    EXPECT_STREQ(buffer,"HelloWorld");
 }
 
+TEST(Z85Test, encode_int16_t_1) {
+   const size_t BUFFER_SIZE = 100;
+   char buffer[BUFFER_SIZE];
+   uint8_t input[2*sizeof(int16_t)];
+   Bt::Core::binaryAppend(static_cast<uint16_t>(1),input);
+   Bt::Core::binaryAppend(static_cast<uint16_t>(2),input+sizeof(uint16_t));
+   encode(input, sizeOfArry(input), buffer, BUFFER_SIZE);
+   EXPECT_STREQ(buffer,"00963");
+}
+
+TEST(Z85Test, encode_int16_t_2) {
+   const size_t BUFFER_SIZE = 100;
+   char buffer[BUFFER_SIZE];
+   uint8_t input[2*sizeof(int16_t)];
+   Bt::Core::binaryAppend(static_cast<uint16_t>(1100),input);
+   Bt::Core::binaryAppend(static_cast<uint16_t>(2200),input+sizeof(uint16_t));
+   encode(input, sizeOfArry(input), buffer, BUFFER_SIZE);
+   EXPECT_STREQ(buffer,"1wx8*");
+}
+
 TEST(Z85Test, decode) {
    const size_t BUFFER_SIZE = 100;
    uint8_t buffer[BUFFER_SIZE];

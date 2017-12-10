@@ -20,35 +20,36 @@ class BeebottePublisher
             'ispublic' => false, 
             'resources' =>  []
         ];
-        foreach($info->sensors as $sensor) {
-            $description = ucwords(str_replace('_',' ',$sensor));
-            $message['resources'][] = [
-                "name" => $sensor .'_i', 
-                "description" => "$description Current", 
-                "vtype" => 'number'
-            ];
-            $message['resources'][] = [
-                "name" => $sensor .'_v', 
-                "description" => "$description Voltage", 
-                "vtype" => 'number'
-            ];
+
+        foreach($info->controllers as $controller) {
+            foreach($info->values as $value) {
+                //$description = ucwords(str_replace('_',' ',$sensor));
+                $message['resources'][] = [
+                    "name" => $controller . '_' . $value, 
+                    "description" => "Controller $controller $value", 
+                    "vtype" => 'number'
+                ];
+            }
         }
+
+        //\var_dump(json_encode($message));
+
         $this->postData('/v1/channels', json_encode($message), true);
     }
 
     public function publish($message) {
         $info = Sensors::info();
-        $names = [];    
-        foreach($info->sensors as $sensor) {
-            $names[] = $sensor .'_i';
-            $names[] = $sensor .'_v';
+        $names = [];
+        foreach($info->controllers as $controller) {
+            foreach($info->values as $value) {
+                $names[] = $controller . '_' .$value;    
+            }
         }
+        
         $records = [];
         foreach($message->measurements as $measurement) {  
-            foreach ($measurement->readings as $i => $reading) {
-                $index = $i * 2; 
-                $records[] = [ 'resource' => $names[$index], 'data' => $reading->current, 'ts' => $measurement->timestamp->getTimestamp() * 1000];
-                $records[] = [ 'resource' => $names[$index+1], 'data' => $reading->voltage, 'ts' => $measurement->timestamp->getTimestamp() * 1000];
+            foreach ($measurement->values as $i => $value) {
+                $records[] = [ 'resource' => $names[$i], 'data' => $value, 'ts' => $measurement->timestamp->getTimestamp() * 1000];
             }           
         }
         $this->writeBulk($records);

@@ -27,12 +27,12 @@ class MessageTest extends TestCase
     public function testMessage_MeasurementReadings()
     {
         $message = self::createExampleMessageWithThreeMeasurements();
-        $this->assertEquals(0.139, $message->measurements[0]->readings[2]->current);
-        $this->assertEquals(1.168, $message->measurements[0]->readings[5]->voltage);
-        $this->assertEquals(0.219, $message->measurements[1]->readings[0]->current);
-        $this->assertEquals(1.248, $message->measurements[1]->readings[3]->voltage);
-        $this->assertEquals(0.359, $message->measurements[2]->readings[4]->current);
-        $this->assertEquals(1.328, $message->measurements[2]->readings[1]->voltage);
+        $this->assertEquals(0.139, $message->measurements[0]->values[4]);
+        $this->assertEquals(1.158, $message->measurements[0]->values[9]);
+        $this->assertEquals(0.219, $message->measurements[1]->values[0]);
+        $this->assertEquals(1.248, $message->measurements[1]->values[7]);
+        $this->assertEquals(0.359, $message->measurements[2]->values[8]);
+        $this->assertEquals(1.328, $message->measurements[2]->values[3]);
     }
 
     public function testMessage_OneEntry()
@@ -58,21 +58,19 @@ class MessageTest extends TestCase
                 139 , 1138,     
                 149 , 1148,     
                 159 , 1158,     
-                169 , 1168,
                 
                 219 , 1218,     
                 229 , 1228,     
                 239 , 1238,     
                 249 , 1248,     
                 259 , 1258,     
-                269 , 1268,
-
+                
                 319 , 1318,     
                 329 , 1328,     
                 339 , 1338,     
                 349 , 1348,     
                 359 , 1358,     
-                369 , 1368,
+                
             ));
     }
 
@@ -86,7 +84,6 @@ class MessageTest extends TestCase
                139 , 1138,     
                149 , 1148,     
                159 , 1158,     
-               169 , 1168,
            ));
    }
 
@@ -100,14 +97,12 @@ class MessageTest extends TestCase
             139 , 1138,     
             149 , 1148,     
             159 , 1158,     
-            169 , 1168,
             
             319 , 1318,     
             329 , 1328,     
             339 , 1338,     
             349 , 1348,     
             359 , 1358,     
-            369 , 1368,
         ));
     }
 }

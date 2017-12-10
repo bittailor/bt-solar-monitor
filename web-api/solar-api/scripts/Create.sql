@@ -9,24 +9,29 @@ DROP TABLE IF EXISTS Measurements;
 CREATE TABLE Measurements (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     ts TIMESTAMP DEFAULT 0,
-    panel_a_i FLOAT,  
-    panel_a_v FLOAT,  
-    panel_b_i FLOAT,  
-    panel_b_v FLOAT,
-    battery_a_i FLOAT,  
-    battery_a_v FLOAT,  
-    battery_b_i FLOAT,  
-    battery_b_v FLOAT, 
-    load_i FLOAT,  
-    load_v FLOAT,
-    controller_i FLOAT,  
-    controller_v FLOAT
+    
+    a_panel_p FLOAT,
+    a_panel_v FLOAT,
+    a_charger_i FLOAT,
+    a_charger_v FLOAT,
+    a_load_i FLOAT,
+
+    b_panel_p FLOAT,
+    b_panel_v FLOAT,
+    b_charger_i FLOAT,
+    b_charger_v FLOAT,
+    b_load_i FLOAT
+    
 ) DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci ;
 
+DROP TABLE IF EXISTS PublishJobs;
 CREATE TABLE PublishJobs (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     rawMessage_id INT UNSIGNED NOT NULL
 ) DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci ;
+
+
+DROP TRIGGER IF EXISTS addPublishJobForRawMessagesInserts;
 
 delimiter #
 

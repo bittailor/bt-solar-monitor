@@ -136,7 +136,7 @@ void loop() {
    sForkFilter.consume(readings);
    timer = millis() - timer;
    //BT_CORE_LOG_INFO("go to sleep after loop %u took %d ms", sLoopCounter, timer);
-   BT_CORE_LOG_WARN("%lu ms",timer);
+   BT_CORE_LOG_INFO("loop took %lu ms",timer);
    Serial1.flush();
    digitalWrite(sBlueLed, LOW);
    //delay(MEASURE_SLEEP * 1000);

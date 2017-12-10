@@ -33,9 +33,9 @@ class Message {
             snprintf(mBuffer + length, MESSAGE_BUFFER_LENGHT - length, "%s|",  Time.format(TIME_FORMAT_ISO8601_FULL).c_str());
          }
          for (size_t i = 0; i < N; i+=2) {
-            append(pValues[i], pValues[i]+1);
+            append(pValues[i], pValues[i+1]);
          }
-         mCount++;
+         mCount = mCount + N;
       }
 
       void end();
@@ -71,9 +71,10 @@ class MessageFilter
          Message& message = mMessages[mCurrentMessageToAppend];
          message.append(pValues);
          mNumerOfStoredMeasurementRecords++;
-         BT_CORE_LOG_INFO("MessageFilter: append MeasurementRecord %zu of %zu to Message %zu of %zu :", mNumerOfStoredMeasurementRecords, C , mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
+         BT_CORE_LOG_INFO("MessageFilter: append MeasurementRecord %u of %u to Message %u of %u :",
+                          forPrintf(mNumerOfStoredMeasurementRecords), forPrintf(C) , forPrintf(mCurrentMessageToAppend), forPrintf(NUMBER_OF_MESSAGES));
          if(message.full() || mNumerOfStoredMeasurementRecords >= C) {
-            BT_CORE_LOG_INFO("MessageFilter: message %zu of %zu ready :", mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
+            BT_CORE_LOG_INFO("MessageFilter: message %u of %u ready :", forPrintf(mCurrentMessageToAppend), forPrintf(NUMBER_OF_MESSAGES));
             message.end();
             mCurrentMessageToAppend++;
             if(mCurrentMessageToAppend >= NUMBER_OF_MESSAGES) {
@@ -82,9 +83,9 @@ class MessageFilter
                   for (size_t i = 0; i < NUMBER_OF_MESSAGES; ++i) {
                      messages[i] = mMessages[i].raw();
                   }
-                  BT_CORE_LOG_INFO("MessageFilter: new messages [%zu] ready:", NUMBER_OF_MESSAGES);
+                  BT_CORE_LOG_INFO("MessageFilter: new messages [%u] ready:", forPrintf(NUMBER_OF_MESSAGES));
                   for (size_t i = 0; i < NUMBER_OF_MESSAGES; ++i) {
-                     BT_CORE_LOG_DEBUG("  - [%zu]: %zu", i, strlen(messages[i]));
+                     BT_CORE_LOG_DEBUG("  - [%u]: %u", forPrintf(i), forPrintf(strlen(messages[i])));
                   }
                   mConsumer(messages, NUMBER_OF_MESSAGES);
                }

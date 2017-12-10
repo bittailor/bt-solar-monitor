@@ -8,16 +8,18 @@
 #define INC__Bt_Core_Platform__h
 
 #ifdef SPARK_PLATFORM
+
 #include <Particle.h>
+
+inline size_t forPrintf(size_t s) { return s;}
+
 #else
+
 #include <PlatformMock.h>
+
+inline unsigned forPrintf(size_t s) { return (unsigned)s;}
+
 #endif
 
-
-namespace Bt {
-namespace Core {
-
-} // namespace Core
-} // namespace Bt
 
 #endif // INC__Bt_Core_Platform__h

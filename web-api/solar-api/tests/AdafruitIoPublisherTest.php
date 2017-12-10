@@ -49,3 +49,4 @@ class AdafruitIoPublisherTest extends TestCase
         $publisher->publish($message);
     }
 }
+

@@ -4,8 +4,8 @@ namespace SolarApi;
 
 class Measurement
 {
-    function __construct($timestamp ,$readings) {
+    function __construct($timestamp , $values) {
         $this->timestamp = $timestamp;
-        $this->readings = $readings;
+        $this->values = $values;
 	}
 }

@@ -54,30 +54,33 @@ class WebHookController
     }
 
     private function storeMessage($message) {
-        $sensors = array(
-            'panel_a',
-            'panel_b',
-            'battery_a',
-            'battery_b',
-            'load',
-            'controller'
+        $columns = array(
+            'ts',
+            
+            'a_panel_p',
+            'a_panel_v',
+            'a_charger_i',
+            'a_charger_v',
+            'a_load_i',
+        
+            'b_panel_p',
+            'b_panel_v',
+            'b_charger_i',
+            'b_charger_v',
+            'b_load_i'
         );
-        $columns = array('ts');
-        foreach ($sensors as $sensor) {
-            $columns[] = $sensor . '_i';
-            $columns[] = $sensor . '_v';
-        }
+
         $values = array_map(function($c) { return ':'.$c; }, $columns);
         
         $sql = 'INSERT INTO Measurements(' . implode(",", $columns). ') VALUES (' . implode(",", $values) .')';
+        \error_log("sql is $sql");
         $stmt = $this->pdo->prepare($sql);
         
         foreach($message->measurements as $measurement) {  
             $stmt->bindValue(':ts', date('c', $measurement->timestamp->getTimestamp()), \PDO::PARAM_STR);
-            foreach ($measurement->readings as $i => $reading) {
-                $index = $i * 2;
-                $stmt->bindValue(':' . $sensors[$i] . '_i' , strval($reading->current), \PDO::PARAM_STR);
-                $stmt->bindValue(':' . $sensors[$i] . '_v' , strval($reading->voltage), \PDO::PARAM_STR);   
+            foreach ($measurement->values as $i => $value) {
+                \error_log("bind " . $values[$i+1] . " to " . strval($value));
+                $stmt->bindValue($values[$i+1] , strval($value), \PDO::PARAM_STR);  
             }
             $stmt->execute();           
         }

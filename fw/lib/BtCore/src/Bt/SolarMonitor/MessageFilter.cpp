@@ -25,17 +25,17 @@ Message::Message() {
 void Message::begin(size_t id, size_t i, size_t n) {
    mBuffer[0] = 0;
    mCount = 0;
-   snprintf(mBuffer, MESSAGE_BUFFER_LENGHT, "%zu|%zu|%zu|", id, i, n);
+   snprintf(mBuffer, MESSAGE_BUFFER_LENGHT, "%u|%u|%u|", forPrintf(id), forPrintf(i), forPrintf(n));
 }
 
 void Message::end() {
-   BT_CORE_LOG_INFO("Message: Message::end() %zu", strlen(mBuffer));
+   BT_CORE_LOG_INFO("Message: Message::end() %u", forPrintf(strlen(mBuffer)));
    size_t length = strlen(mBuffer);
    snprintf(mBuffer + length, MESSAGE_BUFFER_LENGHT - length, "|%s",  Time.format(TIME_FORMAT_ISO8601_FULL).c_str());
 }
 
 bool Message::full() {
-   return mCount == 36;
+   return mCount >= 60;
 }
 
 const char* Message::raw() {

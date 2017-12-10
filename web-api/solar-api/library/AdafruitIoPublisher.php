@@ -22,13 +22,12 @@ class AdafruitIoPublisher
         }
 
         foreach($message->measurements as $measurement) {           
-            foreach ($measurement->readings as $i => $reading) {
+            foreach ($measurement->values as $i => $value) {
                 foreach($feeds as $feed) {
-                    if($feed->sensor === $i) {
-                        $accessor = $feed->reading;
+                    if($feed->valueIndex === $i) {
                         $feed->json['data'][] = [
                             'created_at'=> date('c', $measurement->timestamp->getTimestamp()), 
-                            'value'=> $reading->$accessor
+                            'value'=> $value
                         ];
                     }
                 }    
@@ -65,15 +64,13 @@ class AdafruitIoPublisher
     private static function createInfo(){
         $info = [
             'feeds' => [
-                ['name' =>  'panel-a-i', 'sensor' => 0, 'reading' => 'current' ],   
-                ['name' =>  'panel-a-v', 'sensor' => 0, 'reading' => 'voltage' ],   
-                ['name' =>  'panel-b-i', 'sensor' => 1, 'reading' => 'current' ],   
-                ['name' =>  'panel-b-v', 'sensor' => 1, 'reading' => 'voltage' ],   
+                ['name' =>  'a-panel-p', 'valueIndex' => 0],   
+                ['name' =>  'b-panel-p', 'valueIndex' => 5],   
+                ['name' =>  'a-panel-v', 'valueIndex' => 1],   
+                ['name' =>  'b-panel-v', 'valueIndex' => 6],   
                 
-                ['name' =>  'battery-a-v', 'sensor' => 2, 'reading' => 'voltage' ], 
-                ['name' =>  'battery-b-v', 'sensor' => 3, 'reading' => 'voltage' ],
-
-                ['name' =>  'load-i', 'sensor' => 4, 'reading' => 'voltage' ], 
+                ['name' =>  'a-load-i', 'valueIndex' => 4], 
+                ['name' =>  'b-load-i', 'valueIndex' => 9], 
             ]
         ];
         return json_decode(json_encode($info), FALSE);

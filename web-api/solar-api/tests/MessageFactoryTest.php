@@ -46,7 +46,7 @@ class MessageFactoryTest extends TestCase
 
     public function testCreate_Timestamps()
     {
-        $rawData = "0|0|1|2017-10-01T13:14:15Z|1KnXT1KnXT1KnXT1KnXT1KnXT1KnXT2{--z2{--z2{--z2{--z2{--z2{--z4si^f4si^f4si^f4si^f4si^f4si^f|2017-10-01T13:34:15Z";
+        $rawData = "0|0|1|2017-10-01T13:14:15Z|1KnXT1KnXT1KnXT1KnXT1KnXT1KnXT2{--z2{--z2{--z2{--z2{--z2{--z4si^f4si^f4si^f|2017-10-01T13:34:15Z";
         $factory = new MessageFactory();
         $message = $factory->create($rawData);
         $this->assertEquals(new DateTime('2017-10-01T15:14:15CEST'), $message->startTime);
@@ -55,7 +55,7 @@ class MessageFactoryTest extends TestCase
 
     public function testCreate_Measurents()
     {
-        $rawData = "0|0|1|2017-10-01T13:14:15Z|1wysJ1H6z(1R-Hk1:zOO1(7V}20:+p2Sah52:^oz2(Dv+31bDa3b!KE3mER*3(?5O41Hc}4cfkp4m&rT4xIz04IgGu|2017-10-01T13:34:15Z";
+        $rawData = "0|0|1|2017-10-01T13:14:15Z|1wysJ1H6z(1R-Hk1:zOO1(7V}20:+p2Sah52:^oz2(Dv+31bDa3b!KE3mER*3(?5O41Hc}4cfkp|2017-10-01T13:34:15Z";
         $factory = new MessageFactory();
         $message = $factory->create($rawData);
         $this->assertEquals(3, count($message->measurements));

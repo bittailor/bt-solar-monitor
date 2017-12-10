@@ -5,48 +5,77 @@
 //*************************************************************************************************
 
 #include <functional>
+#include <string>
+#include <sstream>
+#include <vector>
+#include <iterator>
+
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <Bt/TestLogger.h>
 
 #include "Bt/SolarMonitor/MessageFilter.h"
 
+using ::testing::_;
+using ::testing::Exactly;
+using ::testing::Truly;
+
 namespace Bt {
 namespace SolarMonitor {
+namespace {
 
-class MessageFilterTest : public ::testing::Test {
+   class ConsumerMock {
+      public:
+         MOCK_METHOD2(consume, void(const char *const *, size_t));
+   };
 
-   protected:
-      MessageFilterTest()
-      :mMessageFilter(std::bind(&MessageFilterTest::comsume, this, std::placeholders::_1, std::placeholders::_2))
-      ,mConsumed(false){
+   template<typename Out>
+   void split(const std::string &s, char delim, Out result) {
+       std::stringstream ss(s);
+       std::string item;
+       while (std::getline(ss, item, delim)) {
+           *(result++) = item;
+       }
+   }
 
-      }
-
-      virtual void SetUp() {
-      }
-
-      virtual void TearDown() {
-
-      }
-
-      MessageFilter<6,3> mMessageFilter;
-      bool mConsumed;
-
-      void comsume(const MessageFilter<6,3>::MessageString* messages, size_t size) {
-         for(int i = 0 ; i < size ; i++) {
-            log() << i << ": " << messages[i] << std::endl;
-         }
-         mConsumed = true;
-      }
-
-};
+   std::vector<std::string> split(const std::string &s, char delim) {
+       std::vector<std::string> elems;
+       split(s, delim, std::back_inserter(elems));
+       return elems;
+   }
 
 
-TEST_F(MessageFilterTest, binaryAppend) {
-   mMessageFilter.consume(std::array<float,6>{1.1,11.1,1.2,11.2,1.3,11.3});
-   mMessageFilter.consume(std::array<float,6>{2.1,12.1,2.2,12.2,2.3,12.3});
-   mMessageFilter.consume(std::array<float,6>{3.1,13.1,3.2,13.2,3.3,13.3});
-   EXPECT_EQ(true,mConsumed);
+}
+
+TEST(MessageFilterTest, checkForwardOnFull) {
+
+   ConsumerMock consumer;
+   MessageFilter<6,3> messageFilter(std::bind(&ConsumerMock::consume, &consumer, std::placeholders::_1, std::placeholders::_2));
+
+   EXPECT_CALL(consumer, consume(_,_))
+         .Times(Exactly(1));
+
+   messageFilter.consume(std::array<float,6>{1.1,11.1,1.2,11.2,1.3,11.3});
+   messageFilter.consume(std::array<float,6>{2.1,12.1,2.2,12.2,2.3,12.3});
+   messageFilter.consume(std::array<float,6>{3.1,13.1,3.2,13.2,3.3,13.3});
+}
+
+TEST(MessageFilterTest, checkDataTwoFloats) {
+
+   ConsumerMock consumer;
+   MessageFilter<2,1> messageFilter(std::bind(&ConsumerMock::consume, &consumer, std::placeholders::_1, std::placeholders::_2));
+
+   const char* messages[]={"1"};
+
+   EXPECT_CALL(consumer, consume(Truly([](const char *const * messages) -> bool {
+      std::vector<std::string> parts = split(std::string(messages[0]),'|');
+      EXPECT_EQ(6, parts.size());
+      EXPECT_STREQ("1wx8*", parts[4].c_str());
+      return true;
+   }),1))
+   .Times(Exactly(1));
+
+   messageFilter.consume(std::array<float,2>{1.1,2.2});
 }
 
 

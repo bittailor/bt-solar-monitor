@@ -14,16 +14,18 @@ class Sensors
 
     private static function create(){
         $info = [
-            'sensors' => [
-                'panel_a',
-                'panel_b',
-                'battery_a',
-                'battery_b',
-                'load',
-                'controller'    
+            'values' => [
+                'panel_p',
+                'panel_v',
+                'charger_i',
+                'charger_v',
+                'load_i'   
+            ],
+            'controllers' => [
+                'a',
+                'b'
             ]
         ];
-
         return json_decode(json_encode($info), FALSE);
     }
     
