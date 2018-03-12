@@ -17,13 +17,13 @@ namespace {
    }
 }
 
-Message::Message() {
+Message::Message(): mCountMax(0), mCount(0) {
    mBuffer[0] = 0;
-   mCount = 0;
 }
 
-void Message::begin(size_t id, size_t i, size_t n) {
+void Message::begin(size_t pCountMax, size_t id, size_t i, size_t n) {
    mBuffer[0] = 0;
+   mCountMax = pCountMax;
    mCount = 0;
    snprintf(mBuffer, MESSAGE_BUFFER_LENGHT, "%u|%u|%u|", forPrintf(id), forPrintf(i), forPrintf(n));
 }
@@ -35,7 +35,7 @@ void Message::end() {
 }
 
 bool Message::full() {
-   return mCount >= 60;
+   return mCount >= mCountMax;
 }
 
 const char* Message::raw() {

@@ -1,6 +1,7 @@
 #include <functional>
 #include <Particle.h>
 #include <Serial4/Serial4.h>
+#include <Serial5/Serial5.h>
 
 #if PLATFORM_ID == 10
 #include <cellular_hal.h>
@@ -22,8 +23,8 @@
 
 #define MEASURE_SLEEP 1
 
-const size_t AVERAGE_SECONDS = 5  * 10;  // 5 *  60;
-const size_t STOARGE_SECONDS = 10 * 60;  // 60 * 60;
+const size_t AVERAGE_SECONDS = 5 *  60; // 5  * 10;  // 5 *  60;
+const size_t STOARGE_SECONDS = 60 * 60; // 10 * 60;  // 60 * 60;
 
 #define APN       "gprs.swisscom.ch"
 #define USERNAME  ""
@@ -65,7 +66,7 @@ uint32_t sLoopCounter = 0;
 int sBlueLed = 7;
 
 typedef Bt::SolarMonitor::Reader Reader;
-Reader sReader(Serial4,Serial4);
+Reader sReader(Serial4, Serial5);
 
 // CE
 // RST
@@ -74,6 +75,8 @@ Reader sReader(Serial4,Serial4);
 Nokia5110LCD::Display sDisplay(A2, D6, D5, A0);
 
 static const size_t STORAGE_SIZE = (STOARGE_SECONDS/AVERAGE_SECONDS);
+
+static_assert(STORAGE_SIZE == 12,"oops" );
 
 typedef Bt::Core::Cloud<decltype(Radio),decltype(Particle)> Cloud;
 typedef Bt::SolarMonitor::PublishFilter<Cloud> PublishFilter;
@@ -114,6 +117,7 @@ void setup() {
    sDisplay.updateDisplay(); // with displayMap untouched, SFE logo
 
    Serial4.begin(19200);
+   Serial5.begin(19200);
 
 #if PLATFORM_ID == 10
    BT_CORE_LOG_INFO("!!! FuelGauge.sleep()  !!!");
@@ -136,7 +140,7 @@ void loop() {
    sForkFilter.consume(readings);
    timer = millis() - timer;
    //BT_CORE_LOG_INFO("go to sleep after loop %u took %d ms", sLoopCounter, timer);
-   BT_CORE_LOG_INFO("loop took %lu ms",timer);
+   BT_CORE_LOG_DEBUG("loop %lu took %lu ms", sLoopCounter++, timer);
    Serial1.flush();
    digitalWrite(sBlueLed, LOW);
    //delay(MEASURE_SLEEP * 1000);

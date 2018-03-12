@@ -22,12 +22,13 @@ class Message {
    public:
       static const size_t MESSAGE_BUFFER_LENGHT = 256;
 
+
       Message();
-      void begin(size_t id, size_t i, size_t n);
+      void begin(size_t pCountMax, size_t id, size_t i, size_t n);
 
       template<size_t N>
       void append(std::array<float,N> pValues) {
-         static_assert(N%2 == 0, "N must be even");
+         static_assert(N % 2 == 0, "N must be even");
          if(mCount == 0) {
             size_t length = strlen(mBuffer);
             snprintf(mBuffer + length, MESSAGE_BUFFER_LENGHT - length, "%s|",  Time.format(TIME_FORMAT_ISO8601_FULL).c_str());
@@ -46,6 +47,7 @@ class Message {
       void append(float pFirst , float pSecond);
       void append(int16_t pFirst , int16_t pSecond);
 
+      size_t mCountMax;
       size_t mCount;
       char mBuffer[MESSAGE_BUFFER_LENGHT];
 };
@@ -60,7 +62,7 @@ class MessageFilter
 
       MessageFilter(const Consumer& pConsumer = Consumer())
       :mMessageCounter(0), mNumerOfStoredMeasurementRecords(0), mCurrentMessageToAppend(0), mConsumer(pConsumer){
-         mMessages[0].begin(mMessageCounter, mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
+         mMessages[0].begin(NUMBER_OF_VALUES_PER_MESSAGE, mMessageCounter, mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
       }
 
       MessageFilter(const MessageFilter&) = delete;
@@ -93,7 +95,7 @@ class MessageFilter
                mCurrentMessageToAppend = 0;
                mNumerOfStoredMeasurementRecords = 0;
             }
-            mMessages[mCurrentMessageToAppend].begin(mMessageCounter, mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
+            mMessages[mCurrentMessageToAppend].begin(NUMBER_OF_VALUES_PER_MESSAGE, mMessageCounter, mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
          }
 
       }
@@ -102,14 +104,15 @@ class MessageFilter
          mConsumer = pConsumer;
       }
 
-   private:
-      static const size_t MESSAGE_BUFFER_LENGHT = 256;
+
       static const size_t NUMBER_OF_MEASUREMENTRECORD_PER_MESSAGE = 6;
+      static const size_t NUMBER_OF_VALUES_PER_MESSAGE = NUMBER_OF_MEASUREMENTRECORD_PER_MESSAGE *  N;
 
       static const size_t NUMBER_OF_MESSAGES = ( C / NUMBER_OF_MEASUREMENTRECORD_PER_MESSAGE) +
                                                ( C % NUMBER_OF_MEASUREMENTRECORD_PER_MESSAGE != 0 ? 1 : 0); // +1;
+   private:
 
-      typedef char MessageBuffer[MESSAGE_BUFFER_LENGHT];
+      //typedef char MessageBuffer[MESSAGE_BUFFER_LENGHT];
       size_t mMessageCounter;
       size_t mNumerOfStoredMeasurementRecords;
       size_t mCurrentMessageToAppend;

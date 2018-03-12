@@ -52,12 +52,34 @@ TEST(MessageFilterTest, checkForwardOnFull) {
    ConsumerMock consumer;
    MessageFilter<6,3> messageFilter(std::bind(&ConsumerMock::consume, &consumer, std::placeholders::_1, std::placeholders::_2));
 
-   EXPECT_CALL(consumer, consume(_,_))
-         .Times(Exactly(1));
+   EXPECT_CALL(consumer, consume(_,_)).Times(Exactly(1));
 
    messageFilter.consume(std::array<float,6>{1.1,11.1,1.2,11.2,1.3,11.3});
    messageFilter.consume(std::array<float,6>{2.1,12.1,2.2,12.2,2.3,12.3});
    messageFilter.consume(std::array<float,6>{3.1,13.1,3.2,13.2,3.3,13.3});
+}
+
+TEST(MessageFilterTest, checkConstants) {
+
+   ConsumerMock consumer;
+   MessageFilter<10,12> messageFilter(std::bind(&ConsumerMock::consume, &consumer, std::placeholders::_1, std::placeholders::_2));
+
+   EXPECT_CALL(consumer, consume(_,_)).Times(Exactly(1));
+
+   messageFilter.consume(std::array<float,10>{1});
+   messageFilter.consume(std::array<float,10>{2});
+   messageFilter.consume(std::array<float,10>{3});
+   messageFilter.consume(std::array<float,10>{4});
+   messageFilter.consume(std::array<float,10>{5});
+   messageFilter.consume(std::array<float,10>{6});
+   messageFilter.consume(std::array<float,10>{7});
+   messageFilter.consume(std::array<float,10>{8});
+   messageFilter.consume(std::array<float,10>{9});
+   messageFilter.consume(std::array<float,10>{10});
+   messageFilter.consume(std::array<float,10>{11});
+   messageFilter.consume(std::array<float,10>{12});
+
+
 }
 
 TEST(MessageFilterTest, checkDataTwoFloats) {
