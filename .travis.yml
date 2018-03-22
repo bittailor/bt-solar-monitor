@@ -11,7 +11,7 @@ addons:
 before_install:
 - openssl aes-256-cbc -K $encrypted_9b2a275b7417_key -iv $encrypted_9b2a275b7417_iv -in git-crypt-key.key.enc -out git-crypt-key.key -d
 before_script:
-- npm install -g gulp particle-cli
+- npm install -g gulp particle-cli@1.27.1
 - particle login $PARTICLE_USER $PARTICLE_PWD
 - wget https://www.agwa.name/projects/git-crypt/downloads/git-crypt-0.5.0.tar.gz
 - tar -xzf git-crypt-0.5.0.tar.gz
