@@ -10,6 +10,7 @@
 #include <nokia-5110-lcd.h>
 #include <Bt/Core/Log.h>
 #include <Bt/Core/Cloud.h>
+#include <Bt/Drivers/PowerManagment.h>
 #include <Bt/SolarMonitor/AveragingFilter.h>
 #include <Bt/SolarMonitor/StorageFilter.h>
 #include <Bt/SolarMonitor/MessageFilter.h>
@@ -101,10 +102,13 @@ ForkFilter sForkFilter(ForkFilter::Consumers{
 void setCharging(bool enable);
 
 void setup() {
-   BT_CORE_LOG_INFO("*** bt-solar-monitor 2 ***");
-   //RGB.control(true);
-   //RGB.color(0, 0, 0);
-   setCharging(false);
+   BT_CORE_LOG_INFO("*** bt-solar-monitor ***");
+   BT_CORE_LOG_INFO("System version: %s", System.version().c_str());
+
+   Bt::Drivers::PowerManagment().disableCharging();
+
+   // RGB.control(true);
+   // RGB.color(0, 0, 0);
 
    Wire.setSpeed(CLOCK_SPEED_100KHZ);
    Wire.begin();
@@ -132,12 +136,14 @@ void setup() {
 }
 
 void loop() {
-   digitalWrite(sBlueLed, HIGH);
    unsigned long timer = millis();
+   digitalWrite(sBlueLed, HIGH);
    sLoopCounter++;
    //BT_CORE_LOG_INFO("loop a %u [" __DATE__ " " __TIME__ "]", sLoopCounter );
-   auto readings = sReader.read();
-   sForkFilter.consume(readings);
+   //if(sLoopCounter%5 == 0) {
+      auto readings = sReader.read();
+      sForkFilter.consume(readings);
+   //}
    timer = millis() - timer;
    //BT_CORE_LOG_INFO("go to sleep after loop %u took %d ms", sLoopCounter, timer);
    BT_CORE_LOG_DEBUG("loop %lu took %lu ms", sLoopCounter++, timer);
@@ -147,47 +153,5 @@ void loop() {
    //Bt::Core::msSleep(500);
    System.sleep(A0, RISING, MEASURE_SLEEP);
    //System.sleep(SLEEP_MODE_SOFTPOWEROFF, MEASURE_SLEEP);
-}
-
-void setCharging(bool enable) {
-#if PLATFORM_ID == 10
-   PMIC pmic;
-
-   // DisableCharging turns of charging. DisableBATFET completely disconnects the battery.
-   if (enable) {
-      pmic.enableCharging();
-      pmic.enableBATFET();
-   }
-   else {
-      pmic.disableCharging();
-      pmic.disableBATFET();
-   }
-
-   // Disabling the watchdog is necessary, otherwise it will kick in and turn
-   // charing at random times, even when sleeping.
-
-   // This disables both the watchdog and the charge safety timer in
-   // Charge Termination/Timer Control Register REG05
-   // pmic.disableWatchdog() disables the watchdog, but doesn't disable the
-   // charge safety timer, so the red LED will start blinking slowly after
-   // 1 hour if you don't do both.
-   byte DATA = pmic.readChargeTermRegister();
-
-   if (enable) {
-      DATA |= 0b00111000;
-   }
-   else {
-      // 0b11001110 = disable watchdog
-      // 0b11000110 = disable watchdog and charge safety timer
-      DATA &= 0b11000110;
-   }
-
-   // This would be easier if pmic.writeRegister wasn't private (or disable
-   // charge safety timer had an exposed method
-   Wire3.beginTransmission(PMIC_ADDRESS);
-   Wire3.write(CHARGE_TIMER_CONTROL_REGISTER);
-   Wire3.write(DATA);
-   Wire3.endTransmission(true);
-#endif
 }
 

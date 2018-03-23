@@ -87,13 +87,13 @@ template<typename T>
 std::pair<bool,T> GetCommand<T>::execute(Stream& pStream) {
    const char* response = CommandExecutor(pStream, mCommandString).execute();
    if(response == nullptr) {
-      BT_CORE_LOG_DEBUG("command executor failed");
+      BT_CORE_LOG_WARN("command executor failed");
       return std::pair<bool,int16_t>(false,0);
    }
    size_t responseLenght =  strlen(response);
    size_t valueCharactersLenght = responseLenght - strlen(mCommandString);
    if(sizeof(T) * 2 != valueCharactersLenght) {
-      BT_CORE_LOG_DEBUG("wrong valueCharactersLenght %zd * 2 != %zd", sizeof(T), valueCharactersLenght);
+      BT_CORE_LOG_WARN("wrong valueCharactersLenght %zd * 2 != %zd", sizeof(T), valueCharactersLenght);
       return std::pair<bool,int16_t>(false,0);
    }
    size_t indexValueStart = responseLenght - 2 - valueCharactersLenght;
