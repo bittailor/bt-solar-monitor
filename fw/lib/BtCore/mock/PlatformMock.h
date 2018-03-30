@@ -22,6 +22,7 @@ class Logger {
        void warn(const char *fmt, ...) const __attribute__((format(printf, 2, 3)));
        void error(const char *fmt, ...) const __attribute__((format(printf, 2, 3)));
        void log(const char *fmt, ...) const __attribute__((format(printf, 2, 3)));
+
    private:
        FILE* mFile;
 };
@@ -61,7 +62,7 @@ uint32_t millis();
 
 //*************************************************************************************************
 
-
+typedef std::string String;
 
 //class MillisMock {
 // public:

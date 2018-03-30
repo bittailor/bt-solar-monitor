@@ -35,13 +35,17 @@ CommandExecutor::~CommandExecutor() {
 const char* CommandExecutor::execute() {
    mBuffer[0] = 0;
    mBufferIndex = 0;
-   mTimer = Bt::Core::Timer(200);
+   mTimer = Bt::Core::Timer(500);
    mStateFunction = &CommandExecutor::waitForStartCharacter;
    flush();
+   BT_CORE_LOG_DEBUG("send command '%s'", mCommand);
    mStream.println(mCommand);
    State state = State::CONTINUE;
    while(state == State::CONTINUE){
-      if(mTimer.expired()) { return nullptr; }
+      if(mTimer.expired()) {
+         BT_CORE_LOG_WARN("CommandExecutor timer expired");
+         return nullptr;
+      }
       state = (this->*mStateFunction)();
    };
    if(state == SUCCESS) {
@@ -56,10 +60,11 @@ void CommandExecutor::flush() {
       int c = mStream.read();
       BT_CORE_LOG_DEBUG("  %c",c);
       if(mTimer.expired()) {
+         BT_CORE_LOG_WARN("CommandExecutor timer expired");
          return;
       }
    }
-   BT_CORE_LOG_DEBUG("done");
+   BT_CORE_LOG_DEBUG(" ... done");
 }
 
 CommandExecutor::State CommandExecutor::waitForStartCharacter() {
@@ -81,7 +86,7 @@ CommandExecutor::State CommandExecutor::readUntilEndCharacter() {
       BT_CORE_LOG_DEBUG("response => %s", mBuffer);
       mStateFunction = &CommandExecutor::checkMatch;
    } else if (c >= 0 && c < 255) {
-      BT_CORE_LOG_DEBUG(" append %c at [%zd]", c, mBufferIndex);
+      BT_CORE_LOG_DEBUG(" append %c at [%u]", c, forPrintf(mBufferIndex));
       mBuffer[mBufferIndex] = c;
       mBufferIndex++;
       if(mBufferIndex >= BUFFER_SIZE-1) {
@@ -95,6 +100,11 @@ CommandExecutor::State CommandExecutor::readUntilEndCharacter() {
 }
 
 CommandExecutor::State CommandExecutor::checkMatch() {
+   if(mCommand[1] != '7') {
+      mStateFunction = &CommandExecutor::checkCheckSum;
+      return State::CONTINUE;
+   }
+
    int prefixLength = strlen(mCommand)-2;
    if(strncmp(mCommand, mBuffer, prefixLength) == 0) {
       BT_CORE_LOG_DEBUG("match [%d] command = %.*s response = %.*s ", prefixLength, prefixLength, mCommand, prefixLength, mBuffer);

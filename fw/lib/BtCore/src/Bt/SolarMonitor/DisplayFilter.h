@@ -9,7 +9,8 @@
 
 #include <array>
 #include <functional>
-#include <nokia-5110-lcd.h>
+#include "Adafruit_GFX.h"
+#include "Adafruit_PCD8544.h"
 #include <Bt/Core/Log.h>
 #include <Bt/Core/Result.h>
 #include <Bt/Sensors/INA219.h>
@@ -22,7 +23,7 @@ template<size_t N>
 class DisplayFilter
 {
    public:
-      DisplayFilter(Nokia5110LCD::Display& pDisplay) : mLoopCounter(0), mFailCounter(0), mDisplay(pDisplay) {
+      DisplayFilter(Adafruit_PCD8544& pDisplay) : mLoopCounter(0), mFailCounter(0), mDisplay(pDisplay) {
 
       }
       DisplayFilter(const DisplayFilter&) = delete;
@@ -35,8 +36,10 @@ class DisplayFilter
          char buffer[BUFFER_SIZE] = {0};
          mLoopCounter++;
          mDisplay.clearDisplay();
+         mDisplay.setTextSize(1);
          snprintf(buffer, BUFFER_SIZE, "Loop %lu", mLoopCounter);
-         mDisplay.setStr(buffer, 0, 0, BLACK);
+         mDisplay.setCursor(0,0);
+         mDisplay.print(buffer);
          for(size_t i = 0 ; i < pReadings.size() ; i++) {
             buffer[0] = 0;
             if(pReadings[i]) {
@@ -44,16 +47,17 @@ class DisplayFilter
             } else {
                snprintf(buffer, BUFFER_SIZE, "--!--");
             }
-            mDisplay.setStr(buffer, (i%2)*42, ((i/2)+1)*8, BLACK);
+            mDisplay.setCursor((i%2)*42, ((i/2)+1)*8);
+            mDisplay.print(buffer);
             BT_CORE_LOG_DEBUG("value - [%s] v = %f", pReadings[i] ? "valid" : "invalid"  ,pReadings[i].value());
          }
-         mDisplay.updateDisplay();
+         mDisplay.display();
       }
 
    private:
       uint32_t mLoopCounter;
       uint32_t mFailCounter;
-      Nokia5110LCD::Display& mDisplay;
+      Adafruit_PCD8544& mDisplay;
 
       
 };

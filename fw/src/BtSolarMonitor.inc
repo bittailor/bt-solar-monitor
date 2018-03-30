@@ -7,7 +7,6 @@
 #include <cellular_hal.h>
 #endif
 
-#include <nokia-5110-lcd.h>
 #include <Bt/Core/Log.h>
 #include <Bt/Core/Cloud.h>
 #include <Bt/Drivers/PowerManagment.h>
@@ -73,7 +72,8 @@ Reader sReader(Serial4, Serial5);
 // RST
 // DC
 // BackLight
-Nokia5110LCD::Display sDisplay(A2, D6, D5, A0);
+//Nokia5110LCD::Display sDisplay(A2, D6, D5, A0);
+Adafruit_PCD8544 sDisplay = Adafruit_PCD8544(A2, D5, D6);
 
 static const size_t STORAGE_SIZE = (STOARGE_SECONDS/AVERAGE_SECONDS);
 
@@ -99,8 +99,6 @@ ForkFilter sForkFilter(ForkFilter::Consumers{
 });
 
 
-void setCharging(bool enable);
-
 void setup() {
    BT_CORE_LOG_INFO("*** bt-solar-monitor ***");
    BT_CORE_LOG_INFO("System version: %s", System.version().c_str());
@@ -118,7 +116,8 @@ void setup() {
 
    sDisplay.begin();
    sDisplay.setContrast(55); // Pretty good value, play around with it
-   sDisplay.updateDisplay(); // with displayMap untouched, SFE logo
+   sDisplay.clearDisplay();
+   sDisplay.display(); // with displayMap untouched, SFE logo
 
    Serial4.begin(19200);
    Serial5.begin(19200);
@@ -154,4 +153,3 @@ void loop() {
    System.sleep(A0, RISING, MEASURE_SLEEP);
    //System.sleep(SLEEP_MODE_SOFTPOWEROFF, MEASURE_SLEEP);
 }
-

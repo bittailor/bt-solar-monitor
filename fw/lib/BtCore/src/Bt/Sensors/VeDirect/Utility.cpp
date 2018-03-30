@@ -59,7 +59,7 @@ uint8_t checksum(const char* pHex) {
 
 uint8_t checksum(const char* pHex, size_t pLength) {
    uint8_t checksum = 0x55;
-   for (int i = 0; i < pLength; i+=2)
+   for (size_t i = 0; i < pLength; i+=2)
    {
       checksum -= hexToByte(pHex + i);;
    }

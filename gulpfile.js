@@ -200,10 +200,19 @@ gulp.task('web:api:deploy', () => {
 
 //----
 
-gulp.task('clean-make', function(cb) {
+gulp.task('clean-app', function(cb) {
     spawn('make', ['clean', 'PLATFORM=' + conf.platform, 'APPDIR=' + path.join(pwd, 'fw')],{
         stdio: 'inherit',
         cwd:'../firmware/main'
+    }).on('exit', (code) => {
+        cb(code)
+    }); 
+});
+
+gulp.task('clean-core', function(cb) {
+    spawn('make', ['clean', 'PLATFORM=' + conf.platform],{
+        stdio: 'inherit',
+        cwd:'../firmware/modules'
     }).on('exit', (code) => {
         cb(code)
     }); 
@@ -215,7 +224,7 @@ gulp.task('clean-dir', function () {
     ]);
 });
 
-gulp.task('clean',['clean-dir','clean-make'])
+gulp.task('clean',['clean-dir','clean-core','clean-app'])
 
 gulp.task('compile-core', function(cb){
     spawn('make', ['all', 'PLATFORM=' + conf.platform, 'APPDIR=' + path.join(pwd, 'fw')],{

@@ -85,16 +85,17 @@ GetCommand<T>::GetCommand(uint16_t pRegister) : mCommandString{0} {
 
 template<typename T>
 std::pair<bool,T> GetCommand<T>::execute(Stream& pStream) {
-   const char* response = CommandExecutor(pStream, mCommandString).execute();
+   CommandExecutor commandExecutor(pStream, mCommandString);
+   const char* response = commandExecutor.execute();
    if(response == nullptr) {
       BT_CORE_LOG_WARN("command executor failed");
-      return std::pair<bool,int16_t>(false,0);
+      return std::pair<bool,T>(false,0);
    }
    size_t responseLenght =  strlen(response);
    size_t valueCharactersLenght = responseLenght - strlen(mCommandString);
    if(sizeof(T) * 2 != valueCharactersLenght) {
       BT_CORE_LOG_WARN("wrong valueCharactersLenght %zd * 2 != %zd", sizeof(T), valueCharactersLenght);
-      return std::pair<bool,int16_t>(false,0);
+      return std::pair<bool,T>(false,0);
    }
    size_t indexValueStart = responseLenght - 2 - valueCharactersLenght;
    T value = T();
@@ -103,6 +104,28 @@ std::pair<bool,T> GetCommand<T>::execute(Stream& pStream) {
       value = (value << 8) + byte;
    }
    return std::pair<bool,T>(true,value);
+}
+
+template<>
+inline std::pair<bool, String> GetCommand<String>::execute(Stream& pStream) {
+   CommandExecutor commandExecutor(pStream, mCommandString);
+   const char* response = commandExecutor.execute();
+   if(response == nullptr) {
+      BT_CORE_LOG_WARN("command executor failed");
+      return std::pair<bool, String>(false, String((const char*)nullptr));
+   }
+   size_t stringStart = strlen(mCommandString) - 2;
+   size_t stringEnd =  strlen(response) - 2;
+   String string;
+   string.reserve(stringEnd - stringStart + 1);
+   for(size_t i = stringStart; i < stringEnd ; i += 2) {
+         uint8_t byte = hexToByte(response + i);
+         BT_CORE_LOG_DEBUG("byte 0x%x is '%c'", (int)byte, (char)byte);
+         string += (char)byte;
+   }
+   BT_CORE_LOG_DEBUG("response is '%s'", response);
+   BT_CORE_LOG_DEBUG("string is '%s'", string.c_str());
+   return std::pair<bool,String>(true,string);
 }
 
 

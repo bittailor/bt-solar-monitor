@@ -22,7 +22,7 @@ namespace VeDirect {
 template<typename T>
 class Register {
    public:
-      Register(uint16_t pRegister, uint16_t pScale):mGetCommand(pRegister), mScale(pScale){
+      Register(uint16_t pRegister, uint16_t pScale = 1):mGetCommand(pRegister), mScale(pScale){
       }
 
       Core::Result<T> get(Stream& pStream) {

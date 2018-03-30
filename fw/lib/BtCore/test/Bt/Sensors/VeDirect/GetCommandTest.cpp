@@ -115,6 +115,16 @@ TEST(GetCommandTest, getLoadOutputState_False) {
    EXPECT_EQ(false, result.value());
 }
 
+TEST(GetCommandTest, getSerialNumber_One) {
+   StreamMock stream;
+   setupCommandResponse(stream, ":70A010043", ":70A01004851313733364544365542000000000083");
+
+   Core::Result<String> result = Registers::serialNumber().get(stream);
+
+   EXPECT_TRUE(result);
+   EXPECT_STREQ("HQ1736ED6UB", result.value().c_str());
+}
+
 TEST(GetCommandTest, getBatteryMaximumCurrentWithDelays) {
    StreamMock stream;
    {
