@@ -8,12 +8,10 @@
 #define INC__Bt_Sensors_VeDirect_Register__h
 
 #include <stdint.h>
-
 #include <Bt/Core/Platform.h>
-
 #include <Bt/Core/Result.h>
-
 #include "Bt/Sensors/VeDirect/GetCommand.h"
+#include "Bt/Sensors/VeDirect/SetCommand.h"
 
 namespace Bt {
 namespace Sensors {
@@ -22,11 +20,16 @@ namespace VeDirect {
 template<typename T>
 class Register {
    public:
-      Register(uint16_t pRegister, uint16_t pScale = 1):mGetCommand(pRegister), mScale(pScale){
+      Register(uint16_t pRegister, uint16_t pScale = 1)
+      :mGetCommand(pRegister), mSetCommand(pRegister), mScale(pScale){
       }
 
       Core::Result<T> get(Stream& pStream) {
          return mGetCommand.execute(pStream);
+      }
+
+      bool set(Stream& pStream, T value) {
+         return mSetCommand.execute(pStream, value);
       }
 
       Core::Result<float> scaled(Stream& pStream) {
@@ -40,6 +43,7 @@ class Register {
 
    private:
       GetCommand<T> mGetCommand;
+      SetCommand<T> mSetCommand;
       uint16_t mScale;
 
 };

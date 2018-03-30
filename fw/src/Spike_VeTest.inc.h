@@ -35,6 +35,7 @@ void setup() {
 
 }
 
+bool state = false;
 
 void log(Stream& pStream) {
    CommandExecutor version(pStream,":154");
@@ -50,6 +51,7 @@ void log(Stream& pStream) {
    Log.info(" chargerVoltage %f", Registers::chargerVoltage().scaled(pStream).value());
    Log.info(" loadCurrent %f", Registers::loadCurrent().scaled(pStream).value());
    Log.info(" loadOutputState %s", Registers::loadOutputState().get(pStream).value() ? "ON" : "OFF");
+   Registers::loadOutputControl().set(pStream, state ? 4 : 0);
 }
 
 void loop() {
@@ -58,6 +60,7 @@ void loop() {
    log(Serial4);
    Log.info("Serial 5:");
    log(Serial5);
-   delay(2000);
+   state = !state;
+   delay(5000);
 }
 

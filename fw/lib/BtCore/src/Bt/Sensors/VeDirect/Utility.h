@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 namespace Bt {
 namespace Sensors {
@@ -19,6 +20,18 @@ char* byteToHex(uint8_t pByte, char* pHex);
 
 uint8_t checksum(const char* pHex);
 uint8_t checksum(const char* pHex, size_t pLength);
+
+template <typename T>
+char* strAppendLittleEndianHex(char* pBuffer, T value) {
+   const size_t numberOfBytes = sizeof(T);
+   char* append = pBuffer + strlen(pBuffer);
+   for (size_t i = 0; i < numberOfBytes; i++) {
+      byteToHex((value >> (i * 8)),append);
+      append+=2;
+   }
+   return pBuffer;
+}
+
 
 } // namespace VeDirect
 } // namespace Sensors

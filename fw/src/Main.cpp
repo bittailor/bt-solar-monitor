@@ -1,7 +1,6 @@
-//  #include "BtSolarMonitor.inc"
+//  #include "BtSolarMonitor.inc.h"
 
 
-
-// #include "Spike_Display.inc"
-// #include "Spike_VeBridge.inc"
- #include "Spike_VeTest.inc"
+// #include "Spike_Display.inc.h"
+// #include "Spike_VeBridge.inc.h"
+ #include <Spike_VeTest.inc.h>

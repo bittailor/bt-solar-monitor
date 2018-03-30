@@ -30,6 +30,7 @@ class Registers
 
       static Register<uint16_t> loadCurrent() {return Register<uint16_t>(0xEDAD, 10);}
       static Register<bool> loadOutputState() {return Register<bool>(0xEDA8);}
+      static Register<uint8_t> loadOutputControl () {return Register<uint8_t>(0xEDAB);}
 
       static Register<uint16_t> batteryMaximumCurrent() {return Register<uint16_t>(0xEDF0,10);}
 

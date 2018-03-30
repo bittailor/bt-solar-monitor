@@ -22,20 +22,6 @@ namespace Bt {
 namespace Sensors {
 namespace VeDirect {
 
-enum OldRegisters : uint16_t {
-   ChargerCurrent = 0xEDD7,
-   ChargerVoltage = 0xEDD5,
-
-   PanelPower = 0xEDBC,
-   PanelVoltage = 0xEDBB,
-
-   LoadCurrent = 0xEDAD,
-   LoadOutputState = 0xEDA8,
-
-   BatteryMaximumCurrent = 0xEDF0,
-
-};
-
 template<typename T>
 class GetCommand
 {
