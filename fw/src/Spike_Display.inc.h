@@ -78,14 +78,14 @@ void loop() {
    delay(5000);
 
    sDisplay.clearDisplay();
-   sDisplay.drawXBitmap(0, 0, sBatteryBits, ICON_SIZE, ICON_SIZE, 1);
+   sDisplay.drawXBitmap(1*(2*6) + 6, 0, sBatteryBits, ICON_SIZE, ICON_SIZE, 1);
    show(1,'A',12.4,'V');
    show(2,'B',8.9,'V');
    sDisplay.display();
    delay(5000);
 
    sDisplay.clearDisplay();
-   sDisplay.drawXBitmap(0, 0, sLightBits, ICON_SIZE, ICON_SIZE, 1);
+   sDisplay.drawXBitmap(2*(2*6) + 6, 0, sLightBits, ICON_SIZE, ICON_SIZE, 1);
    show(1,'A',7.6,'A');
    show(2,'B',0.1,'V');
    sDisplay.display();
