@@ -9,6 +9,10 @@
 
 #include <Bt/Core/Log.h>
 #include <Bt/Core/Cloud.h>
+#include <Bt/Core/Workcycle.h>
+#include <Bt/Core/PeriodicCallback.h>
+#include <Bt/Core/Time.h>
+#include <Bt/Core/Singleton.h>
 #include <Bt/Drivers/PowerManagment.h>
 #include <Bt/SolarMonitor/AveragingFilter.h>
 #include <Bt/SolarMonitor/StorageFilter.h>
@@ -21,7 +25,7 @@
 
 // ==== <Configuration> ==========
 
-#define MEASURE_SLEEP 1
+#define MEASURE_SLEEP 5
 
 const size_t AVERAGE_SECONDS = 5 *  60; // 5  * 10;  // 5 *  60;
 const size_t STOARGE_SECONDS = 60 * 60; // 10 * 60;  // 60 * 60;
@@ -47,7 +51,7 @@ STARTUP(cellular_credentials_set(APN, USERNAME, PASSWORD, NULL));
    #define Radio WiFi
 #endif
 
-
+void measure();
 
 
 
@@ -98,10 +102,22 @@ ForkFilter sForkFilter(ForkFilter::Consumers{
    std::bind(&ValidateFilter::consume, &sValidateFilter, std::placeholders::_1),
 });
 
+Bt::Core::Time sTime;
+Bt::Core::Singleton<Bt::Core::I_Time>::Instance sTimeInstance(sTime);
+
+Bt::Core::Workcycle sWorkcycle;
+Bt::Core::PeriodicCallback sMeasureLoop(
+         Bt::Core::PeriodicCallback::SECONDS,
+         MEASURE_SLEEP,
+         &measure
+);
+
 
 void setup() {
    BT_CORE_LOG_INFO("*** bt-solar-monitor ***");
    BT_CORE_LOG_INFO("System version: %s", System.version().c_str());
+
+   sWorkcycle.add(sMeasureLoop);
 
    Bt::Drivers::PowerManagment().disableCharging();
 
@@ -135,21 +151,32 @@ void setup() {
 }
 
 void loop() {
-   unsigned long timer = millis();
-   digitalWrite(sBlueLed, HIGH);
-   sLoopCounter++;
-   //BT_CORE_LOG_INFO("loop a %u [" __DATE__ " " __TIME__ "]", sLoopCounter );
-   //if(sLoopCounter%5 == 0) {
-      auto readings = sReader.read();
-      sForkFilter.consume(readings);
-   //}
-   timer = millis() - timer;
-   //BT_CORE_LOG_INFO("go to sleep after loop %u took %d ms", sLoopCounter, timer);
-   BT_CORE_LOG_DEBUG("loop %lu took %lu ms", sLoopCounter++, timer);
-   Serial1.flush();
-   digitalWrite(sBlueLed, LOW);
-   //delay(MEASURE_SLEEP * 1000);
-   //Bt::Core::msSleep(500);
-   System.sleep(A0, RISING, MEASURE_SLEEP);
-   //System.sleep(SLEEP_MODE_SOFTPOWEROFF, MEASURE_SLEEP);
+   sWorkcycle.oneWorkcycle();
 }
+
+void measure() {
+   sLoopCounter++;
+   BT_CORE_LOG_INFO("-- measure --");
+   auto readings = sReader.read();
+   sForkFilter.consume(readings);
+}
+
+//void loop() {
+//   unsigned long timer = millis();
+//   digitalWrite(sBlueLed, HIGH);
+//   sLoopCounter++;
+//   //BT_CORE_LOG_INFO("loop a %u [" __DATE__ " " __TIME__ "]", sLoopCounter );
+//   //if(sLoopCounter%5 == 0) {
+//      auto readings = sReader.read();
+//      sForkFilter.consume(readings);
+//   //}
+//   timer = millis() - timer;
+//   //BT_CORE_LOG_INFO("go to sleep after loop %u took %d ms", sLoopCounter, timer);
+//   BT_CORE_LOG_DEBUG("loop %lu took %lu ms", sLoopCounter++, timer);
+//   Serial1.flush();
+//   digitalWrite(sBlueLed, LOW);
+//   //delay(MEASURE_SLEEP * 1000);
+//   //Bt::Core::msSleep(500);
+//   System.sleep(A0, RISING, MEASURE_SLEEP);
+//   //System.sleep(SLEEP_MODE_SOFTPOWEROFF, MEASURE_SLEEP);
+//}
