@@ -151,6 +151,7 @@ void setup() {
 }
 
 void loop() {
+   BT_CORE_LOG_INFO("-- loop memory %lu", System.freeMemory());
    sWorkcycle.oneWorkcycle();
 }
 

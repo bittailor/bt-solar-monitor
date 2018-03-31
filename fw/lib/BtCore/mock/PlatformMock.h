@@ -12,6 +12,40 @@
 #include <chrono>
 #include "gmock/gmock.h"
 
+
+
+//*************************************************************************************************
+
+#define D0 0
+#define D1 1
+#define D2 2
+#define D3 3
+#define D4 4
+#define D5 5
+#define D6 6
+#define D7 7
+
+// todo - this is corev1 specific, needs to go in a conditional define
+
+#define A0 10
+#define A1 11
+#define A2 12
+#define A3 13
+#define A4 14
+#define A5 15
+#define A6 16
+
+// WKP pin is also an ADC on Photon
+#define A7 17
+
+#define RX 18
+#define TX 19
+
+#define BTN 20
+
+// WKP pin on Photon
+#define WKP 17
+
 //*************************************************************************************************
 
 class Logger {
@@ -34,10 +68,11 @@ extern const char* TIME_FORMAT_ISO8601_FULL;
 
 class TimeClass {
    public:
+      static time_t now();
       std::string format(const char* format_spec);
 };
 
-extern TimeClass Time;  //eg. usage: Time.day();
+extern TimeClass Time;
 
 //*************************************************************************************************
 
@@ -58,9 +93,32 @@ class StreamMock : public Stream {
 
 //*************************************************************************************************
 
-uint32_t millis();
+typedef enum InterruptMode {
+  CHANGE,
+  RISING,
+  FALLING
+} InterruptMode;
 
 //*************************************************************************************************
+
+class SystemClass {
+   public:
+      static void sleep(uint16_t wakeUpPin, InterruptMode edgeTriggerMode, long seconds=0);
+};
+
+extern SystemClass System;
+
+//*************************************************************************************************
+
+uint32_t millis();
+uint32_t micros();
+
+//*************************************************************************************************
+
+#define __WFI()
+
+//*************************************************************************************************
+
 
 typedef std::string String;
 

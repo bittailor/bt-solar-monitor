@@ -76,12 +76,30 @@ std::string TimeClass::format(const char* format_spec) {
    return "2017-10-01T13:14:15Z";
 }
 
+time_t TimeClass::now() {
+   time_t timer;
+   time(&timer);
+   return timer;
+}
+
 TimeClass Time;
+
+//*************************************************************************************************
+
+void SystemClass::sleep(uint16_t wakeUpPin, InterruptMode edgeTriggerMode, long seconds) {
+
+}
+
+SystemClass System;
 
 //*************************************************************************************************
 
 uint32_t millis() {
    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
+uint32_t micros() {
+   return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 //*************************************************************************************************

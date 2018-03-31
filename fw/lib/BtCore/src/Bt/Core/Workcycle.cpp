@@ -7,6 +7,7 @@
 #include "Bt/Core/Workcycle.h"
 
 #include <algorithm>
+#include <inttypes.h>
 #include <Bt/Core/Platform.h>
 #include <Bt/Core/Log.h>
 #include <Bt/Core/Sleep.h>
@@ -29,13 +30,13 @@ Workcycle::~Workcycle() {
 //-------------------------------------------------------------------------------------------------
 
 void Workcycle::add(I_Runnable& iRunnable) {
-   mRunnables.pushBack(iRunnable);
+   mRunnables.push_back(&iRunnable);
 }
 
 //-------------------------------------------------------------------------------------------------
 
 void Workcycle::remove(I_Runnable& iRunnable) {
-   mRunnables.remove(iRunnable);
+   mRunnables.erase(std::find(begin(mRunnables), end(mRunnables), &iRunnable));
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -44,12 +45,13 @@ void Workcycle::oneWorkcycle() {
    uint32_t timer = millis();
    BT_CORE_LOG_INFO(">>workcycle start");
    Scheduling nextScheduling = Scheduling::never();
-   for (I_Runnable& runnable : mRunnables) {
-      Scheduling runnableScheduling = runnable.workcycle();
+   Runnables currentRunnables = mRunnables;
+   for (I_Runnable* runnable : currentRunnables) {
+      Scheduling runnableScheduling = runnable->workcycle();
       nextScheduling = std::min(runnableScheduling, nextScheduling);
    }
    timer = millis() - timer;
-   BT_CORE_LOG_INFO("<<workcycle end took %lu ms => scheduling %s  [%lu]", timer, nextScheduling.typeString(), nextScheduling.delay());
+   BT_CORE_LOG_INFO("<<workcycle end took %" PRIu32 " ms => scheduling %s  [%" PRIu32 "]", timer, nextScheduling.typeString(), nextScheduling.delay());
    scheduling(nextScheduling);
 }
 

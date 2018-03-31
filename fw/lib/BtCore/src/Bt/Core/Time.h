@@ -7,7 +7,7 @@
 #ifndef INC__Bt_Core_Time__hpp
 #define INC__Bt_Core_Time__hpp
 
-#include "Bt/Core/I_Time.hpp"
+#include "Bt/Core/I_Time.h"
 
 namespace Bt {
 namespace Core {

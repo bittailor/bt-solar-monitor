@@ -7,6 +7,7 @@
 #ifndef INC__Bt_Core_Workcycle__hpp
 #define INC__Bt_Core_Workcycle__hpp
 
+#include <vector>
 #include "Bt/Core/I_Workcycle.h"
 
 namespace Bt {
@@ -32,9 +33,9 @@ class Workcycle : public I_Workcycle
 
       void scheduling(Scheduling pScheduling);
 
-      typedef IntrusiveList<I_Runnable> Runnables;
+      typedef std::vector<I_Runnable*> Runnables;
 
-      IntrusiveList<I_Runnable> mRunnables;
+      Runnables mRunnables;
 };
 
 

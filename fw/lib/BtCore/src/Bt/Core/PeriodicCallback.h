@@ -9,7 +9,7 @@
 
 #include <functional>
 #include <Bt/Core/I_Runnable.h>
-#include "Bt/Core/I_Time.hpp"
+#include "Bt/Core/I_Time.h"
 
 namespace Bt {
 namespace Core {
