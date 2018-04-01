@@ -8,6 +8,7 @@ var gulp = require('gulp');
 var plugins = require('gulp-load-plugins')();
 var Q = require('q');
 var Particle = require('particle-api-js');
+var notifier  = require('node-notifier');
 var particle = new Particle();
 
 var secrets = require('./secrets');
@@ -169,6 +170,7 @@ gulp.task('fw:host:test', () => {
         return sh('cmake', ['-DCMAKE_BUILD_TYPE=Debug','../../'], out);
     })
     .then(()=>{
+        // notifier.notify('Test run OK');
         return sh('make', ['check'], out);
     });
 });

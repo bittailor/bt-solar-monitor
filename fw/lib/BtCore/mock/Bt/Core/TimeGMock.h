@@ -4,8 +4,8 @@
 //
 //*************************************************************************************************
 
-#ifndef INC__Bt_Core_TimeGMock__hpp
-#define INC__Bt_Core_TimeGMock__hpp
+#ifndef INC__Bt_Core_TimeGMock__h
+#define INC__Bt_Core_TimeGMock__h
 
 #include <gmock/gmock.h>
 
@@ -25,4 +25,4 @@ class TimeGMock : public I_Time {
 } // namespace Core
 } // namespace Bt
 
-#endif // INC__Bt_Core_TimeGMock__hpp
+#endif // INC__Bt_Core_TimeGMock__h

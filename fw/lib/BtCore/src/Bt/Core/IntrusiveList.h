@@ -4,8 +4,8 @@
 //
 //*************************************************************************************************
 
-#ifndef INC__Bt_Core_IntrusiveList__hpp
-#define INC__Bt_Core_IntrusiveList__hpp
+#ifndef INC__Bt_Core_IntrusiveList__h
+#define INC__Bt_Core_IntrusiveList__h
 
 namespace Bt {
 namespace Core {
@@ -155,4 +155,4 @@ class IntrusiveList : private IntrusiveListBase  {
 } // namespace Core
 } // namespace Bt
 
-#endif // INC__Bt_Core_IntrusiveList__hpp
+#endif // INC__Bt_Core_IntrusiveList__h

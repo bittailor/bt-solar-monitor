@@ -1,17 +1,17 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - Bt::Core::Cloud
+//  BITTAILOR.CH - Bt::Net::Cloud
 //
 //*************************************************************************************************
 
-#ifndef INC__Bt_Core_Cloud__h
-#define INC__Bt_Core_Cloud__h
+#ifndef INC__Bt_Net_Cloud__h
+#define INC__Bt_Net_Cloud__h
 
 #include <functional>
 #include <Bt/Core/Log.h>
 
 namespace Bt {
-namespace Core {
+namespace Net {
 
 template<typename TRadio, typename TClient>
 class Cloud
@@ -92,7 +92,7 @@ class Cloud
       
 };
 
-} // namespace Core
+} // namespace Net
 } // namespace Bt
 
-#endif // INC__Bt_Core_Cloud__h
+#endif // INC__Bt_Net_Cloud__h

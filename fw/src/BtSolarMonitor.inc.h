@@ -8,12 +8,12 @@
 #endif
 
 #include <Bt/Core/Log.h>
-#include <Bt/Core/Cloud.h>
 #include <Bt/Core/Workcycle.h>
 #include <Bt/Core/PeriodicCallback.h>
 #include <Bt/Core/Time.h>
 #include <Bt/Core/Singleton.h>
 #include <Bt/Drivers/PowerManagment.h>
+#include <Bt/Net/Cloud.h>
 #include <Bt/SolarMonitor/AveragingFilter.h>
 #include <Bt/SolarMonitor/StorageFilter.h>
 #include <Bt/SolarMonitor/MessageFilter.h>
@@ -83,7 +83,7 @@ static const size_t STORAGE_SIZE = (STOARGE_SECONDS/AVERAGE_SECONDS);
 
 static_assert(STORAGE_SIZE == 12,"oops" );
 
-typedef Bt::Core::Cloud<decltype(Radio),decltype(Particle)> Cloud;
+typedef Bt::Net::Cloud<decltype(Radio),decltype(Particle)> Cloud;
 typedef Bt::SolarMonitor::PublishFilter<Cloud> PublishFilter;
 typedef Bt::SolarMonitor::MessageFilter<Reader::NUMBER_OF_VALUES,STORAGE_SIZE> MessageFilter;
 typedef Bt::SolarMonitor::DisplayFilter<Reader::NUMBER_OF_VALUES> DisplayFilter;

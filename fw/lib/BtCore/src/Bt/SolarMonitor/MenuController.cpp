@@ -22,6 +22,18 @@ void MenuController::wakeUp() {
    mActiveTimer = Core::Timer(60*1000);
 }
 
+void MenuController::select() {
+
+}
+
+void MenuController::next() {
+
+}
+
+void MenuController::previous() {
+
+}
+
 Core::Scheduling MenuController::workcycle() {
    return (this->*mStateFunction)();
 }
@@ -37,6 +49,8 @@ Core::Scheduling MenuController::active() {
    }
    return Core::Scheduling::immediately();
 }
+
+
 
 
 } // namespace SolarMonitor

@@ -22,6 +22,10 @@ class MenuController : public Core::I_Runnable
       ~MenuController();
 
       void wakeUp();
+      void select();
+      void next();
+      void previous();
+
 
       virtual Core::Scheduling workcycle();
 

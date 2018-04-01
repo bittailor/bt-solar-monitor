@@ -4,8 +4,8 @@
 //
 //*************************************************************************************************
 
-#ifndef INC__Bt_Core_PeriodicCallback__hpp
-#define INC__Bt_Core_PeriodicCallback__hpp
+#ifndef INC__Bt_Core_PeriodicCallback__h
+#define INC__Bt_Core_PeriodicCallback__h
 
 #include <functional>
 #include <Bt/Core/I_Runnable.h>
@@ -37,4 +37,4 @@ class PeriodicCallback : public I_Runnable {
 } // namespace Core
 } // namespace Bt
 
-#endif // INC__Bt_Core_PeriodicCallback__hpp
+#endif // INC__Bt_Core_PeriodicCallback__h

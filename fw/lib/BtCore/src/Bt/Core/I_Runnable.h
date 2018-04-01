@@ -4,8 +4,8 @@
 //
 //*************************************************************************************************
 
-#ifndef INC__Bt_Core_I_Runnable__hpp
-#define INC__Bt_Core_I_Runnable__hpp
+#ifndef INC__Bt_Core_I_Runnable__h
+#define INC__Bt_Core_I_Runnable__h
 
 #include <Bt/Core/Scheduling.h>
 #include <Bt/Core/IntrusiveList.h>
@@ -13,7 +13,7 @@
 namespace Bt {
 namespace Core {
 
-class I_Runnable : public IntrusiveList<I_Runnable>::Element {
+class I_Runnable {
    public:
 
       virtual ~I_Runnable() {}
@@ -23,4 +23,4 @@ class I_Runnable : public IntrusiveList<I_Runnable>::Element {
 } // namespace Core
 } // namespace Bt
 
-#endif // INC__Bt_Core_I_Runnable__hpp
+#endif // INC__Bt_Core_I_Runnable__h

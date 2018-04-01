@@ -4,8 +4,8 @@
 //
 //*************************************************************************************************
 
-#ifndef INC__Bt_Core_RunnableGMock__hpp
-#define INC__Bt_Core_RunnableGMock__hpp
+#ifndef INC__Bt_Core_RunnableGMock__h
+#define INC__Bt_Core_RunnableGMock__h
 
 #include <gmock/gmock.h>
 
@@ -22,4 +22,4 @@ class RunnableGMock : public I_Runnable {
 } // namespace Core
 } // namespace Bt
 
-#endif // INC__Bt_Core_RunnableGMock__hpp
+#endif // INC__Bt_Core_RunnableGMock__h

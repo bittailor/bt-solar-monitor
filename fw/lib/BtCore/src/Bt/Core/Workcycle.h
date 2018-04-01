@@ -4,8 +4,8 @@
 //
 //*************************************************************************************************
 
-#ifndef INC__Bt_Core_Workcycle__hpp
-#define INC__Bt_Core_Workcycle__hpp
+#ifndef INC__Bt_Core_Workcycle__h
+#define INC__Bt_Core_Workcycle__h
 
 #include <vector>
 #include "Bt/Core/I_Workcycle.h"
@@ -42,4 +42,4 @@ class Workcycle : public I_Workcycle
 } // namespace Core
 } // namespace Bt
 
-#endif // INC__Bt_Core_Workcycle__hpp
+#endif // INC__Bt_Core_Workcycle__h

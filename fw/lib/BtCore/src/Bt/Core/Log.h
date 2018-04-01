@@ -4,8 +4,8 @@
 //
 //*************************************************************************************************
 
-#ifndef INC__Bt_Core_Log__hpp
-#define INC__Bt_Core_Log__hpp
+#ifndef INC__Bt_Core_Log__h
+#define INC__Bt_Core_Log__h
 
 #include <Bt/Core/Platform.h>
 
@@ -26,4 +26,4 @@ namespace Core {
 } // namespace Core
 } // namespace Bt
 
-#endif // INC__Bt_Core_Log__hpp
+#endif // INC__Bt_Core_Log__h

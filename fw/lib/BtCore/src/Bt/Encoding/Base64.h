@@ -1,16 +1,16 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - Bt::Net::Base64
+//  BITTAILOR.CH - Bt::Encoding::Base64
 //
 //*************************************************************************************************
 
-#ifndef INC__Bt_Net_Base64__h
-#define INC__Bt_Net_Base64__h
+#ifndef INC__Bt_Encoding_Base64__h
+#define INC__Bt_Encoding_Base64__h
 
 #include <stddef.h>
 
 namespace Bt {
-namespace Net {
+namespace Encoding {
 namespace Base64 {
 
 
@@ -22,7 +22,7 @@ constexpr int requiredEncodeSize(size_t pSize)
 int encode(const char *string, int len, char *encoded);
 
 } // namespace Base64
-} // namespace Net
+} // namespace Encoding
 } // namespace Bt
 
-#endif // INC__Bt_Net_Base64__h
+#endif // INC__Bt_Encoding_Base64__h

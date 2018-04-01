@@ -4,8 +4,8 @@
 //
 //*************************************************************************************************
 
-#ifndef INC__Bt_Core_Time__hpp
-#define INC__Bt_Core_Time__hpp
+#ifndef INC__Bt_Core_Time__h
+#define INC__Bt_Core_Time__h
 
 #include "Bt/Core/I_Time.h"
 
@@ -33,4 +33,4 @@ class Time : public I_Time
 } // namespace Core
 } // namespace Bt
 
-#endif // INC__Bt_Core_Time__hpp
+#endif // INC__Bt_Core_Time__h

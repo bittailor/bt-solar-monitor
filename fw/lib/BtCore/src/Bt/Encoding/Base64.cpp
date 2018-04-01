@@ -1,15 +1,15 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - Bt::Net::Base64
+//  BITTAILOR.CH - Bt::Encoding::Base64
 //
 //*************************************************************************************************
 
-#include "Bt/Net/Base64.h"
+#include "Bt/Encoding/Base64.h"
 
 #include <stdint.h>
 
 namespace Bt {
-namespace Net {
+namespace Encoding {
 namespace Base64 {
 
 namespace {
@@ -61,5 +61,5 @@ int encode(const uint8_t* binaryData, size_t length, char* encoded)
 
 
 } // namespace Base64
-} // namespace Net
+} // namespace Encoding
 } // namespace Bt

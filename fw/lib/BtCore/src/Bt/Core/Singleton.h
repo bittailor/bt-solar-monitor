@@ -4,8 +4,8 @@
 //
 //*************************************************************************************************
 
-#ifndef INC__Bt_Core_Singleton__hpp
-#define INC__Bt_Core_Singleton__hpp
+#ifndef INC__Bt_Core_Singleton__h
+#define INC__Bt_Core_Singleton__h
 
 namespace Bt {
 namespace Core {
@@ -67,4 +67,4 @@ T* Singleton<T>::mInstance;
 } // namespace Core
 } // namespace Bt
 
-#endif // INC__Bt_Core_Singleton__hpp
+#endif // INC__Bt_Core_Singleton__h
