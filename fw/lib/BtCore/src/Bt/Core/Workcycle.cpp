@@ -45,8 +45,7 @@ void Workcycle::oneWorkcycle() {
    uint32_t timer = millis();
    BT_CORE_LOG_INFO(">>workcycle start");
    Scheduling nextScheduling = Scheduling::never();
-   Runnables currentRunnables = mRunnables;
-   for (I_Runnable* runnable : currentRunnables) {
+   for (I_Runnable* runnable : mRunnables) {
       Scheduling runnableScheduling = runnable->workcycle();
       nextScheduling = std::min(runnableScheduling, nextScheduling);
    }
@@ -72,6 +71,7 @@ void Workcycle::scheduling(Scheduling pScheduling) {
          return;
       }
       case Scheduling::NEVER : {
+         System.sleep(A0, RISING);
          return;
       }
    }
