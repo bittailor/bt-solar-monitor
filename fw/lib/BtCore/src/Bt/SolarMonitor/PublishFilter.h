@@ -27,7 +27,9 @@ class PublishFilter
       PublishFilter& operator=(const PublishFilter&) = delete;
 
       void consume(const MessageString* pMessages, size_t pSize) {
-         mCloud.executeConnected([&] (typename TCloud::Client& client) {
+         BT_CORE_LOG_INFO("PublishFilter A consume %p -  %u ", (void*)pMessages, forPrintf(pSize));
+         mCloud.executeConnected([this, pMessages, pSize] (typename TCloud::Client& client) {
+            BT_CORE_LOG_INFO("PublishFilter B consume %p - %u ", (void*)pMessages, forPrintf(pSize));
             int republishLimit = 10;
             for (size_t msgCounter = 0; msgCounter < pSize; ++msgCounter) {
                bool ack = client.publish(mEventName, pMessages[msgCounter], WITH_ACK);

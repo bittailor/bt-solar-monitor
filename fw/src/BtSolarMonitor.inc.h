@@ -22,6 +22,7 @@
 #include <Bt/SolarMonitor/ValidateFilter.h>
 #include <Bt/SolarMonitor/PublishFilter.h>
 #include <Bt/SolarMonitor/Reader.h>
+#include <Bt/SolarMonitor/Ui/ReadingsView.h>
 
 // ==== <Configuration> ==========
 
@@ -29,6 +30,8 @@
 
 const size_t AVERAGE_SECONDS = 5 *  60; // 5  * 10;  // 5 *  60;
 const size_t STOARGE_SECONDS = 60 * 60; // 10 * 60;  // 60 * 60;
+// const size_t AVERAGE_SECONDS = 15; // 5  * 10;  // 5 *  60;
+// const size_t STOARGE_SECONDS = 3 * 60; // 10 * 60;  // 60 * 60;
 
 #define APN       "gprs.swisscom.ch"
 #define USERNAME  ""
@@ -56,7 +59,7 @@ void measure();
 
 
 //STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
-//SYSTEM_THREAD(ENABLED);
+SYSTEM_THREAD(ENABLED);
 
 Serial1LogHandler logHandler(115200,LOG_LEVEL_INFO);
 
@@ -78,6 +81,7 @@ Reader sReader(Serial4, Serial5);
 // BackLight
 //Nokia5110LCD::Display sDisplay(A2, D6, D5, A0);
 Adafruit_PCD8544 sDisplay = Adafruit_PCD8544(A2, D5, D6);
+Bt::SolarMonitor::Ui::ReadingsView sReadingsView(sDisplay);
 
 static const size_t STORAGE_SIZE = (STOARGE_SECONDS/AVERAGE_SECONDS);
 
@@ -91,19 +95,21 @@ typedef Bt::SolarMonitor::ValidateFilter<float, Reader::NUMBER_OF_VALUES> Valida
 typedef Bt::SolarMonitor::AveragingFilter<std::array<float, Reader::NUMBER_OF_VALUES>> AveragingFilter;
 typedef Bt::SolarMonitor::ForkFilter<Reader::Readings,2> ForkFilter;
 
+Bt::Core::Time sTime;
+Bt::Core::Singleton<Bt::Core::I_Time>::Instance sTimeInstance(sTime);
+
 Cloud sCloud(Radio, Particle, EVENT_NAME_STATUS);
 PublishFilter sPublishFilter(sCloud, EVENT_NAME_DATA);
 MessageFilter sMessageFilter(std::bind(&PublishFilter::consume, &sPublishFilter, std::placeholders::_1, std::placeholders::_2));
 AveragingFilter sAveragingFilter(((AVERAGE_SECONDS)/MEASURE_SLEEP), std::bind(&MessageFilter::consume,&sMessageFilter, std::placeholders::_1));
 ValidateFilter sValidateFilter(std::bind(&AveragingFilter::consume, &sAveragingFilter, std::placeholders::_1));
-DisplayFilter sDisplayFilter(sDisplay);
+DisplayFilter sDisplayFilter(sReadingsView);
 ForkFilter sForkFilter(ForkFilter::Consumers{
    std::bind(&DisplayFilter::consume, &sDisplayFilter, std::placeholders::_1),
    std::bind(&ValidateFilter::consume, &sValidateFilter, std::placeholders::_1),
 });
 
-Bt::Core::Time sTime;
-Bt::Core::Singleton<Bt::Core::I_Time>::Instance sTimeInstance(sTime);
+
 
 Bt::Core::Workcycle sWorkcycle;
 Bt::Core::PeriodicCallback sMeasureLoop(
@@ -117,9 +123,12 @@ void setup() {
    BT_CORE_LOG_INFO("*** bt-solar-monitor ***");
    BT_CORE_LOG_INFO("System version: %s", System.version().c_str());
 
-   sWorkcycle.add(sMeasureLoop);
-
    Bt::Drivers::PowerManagment().disableCharging();
+
+   sWorkcycle.add(sMeasureLoop);
+   sWorkcycle.add(sCloud);
+
+   sCloud.begin();
 
    // RGB.control(true);
    // RGB.color(0, 0, 0);
@@ -151,7 +160,7 @@ void setup() {
 }
 
 void loop() {
-   BT_CORE_LOG_INFO("-- loop memory %lu", System.freeMemory());
+   BT_CORE_LOG_DEBUG("-- loop memory %lu", System.freeMemory());
    sWorkcycle.oneWorkcycle();
 }
 

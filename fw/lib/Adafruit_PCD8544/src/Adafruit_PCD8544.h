@@ -17,6 +17,9 @@ All text above, and the splash screen must be included in any redistribution
 
 Adapted for Spark Core by Paul Kourany, April 2014
 *********************************************************************/
+#ifndef _Adafruit_PCD8544_H
+#define _Adafruit_PCD8544_H
+
 
 #include "Particle.h"
 
@@ -77,3 +80,5 @@ class Adafruit_PCD8544 : public Adafruit_GFX {
   void slowSPIwrite(uint8_t c);
   void fastSPIwrite(uint8_t c);
 };
+
+#endif

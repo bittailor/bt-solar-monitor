@@ -8,8 +8,12 @@
 #define INC__Bt_Core_StateMachine__h
 
 #include <stdint.h>
+#include <deque>
+#include <functional>
 #include "Bt/Core/I_Time.h"
 #include "Bt/Core/I_Runnable.h"
+#include "Bt/Core/Scheduling.h"
+#include "Bt/Core/Singleton.h"
 #include "Bt/Core/Log.h"
 
 namespace Bt {
@@ -32,7 +36,7 @@ class StateMachine : public Bt::Core::I_Runnable
             Implementation* mController;
       };
 
-      StateMachine(I_Time& pTime):mTime(&pTime), mTimerActive(false), mStartTime(0), mInterval(0) {
+      StateMachine() : mProcessingEvent(false), mScheduling(Scheduling::never()), mTimerActive(false), mStartTime(0), mInterval(0) {
       }
 
       ~StateMachine() {
@@ -41,10 +45,10 @@ class StateMachine : public Bt::Core::I_Runnable
 
       virtual Scheduling workcycle() {
          if(!mTimerActive) {
-            return Scheduling::never();
+            return mScheduling;
          }
 
-         uint32_t diff = mTime->milliseconds() - mStartTime;
+         uint32_t diff = Singleton<I_Time>::instance()->milliseconds() - mStartTime;
          if (diff >= mInterval) {
             mTimerActive = false;
             mInterval = 0;
@@ -59,37 +63,62 @@ class StateMachine : public Bt::Core::I_Runnable
    protected:
 
       void handle(void (State::*pEvent)()) {
+         if (mProcessingEvent) {
+            mQueue.push_back(pEvent);
+            return;
+         }
+         mProcessingEvent = true;
          (mCurrentState->*pEvent)();
-      }
-
-      template<typename R>
-      R handle(R (State::*pEvent)()) {
-         return (mCurrentState->*pEvent)();
+         processPending();
+         mProcessingEvent = false;
       }
 
       template<typename Arg>
       void handle(void (State::*pEvent)(Arg),Arg pArg) {
+         if (mProcessingEvent) {
+            mQueue.push_back(std::bind(pEvent,std::placeholders::_1,pArg));
+            return;
+         }
+         mProcessingEvent = true;
          (mCurrentState->*pEvent)(pArg);
+         processPending();
+         mProcessingEvent = false;
       }
 
       template<typename Arg1, typename Arg2>
       void handle(void (State::*pEvent)(Arg1,Arg2), Arg1 pArg1, Arg2 pArg2) {
+         if (mProcessingEvent) {
+            mQueue.push_back(std::bind(pEvent,std::placeholders::_1, pArg1, pArg2));
+            return;
+         }
+         mProcessingEvent = true;
          (mCurrentState->*pEvent)(pArg1, pArg2);
+         processPending();
+         mProcessingEvent = false;
       }
 
-      template<typename R, typename Arg1, typename Arg2>
-      R handle(R (State::*pEvent)(Arg1,Arg2), Arg1 pArg1, Arg2 pArg2) {
-         return (mCurrentState->*pEvent)(pArg1, pArg2);
+      template<typename Arg1, typename Arg2, typename Arg3>
+      void handle(void (State::*pEvent)(Arg1,Arg2,Arg3), Arg1 pArg1, Arg2 pArg2, Arg3 pArg3) {
+         if (mProcessingEvent) {
+            mQueue.push_back(std::bind(pEvent,std::placeholders::_1, pArg1, pArg2, pArg3));
+            return;
+         }
+         mProcessingEvent = true;
+         (mCurrentState->*pEvent)(pArg1, pArg2, pArg3);
+         processPending();
+         mProcessingEvent = false;
       }
 
-      template<typename R, typename Arg1, typename Arg2, typename Arg3>
-      R handle(R (State::*pEvent)(Arg1,Arg2,Arg3), Arg1 pArg1, Arg2 pArg2, Arg3 pArg3) {
-         return (mCurrentState->*pEvent)(pArg1, pArg2, pArg3);
+      void processPending() {
+         BT_CORE_LOG_INFO("%s: processPending %d", name() ,forPrintf(mQueue.size()));
+         while(!mQueue.empty()) {
+            mQueue.front()(mCurrentState);
+            mQueue.pop_front();
+         }
       }
-
 
       void nextState(StateBase& pState) {
-         BT_CORE_LOG_DEBUG("%s: %s => %s", name(), mCurrentState->name(), pState.name());
+         BT_CORE_LOG_INFO("%s: %s => %s", name(), mCurrentState->name(), pState.name());
          mCurrentState->onExit();
          mCurrentState = &pState;
          mCurrentState->onEnter();
@@ -97,7 +126,7 @@ class StateMachine : public Bt::Core::I_Runnable
 
       void setTimer(uint32_t pInterval) {
          mTimerActive = true;
-         mStartTime = mTime->milliseconds();
+         mStartTime = Singleton<I_Time>::instance()->milliseconds();
          mInterval = pInterval;
       }
 
@@ -116,6 +145,10 @@ class StateMachine : public Bt::Core::I_Runnable
          return mCurrentState ==  &pState;
       }
 
+      void scheduling(Scheduling pScheduling) {
+         mScheduling = pScheduling;
+      }
+
       StateBase& currentState() {
          return *mCurrentState;
       }
@@ -123,8 +156,10 @@ class StateMachine : public Bt::Core::I_Runnable
       virtual const char* name() =0;
 
    private:
-      I_Time* mTime;
       StateBase* mCurrentState;
+      std::deque<std::function<void(State*)> > mQueue;
+      bool mProcessingEvent;
+      Scheduling mScheduling;
       bool mTimerActive;
       uint32_t mStartTime;
       uint32_t mInterval;

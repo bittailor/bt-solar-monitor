@@ -23,7 +23,7 @@ class PushButtonState {
 class PushButton : public I_PushButton, public StateMachine<PushButtonState, PushButton>
 {
    public:
-      PushButton(Core::I_Time& pTime, I_DigitalIn& pInput, I_Listener& pListener);
+      PushButton(I_DigitalIn& pInput, I_Listener& pListener);
       ~PushButton();
 
       void begin();

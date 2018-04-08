@@ -61,8 +61,8 @@ class MessageFilter
       typedef std::function<void(const MessageString*, size_t size)> Consumer;
 
       MessageFilter(const Consumer& pConsumer = Consumer())
-      :mMessageCounter(0), mNumerOfStoredMeasurementRecords(0), mCurrentMessageToAppend(0), mConsumer(pConsumer){
-         mMessages[0].begin(NUMBER_OF_VALUES_PER_MESSAGE, mMessageCounter, mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
+      :mCurrentMessages(0), mMessageCounter(0), mNumerOfStoredMeasurementRecords(0), mCurrentMessageToAppend(0), mConsumer(pConsumer){
+         mMessages[mCurrentMessages][0].begin(NUMBER_OF_VALUES_PER_MESSAGE, mMessageCounter, mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
       }
 
       MessageFilter(const MessageFilter&) = delete;
@@ -70,32 +70,32 @@ class MessageFilter
       ~MessageFilter(){}
 
       void consume(const std::array<float,N>& pValues) {
-         Message& message = mMessages[mCurrentMessageToAppend];
+         Message& message = mMessages[mCurrentMessages][mCurrentMessageToAppend];
          message.append(pValues);
          mNumerOfStoredMeasurementRecords++;
-         BT_CORE_LOG_INFO("MessageFilter: append MeasurementRecord %u of %u to Message %u of %u :",
-                          forPrintf(mNumerOfStoredMeasurementRecords), forPrintf(C) , forPrintf(mCurrentMessageToAppend), forPrintf(NUMBER_OF_MESSAGES));
+         BT_CORE_LOG_INFO("MessageFilter: append MeasurementRecord %u of %u to Message %u of %u [%u] :",
+                          forPrintf(mNumerOfStoredMeasurementRecords), forPrintf(C) , forPrintf(mCurrentMessageToAppend), forPrintf(NUMBER_OF_MESSAGES), forPrintf(mCurrentMessages));
          if(message.full() || mNumerOfStoredMeasurementRecords >= C) {
             BT_CORE_LOG_INFO("MessageFilter: message %u of %u ready :", forPrintf(mCurrentMessageToAppend), forPrintf(NUMBER_OF_MESSAGES));
             message.end();
             mCurrentMessageToAppend++;
             if(mCurrentMessageToAppend >= NUMBER_OF_MESSAGES) {
                if(mConsumer) {
-                  MessageString messages[NUMBER_OF_MESSAGES];
                   for (size_t i = 0; i < NUMBER_OF_MESSAGES; ++i) {
-                     messages[i] = mMessages[i].raw();
+                     mConsumerMessages[i] = mMessages[mCurrentMessages][i].raw();
                   }
-                  BT_CORE_LOG_INFO("MessageFilter: new messages [%u] ready:", forPrintf(NUMBER_OF_MESSAGES));
+                  BT_CORE_LOG_INFO("MessageFilter: new messages %u ready [%u]:", forPrintf(NUMBER_OF_MESSAGES), forPrintf(mCurrentMessages));
                   for (size_t i = 0; i < NUMBER_OF_MESSAGES; ++i) {
-                     BT_CORE_LOG_DEBUG("  - [%u]: %u", forPrintf(i), forPrintf(strlen(messages[i])));
+                     BT_CORE_LOG_DEBUG("  - [%u]: %u", forPrintf(i), forPrintf(strlen(mConsumerMessages[i])));
                   }
-                  mConsumer(messages, NUMBER_OF_MESSAGES);
+                  mConsumer(mConsumerMessages, NUMBER_OF_MESSAGES);
                }
+               mCurrentMessages = mCurrentMessages == 0 ? 1 : 0;
                mMessageCounter++;
                mCurrentMessageToAppend = 0;
                mNumerOfStoredMeasurementRecords = 0;
             }
-            mMessages[mCurrentMessageToAppend].begin(NUMBER_OF_VALUES_PER_MESSAGE, mMessageCounter, mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
+            mMessages[mCurrentMessages][mCurrentMessageToAppend].begin(NUMBER_OF_VALUES_PER_MESSAGE, mMessageCounter, mCurrentMessageToAppend, NUMBER_OF_MESSAGES);
          }
 
       }
@@ -113,10 +113,12 @@ class MessageFilter
    private:
 
       //typedef char MessageBuffer[MESSAGE_BUFFER_LENGHT];
+      size_t mCurrentMessages;
       size_t mMessageCounter;
       size_t mNumerOfStoredMeasurementRecords;
       size_t mCurrentMessageToAppend;
-      std::array<Message,NUMBER_OF_MESSAGES> mMessages;
+      MessageString mConsumerMessages[NUMBER_OF_MESSAGES];
+      std::array<std::array<Message,NUMBER_OF_MESSAGES>, 2> mMessages;
       Consumer mConsumer;
 
 };
