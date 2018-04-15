@@ -18,6 +18,7 @@ class I_Workcycle {
 
       virtual void add(I_Runnable& iRunnable) = 0;
       virtual void remove(I_Runnable& iRunnable) = 0;
+
 };
 
 } // namespace Core

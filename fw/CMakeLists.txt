@@ -42,7 +42,10 @@ file(GLOB_RECURSE LIBRARY_SOURCES
 #    ${BTCORE_SOURCE_DIR}/Bt/Core/Timer.cpp 
 )
 
-list(REMOVE_ITEM LIBRARY_SOURCES ${BTCORE_SOURCE_DIR}/Bt/Core/Cloud.cpp)
+list(REMOVE_ITEM LIBRARY_SOURCES 
+    ${BTCORE_SOURCE_DIR}/Bt/Core/Cloud.cpp
+    ${BTCORE_SOURCE_DIR}/Bt/Core/RuntimeLogHandler.cpp
+)
 
 message ("LIBRARY_SOURCES is ${LIBRARY_SOURCES}")
 

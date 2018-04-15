@@ -12,6 +12,37 @@
 
 //*************************************************************************************************
 
+void pinMode(uint16_t pin, PinMode mode) {
+}
+
+PinMode getPinMode(uint16_t pin) {
+   return PIN_MODE_NONE;
+}
+bool pinAvailable(uint16_t pin) {
+   return false;
+}
+void digitalWrite(uint16_t pin, uint8_t value) {
+
+}
+
+int32_t digitalRead(uint16_t pin) {
+   return 1;
+}
+
+int32_t pinReadFast(uint16_t _pin) {
+   return 1;
+}
+
+bool attachInterrupt(uint16_t pin, wiring_interrupt_handler_t handler, InterruptMode mode, int8_t priority, uint8_t subpriority) {
+   return true;
+}
+
+bool attachInterrupt(uint16_t pin, raw_interrupt_handler_t handler, InterruptMode mode, int8_t priority, uint8_t subpriority) {
+   return true;
+}
+
+//*************************************************************************************************
+
 Logger::Logger() {
    mFile = fopen ("PlatfromMockLog.txt","a");
    fprintf(mFile, "*** START Platfrom Mock **\n\n");

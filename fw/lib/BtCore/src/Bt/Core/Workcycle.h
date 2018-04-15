@@ -8,6 +8,7 @@
 #define INC__Bt_Core_Workcycle__h
 
 #include <vector>
+#include "Bt/Core/I_SchedulingListener.h"
 #include "Bt/Core/I_Workcycle.h"
 
 namespace Bt {
@@ -16,11 +17,17 @@ namespace Core {
 class Workcycle : public I_Workcycle
 {
    public:
-      Workcycle();
+      Workcycle(uint16_t pWakeUpPin);
       ~Workcycle();
 
-      virtual void add(I_Runnable& iRunnable);
-      virtual void remove(I_Runnable& iRunnable);
+      void begin();
+
+      virtual void add(I_Runnable& pRunnable);
+      virtual void remove(I_Runnable& pRunnable);
+
+      virtual void addSchedulingListener(I_SchedulingListener& pSchedulingListener);
+      virtual void removeSchedulingListener(I_SchedulingListener& pSchedulingListener);
+
 
       void oneWorkcycle();
 
@@ -32,10 +39,15 @@ class Workcycle : public I_Workcycle
       Workcycle& operator=(const Workcycle&);
 
       void scheduling(Scheduling pScheduling);
+      void beforeStopModeSleep();
+      void afterStopModeSleep();
 
-      typedef std::vector<I_Runnable*> Runnables;
+      typedef Core::IntrusiveList<I_Runnable> Runnables;
+      typedef Core::IntrusiveList<I_SchedulingListener> SchedulingListeners;
 
       Runnables mRunnables;
+      SchedulingListeners mSchedulingListeners;
+      uint16_t mWakeUpPin;
 };
 
 

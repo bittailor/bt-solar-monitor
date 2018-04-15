@@ -21,8 +21,12 @@
 #include <Bt/SolarMonitor/DisplayFilter.h>
 #include <Bt/SolarMonitor/ValidateFilter.h>
 #include <Bt/SolarMonitor/PublishFilter.h>
+#include <Bt/SolarMonitor/LogHandler.h>
 #include <Bt/SolarMonitor/Reader.h>
+#include <Bt/SolarMonitor/Cli/CliController.h>
+#include <Bt/SolarMonitor/Ui/ViewsController.h>
 #include <Bt/SolarMonitor/Ui/ReadingsView.h>
+#include <Bt/Core/InterruptPushButton.h>
 
 // ==== <Configuration> ==========
 
@@ -61,7 +65,10 @@ void measure();
 //STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
 SYSTEM_THREAD(ENABLED);
 
-Serial1LogHandler logHandler(115200,LOG_LEVEL_INFO);
+
+Bt::SolarMonitor::LogHandler sLogHandler;
+
+//Serial1LogHandler logHandler(115200,LOG_LEVEL_INFO);
 
 //===
 //retained uint32_t sLoopCounter = 0;
@@ -111,13 +118,19 @@ ForkFilter sForkFilter(ForkFilter::Consumers{
 
 
 
-Bt::Core::Workcycle sWorkcycle;
+Bt::Core::Workcycle sWorkcycle(A0);
 Bt::Core::PeriodicCallback sMeasureLoop(
          Bt::Core::PeriodicCallback::SECONDS,
          MEASURE_SLEEP,
          &measure
 );
 
+Bt::Core::InterruptPushButton sUp(C5);
+Bt::Core::InterruptPushButton sDown(C4);
+
+
+Bt::SolarMonitor::Cli::CliController sCliController(Serial1);
+Bt::SolarMonitor::Ui::ViewsController sViewsController;
 
 void setup() {
    BT_CORE_LOG_INFO("*** bt-solar-monitor ***");
@@ -126,9 +139,19 @@ void setup() {
    Bt::Drivers::PowerManagment().disableCharging();
 
    sWorkcycle.add(sMeasureLoop);
+   sWorkcycle.add(sUp);
+   sWorkcycle.add(sDown);
+   sWorkcycle.add(sMeasureLoop);
    sWorkcycle.add(sCloud);
+   sWorkcycle.add(sCliController);
+   sWorkcycle.add(sViewsController);
+   sWorkcycle.addSchedulingListener(sCliController);
+   sWorkcycle.addSchedulingListener(sViewsController);
 
    sCloud.begin();
+   sWorkcycle.begin();
+   sUp.begin();
+   sDown.begin();
 
    // RGB.control(true);
    // RGB.color(0, 0, 0);

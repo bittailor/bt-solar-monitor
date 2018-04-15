@@ -17,7 +17,7 @@ namespace Core {
 
 //-------------------------------------------------------------------------------------------------
 
-Workcycle::Workcycle() {
+Workcycle::Workcycle(uint16_t pWakeUpPin) : mWakeUpPin(pWakeUpPin) {
 
 }
 
@@ -29,14 +29,32 @@ Workcycle::~Workcycle() {
 
 //-------------------------------------------------------------------------------------------------
 
-void Workcycle::add(I_Runnable& iRunnable) {
-   mRunnables.push_back(&iRunnable);
+void Workcycle::begin() {
+   pinMode(mWakeUpPin, INPUT_PULLDOWN);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-void Workcycle::remove(I_Runnable& iRunnable) {
-   mRunnables.erase(std::find(begin(mRunnables), end(mRunnables), &iRunnable));
+void Workcycle::add(I_Runnable& pRunnable) {
+   mRunnables.pushBack(pRunnable);
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void Workcycle::remove(I_Runnable& pRunnable) {
+   mRunnables.remove(pRunnable);
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void Workcycle::addSchedulingListener(I_SchedulingListener& pSchedulingListener) {
+   mSchedulingListeners.pushBack(pSchedulingListener);
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void Workcycle::removeSchedulingListener(I_SchedulingListener& pSchedulingListener) {
+   mSchedulingListeners.remove(pSchedulingListener);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -45,8 +63,8 @@ void Workcycle::oneWorkcycle() {
    uint32_t timer = millis();
    BT_CORE_LOG_DEBUG(">>workcycle start");
    Scheduling nextScheduling = Scheduling::never();
-   for (I_Runnable* runnable : mRunnables) {
-      Scheduling runnableScheduling = runnable->workcycle();
+   for (I_Runnable& runnable : mRunnables) {
+      Scheduling runnableScheduling = runnable.workcycle();
       nextScheduling = std::min(runnableScheduling, nextScheduling);
    }
    timer = millis() - timer;
@@ -66,17 +84,38 @@ void Workcycle::scheduling(Scheduling pScheduling) {
          return;
       }
       case Scheduling::SECONDS_DELAY : {
-         //Serial1.flush();
-         System.sleep(A0, RISING, pScheduling.delay());
+         beforeStopModeSleep();
+         System.sleep(mWakeUpPin, RISING, pScheduling.delay());
+         afterStopModeSleep();
          return;
       }
       case Scheduling::NEVER : {
-         System.sleep(A0, RISING);
+         beforeStopModeSleep();
+         System.sleep(mWakeUpPin, RISING);
+         afterStopModeSleep();
          return;
       }
    }
 }
 
+//-------------------------------------------------------------------------------------------------
+
+void Workcycle::beforeStopModeSleep()
+{
+   for (I_SchedulingListener& listener : mSchedulingListeners) {
+      listener.beforeStopModeSleep();
+   }
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void Workcycle::afterStopModeSleep()
+{
+   bool wakeUpPin = pinReadFast(mWakeUpPin) == HIGH;
+   for (I_SchedulingListener& listener : mSchedulingListeners) {
+      listener.afterStopModeSleep(wakeUpPin);
+   }
+}
 
 //-------------------------------------------------------------------------------------------------
 

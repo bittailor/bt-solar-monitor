@@ -13,7 +13,7 @@
 namespace Bt {
 namespace Core {
 
-class I_Runnable {
+class I_Runnable : public IntrusiveList<I_Runnable>::Element {
    public:
 
       virtual ~I_Runnable() {}

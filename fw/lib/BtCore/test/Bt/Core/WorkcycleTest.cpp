@@ -15,6 +15,10 @@ namespace Bt {
 namespace Core {
 
 class WorkcycleTest : public ::testing::Test {
+   public:
+      WorkcycleTest() : mWorkcycle(10) {
+
+      }
 
    protected:
 
