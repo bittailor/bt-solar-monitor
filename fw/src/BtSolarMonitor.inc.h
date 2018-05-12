@@ -125,8 +125,15 @@ Bt::Core::PeriodicCallback sMeasureLoop(
          &measure
 );
 
-Bt::Core::InterruptPushButton sUp(C5);
-Bt::Core::InterruptPushButton sDown(C4);
+Bt::Core::InterruptPushButton sSelect(A0, [](){
+   BT_CORE_LOG_INFO("click select");
+});
+Bt::Core::InterruptPushButton sUp(C5, [](){
+   BT_CORE_LOG_INFO("click up");
+});
+Bt::Core::InterruptPushButton sDown(C4, [](){
+   BT_CORE_LOG_INFO("click down");
+});
 
 
 Bt::SolarMonitor::Cli::CliController sCliController(Serial1);
@@ -139,17 +146,19 @@ void setup() {
    Bt::Drivers::PowerManagment().disableCharging();
 
    sWorkcycle.add(sMeasureLoop);
+   sWorkcycle.add(sSelect);
    sWorkcycle.add(sUp);
    sWorkcycle.add(sDown);
-   sWorkcycle.add(sMeasureLoop);
    sWorkcycle.add(sCloud);
    sWorkcycle.add(sCliController);
    sWorkcycle.add(sViewsController);
+
    sWorkcycle.addSchedulingListener(sCliController);
    sWorkcycle.addSchedulingListener(sViewsController);
 
    sCloud.begin();
    sWorkcycle.begin();
+   sSelect.begin();
    sUp.begin();
    sDown.begin();
 

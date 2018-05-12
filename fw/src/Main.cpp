@@ -1,4 +1,4 @@
-//#include "BtSolarMonitor.inc.h"
+#include "BtSolarMonitor.inc.h"
 
 
 // #include "Spike_Display.inc.h"
@@ -7,4 +7,4 @@
 // #include <Spike_SleepPinWakeup.inc.h>
 // #include <Spike_ReadingsView.inc.h>
 
-#include <Spike_InterruptPushButton.inc.h>
+// #include <Spike_InterruptPushButton.inc.h>

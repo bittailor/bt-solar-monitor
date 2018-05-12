@@ -17,7 +17,7 @@ namespace Core {
 class InterruptPushButton : public I_Runnable
 {
    public:
-      InterruptPushButton(uint16_t pPin);
+      InterruptPushButton(uint16_t pPin, std::function<void()> pOnClick = std::function<void()>());
       InterruptPushButton(const InterruptPushButton&) = delete;
       InterruptPushButton& operator=(const InterruptPushButton&) = delete;
       ~InterruptPushButton();
@@ -29,6 +29,7 @@ class InterruptPushButton : public I_Runnable
       void interruptHandler();
 
       uint16_t mPin;
+      std::function<void()> mOnClick;
       bool mPressed;
       bool mFire;
       Timer mTimer;

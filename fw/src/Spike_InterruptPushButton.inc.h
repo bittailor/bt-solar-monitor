@@ -21,7 +21,9 @@ int sBlueLed = 7;
 
 Bt::Core::Workcycle sWorkcycle(A0);
 NeverSleep sNeverSleep;
-Bt::Core::InterruptPushButton sUp(C5);
+Bt::Core::InterruptPushButton sUp(C5, [](){
+   Log.info("click C5");
+});
 Bt::Core::InterruptPushButton sDown(C4);
 
 void setup() {

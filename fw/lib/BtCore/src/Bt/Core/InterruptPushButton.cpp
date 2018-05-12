@@ -15,12 +15,13 @@ namespace Bt {
 namespace Core {
 namespace {
    // DBG_BT const size_t MSG_SIZE = 30;
-   // DBG_BT std::array<char[MSG_SIZE],30> sMessages;
+   // DBG_BT std::array<char[MSG_SIZE],10> sMessages;
    // DBG_BT size_t sMessagesIndex = 0;
    // DBG_BT bool mToggle = false;
 }
 
-InterruptPushButton::InterruptPushButton(uint16_t pPin) : mPin(pPin), mPressed(false), mFire(false) {
+InterruptPushButton::InterruptPushButton(uint16_t pPin, std::function<void()> pOnClick)
+: mPin(pPin), mOnClick(pOnClick), mPressed(false), mFire(false) {
 }
 
 InterruptPushButton::~InterruptPushButton() {
@@ -58,6 +59,9 @@ Scheduling InterruptPushButton::workcycle() {
    }
    if(fire) {
       BT_CORE_LOG_INFO("Pin %d pressed", mPin);
+      if(mOnClick) {
+         mOnClick();
+      }
    }
    return Scheduling::never();
 }
@@ -78,6 +82,10 @@ void InterruptPushButton::interruptHandler() {
    } else {
       // DBG_BT snprintf(sMessages[sMessagesIndex++], MSG_SIZE, "%d s=n s=%s n=%s  t=%" PRIu32, mPin, mPressed ? "true": "false", pressed ? "true": "false",  millis());
    }
+   // DBG_BT if(sMessagesIndex >= sMessages.size()) {
+   // DBG_BT    sMessagesIndex = 0;
+   // DBG_BT    snprintf(sMessages[sMessagesIndex++], MSG_SIZE, "overflow");
+   // DBG_BT }
    mPressed = pressed;
 }
 

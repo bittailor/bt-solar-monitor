@@ -11,6 +11,8 @@
 #include <Bt/Core/I_Runnable.h>
 #include <Bt/Core/Timer.h>
 #include <Bt/Core/I_SchedulingListener.h>
+#include <Bt/SolarMonitor/Cli/Tokenizer.h>
+#include <Bt/SolarMonitor/Cli/CommandRepository.h>
 
 namespace Bt {
 namespace SolarMonitor {
@@ -32,15 +34,21 @@ class CliController : public Core::I_Runnable , public Core::I_SchedulingListene
    private:
       Core::Scheduling idle();
       Core::Scheduling listening();
-      void execute(const char* cmdline);
+      void execute(char* cmdline);
+      void execute(int pArgc, char* pArgv[]);
       
       typedef Core::Scheduling (CliController::*StateFunction)();
+      static const size_t BUFFER_SIZE = 256;
+      static const size_t ARGS_SIZE = 10;
 
       Core::Timer mActiveTimer;
       size_t mBufferIndex;
-      std::array<char,256> mBuffer;
+      std::array<char,BUFFER_SIZE> mBuffer;
       StateFunction mStateFunction;
       Stream& mStream;
+      Tokenizer mTokenizer;
+      CommandRepository mCommandRepository;
+
 
 };
 
