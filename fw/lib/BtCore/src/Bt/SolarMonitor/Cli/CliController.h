@@ -26,6 +26,8 @@ class CliController : public Core::I_Runnable , public Core::I_SchedulingListene
       CliController& operator=(const CliController&) = delete;
       ~CliController();
 
+      void addCommand(const char* pName, const Command& pCommand);
+
       virtual Core::Scheduling workcycle();
 
       virtual void beforeStopModeSleep();

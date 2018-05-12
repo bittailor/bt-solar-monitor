@@ -1,15 +1,14 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - Bt::SolarMonitor::Cli::Command
+//  BITTAILOR.CH - Bt::SolarMonitor::LogFilter
 //
 //*************************************************************************************************
 
-#include "Bt/SolarMonitor/Cli/Command.h"
+#include "Bt/SolarMonitor/LogFilter.h"
 
 namespace Bt {
 namespace SolarMonitor {
-namespace Cli {
 
-} // namespace Cli
+
 } // namespace SolarMonitor
 } // namespace Bt

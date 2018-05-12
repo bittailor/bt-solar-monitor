@@ -18,14 +18,12 @@
 #include <Bt/SolarMonitor/StorageFilter.h>
 #include <Bt/SolarMonitor/MessageFilter.h>
 #include <Bt/SolarMonitor/ForkFilter.h>
-#include <Bt/SolarMonitor/DisplayFilter.h>
 #include <Bt/SolarMonitor/ValidateFilter.h>
+#include <Bt/SolarMonitor/LogFilter.h>
 #include <Bt/SolarMonitor/PublishFilter.h>
 #include <Bt/SolarMonitor/LogHandler.h>
 #include <Bt/SolarMonitor/Reader.h>
 #include <Bt/SolarMonitor/Cli/CliController.h>
-#include <Bt/SolarMonitor/Ui/ViewsController.h>
-#include <Bt/SolarMonitor/Ui/ReadingsView.h>
 #include <Bt/Core/InterruptPushButton.h>
 
 // ==== <Configuration> ==========
@@ -60,35 +58,15 @@ STARTUP(cellular_credentials_set(APN, USERNAME, PASSWORD, NULL));
 
 void measure();
 
-
-
-//STARTUP(System.enableFeature(FEATURE_RETAINED_MEMORY));
 SYSTEM_THREAD(ENABLED);
 
 
 Bt::SolarMonitor::LogHandler sLogHandler;
 
-//Serial1LogHandler logHandler(115200,LOG_LEVEL_INFO);
-
-//===
-//retained uint32_t sLoopCounter = 0;
-//retained uint8_t sSensorState = 0;
-//===
-
-uint32_t sLoopCounter = 0;
-
 int sBlueLed = 7;
 
 typedef Bt::SolarMonitor::Reader Reader;
 Reader sReader(Serial4, Serial5);
-
-// CE
-// RST
-// DC
-// BackLight
-//Nokia5110LCD::Display sDisplay(A2, D6, D5, A0);
-Adafruit_PCD8544 sDisplay = Adafruit_PCD8544(A2, D5, D6);
-Bt::SolarMonitor::Ui::ReadingsView sReadingsView(sDisplay);
 
 static const size_t STORAGE_SIZE = (STOARGE_SECONDS/AVERAGE_SECONDS);
 
@@ -97,9 +75,10 @@ static_assert(STORAGE_SIZE == 12,"oops" );
 typedef Bt::Net::Cloud<decltype(Radio),decltype(Particle)> Cloud;
 typedef Bt::SolarMonitor::PublishFilter<Cloud> PublishFilter;
 typedef Bt::SolarMonitor::MessageFilter<Reader::NUMBER_OF_VALUES,STORAGE_SIZE> MessageFilter;
-typedef Bt::SolarMonitor::DisplayFilter<Reader::NUMBER_OF_VALUES> DisplayFilter;
 typedef Bt::SolarMonitor::ValidateFilter<float, Reader::NUMBER_OF_VALUES> ValidateFilter;
 typedef Bt::SolarMonitor::AveragingFilter<std::array<float, Reader::NUMBER_OF_VALUES>> AveragingFilter;
+typedef Bt::SolarMonitor::LogFilter<Reader::NUMBER_OF_VALUES> LogFilter;
+
 typedef Bt::SolarMonitor::ForkFilter<Reader::Readings,2> ForkFilter;
 
 Bt::Core::Time sTime;
@@ -110,13 +89,11 @@ PublishFilter sPublishFilter(sCloud, EVENT_NAME_DATA);
 MessageFilter sMessageFilter(std::bind(&PublishFilter::consume, &sPublishFilter, std::placeholders::_1, std::placeholders::_2));
 AveragingFilter sAveragingFilter(((AVERAGE_SECONDS)/MEASURE_SLEEP), std::bind(&MessageFilter::consume,&sMessageFilter, std::placeholders::_1));
 ValidateFilter sValidateFilter(std::bind(&AveragingFilter::consume, &sAveragingFilter, std::placeholders::_1));
-DisplayFilter sDisplayFilter(sReadingsView);
+LogFilter sLogFilter;
 ForkFilter sForkFilter(ForkFilter::Consumers{
-   std::bind(&DisplayFilter::consume, &sDisplayFilter, std::placeholders::_1),
+   std::bind(&LogFilter::consume, &sLogFilter, std::placeholders::_1),
    std::bind(&ValidateFilter::consume, &sValidateFilter, std::placeholders::_1),
 });
-
-
 
 Bt::Core::Workcycle sWorkcycle(A0);
 Bt::Core::PeriodicCallback sMeasureLoop(
@@ -135,9 +112,7 @@ Bt::Core::InterruptPushButton sDown(C4, [](){
    BT_CORE_LOG_INFO("click down");
 });
 
-
 Bt::SolarMonitor::Cli::CliController sCliController(Serial1);
-Bt::SolarMonitor::Ui::ViewsController sViewsController;
 
 void setup() {
    BT_CORE_LOG_INFO("*** bt-solar-monitor ***");
@@ -151,10 +126,12 @@ void setup() {
    sWorkcycle.add(sDown);
    sWorkcycle.add(sCloud);
    sWorkcycle.add(sCliController);
-   sWorkcycle.add(sViewsController);
 
    sWorkcycle.addSchedulingListener(sCliController);
-   sWorkcycle.addSchedulingListener(sViewsController);
+
+   sCliController.addCommand("loglevel", [](Stream& pStream, int pArgc, char* pArgv[]){
+      sLogHandler.changeLevel(pStream,pArgc,pArgv);
+   });
 
    sCloud.begin();
    sWorkcycle.begin();
@@ -170,11 +147,6 @@ void setup() {
 
    pinMode(sBlueLed, OUTPUT);
    digitalWrite(sBlueLed, LOW);
-
-   sDisplay.begin();
-   sDisplay.setContrast(55); // Pretty good value, play around with it
-   sDisplay.clearDisplay();
-   sDisplay.display(); // with displayMap untouched, SFE logo
 
    Serial4.begin(19200);
    Serial5.begin(19200);
@@ -197,28 +169,6 @@ void loop() {
 }
 
 void measure() {
-   sLoopCounter++;
-   BT_CORE_LOG_INFO("-- measure --");
    auto readings = sReader.read();
    sForkFilter.consume(readings);
 }
-
-//void loop() {
-//   unsigned long timer = millis();
-//   digitalWrite(sBlueLed, HIGH);
-//   sLoopCounter++;
-//   //BT_CORE_LOG_INFO("loop a %u [" __DATE__ " " __TIME__ "]", sLoopCounter );
-//   //if(sLoopCounter%5 == 0) {
-//      auto readings = sReader.read();
-//      sForkFilter.consume(readings);
-//   //}
-//   timer = millis() - timer;
-//   //BT_CORE_LOG_INFO("go to sleep after loop %u took %d ms", sLoopCounter, timer);
-//   BT_CORE_LOG_DEBUG("loop %lu took %lu ms", sLoopCounter++, timer);
-//   Serial1.flush();
-//   digitalWrite(sBlueLed, LOW);
-//   //delay(MEASURE_SLEEP * 1000);
-//   //Bt::Core::msSleep(500);
-//   System.sleep(A0, RISING, MEASURE_SLEEP);
-//   //System.sleep(SLEEP_MODE_SOFTPOWEROFF, MEASURE_SLEEP);
-//}

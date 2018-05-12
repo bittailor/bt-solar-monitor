@@ -27,6 +27,7 @@ class LogHandler
       void enable();
 
       void changeLevel(LogLevel pLevel);
+      void changeLevel(Stream& pStream, int pArgc, char* pArgv[]);
 
    private:
       LogLevel mLevel;

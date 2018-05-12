@@ -18,8 +18,8 @@ CommandRepository::~CommandRepository() {
 
 }
 
-void CommandRepository::add(const Command& pCommand)  {
-   mCommands.insert(Commands::value_type(pCommand.name(), pCommand));
+void CommandRepository::add(const char* pName, const Command& pCommand)  {
+   mCommands.insert(Commands::value_type(pName, pCommand));
 }
 
 Command* CommandRepository::lookup(const char* pName) {

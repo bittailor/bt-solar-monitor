@@ -19,31 +19,36 @@ CliController::CliController(Stream& pStream)
    execute(pArgc,pArgv);
 }){
 
-   mCommandRepository.add({"exit", [this](Stream& pStream, int pArgc, char* pArgv[]){
+   mCommandRepository.add("exit", [this](Stream& pStream, int pArgc, char* pArgv[]){
       BT_CORE_LOG_INFO("CliController exit cmd => idle");
       mStateFunction = &CliController::idle;
-   }});
+   });
 
-   mCommandRepository.add({"help", [this](Stream& pStream, int pArgc, char* pArgv[]){
+   mCommandRepository.add("help", [this](Stream& pStream, int pArgc, char* pArgv[]){
       for(auto command : mCommandRepository) {
          pStream.printlnf(" - %s", command.first);
       }
-   }});
+   });
 
-   mCommandRepository.add({"dfu", [](Stream& pStream, int pArgc, char* pArgv[]){
+   mCommandRepository.add("dfu", [](Stream& pStream, int pArgc, char* pArgv[]){
       pStream.printlnf("enter DFU mode");
       pStream.flush();
       System.dfu();
-   }});
+   });
 
-   mCommandRepository.add({"memory", [](Stream& pStream, int pArgc, char* pArgv[]){
+   mCommandRepository.add("memory", [](Stream& pStream, int pArgc, char* pArgv[]){
       pStream.printlnf("freeMemory = %" PRIu32, System.freeMemory());
-   }});
+   });
 
 }
 
 CliController::~CliController() {
 
+}
+
+
+void CliController::addCommand(const char* pName, const Command& pCommand) {
+   mCommandRepository.add(pName, pCommand);
 }
 
 Core::Scheduling CliController::workcycle() {
@@ -56,7 +61,7 @@ void CliController::beforeStopModeSleep() {
 
 void CliController::afterStopModeSleep(bool pWakeUpPinState) {
    if(pWakeUpPinState) {
-      BT_CORE_LOG_INFO("CliController WakeUp => listening");
+      mStream.printlnf("*** CLI => listening ***");
       mActiveTimer = Core::Timer(20*1000);
       mStateFunction = &CliController::listening;
    }
@@ -93,7 +98,7 @@ Core::Scheduling CliController::listening() {
       mBuffer[mBufferIndex] = 0;
    }
    if(mActiveTimer.expired()) {
-      BT_CORE_LOG_INFO("CliController ActiveTimer.expired => idle");
+      mStream.printlnf("*** CLI => exit ***");
       mStateFunction = &CliController::idle;
    }
    return Core::Scheduling::immediately();
@@ -113,37 +118,7 @@ void CliController::execute(int pArgc, char* pArgv[]) {
       mStream.printlnf("cli-e> cmd '%s' not found!>", pArgv[0]);
       return;
    }
-   command->execute(mStream, pArgc, pArgv);
-
-
-
-//   int argc = 0;
-//   char* argv[ARGS_SIZE] = {nullptr};
-//
-//   char* token = strtok(cmdline, " ");
-//   while (token != nullptr) {
-//      if (argc < ARGS_SIZE) {
-//         parts[argc++] = token;
-//      }
-//      token = strtok(NULL, " ");
-//   }
-//
-//   mStream.printlnf("</cmd>");
-//   for (int i = 0; i < argc; ++i) {
-//
-//   }
-//
-//   mStream.printlnf("</cmd>");
-
-
-//   if(strcmp(cmdline, "exit") == 0) {
-//      BT_CORE_LOG_INFO("CliController exit => idle");
-//      mStateFunction = &CliController::idle;
-//   }
-//   if(strcmp(cmdline, "dfu") == 0) {
-//      BT_CORE_LOG_INFO("CliController dfu");
-//      System.dfu();
-//   }
+   (*command)(mStream, pArgc, pArgv);
 }
 
 } // namespace Cli

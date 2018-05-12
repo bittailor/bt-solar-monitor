@@ -12,6 +12,9 @@
 #undef swap
 
 #include <map>
+#include <functional>
+#include <Bt/Core/Platform.h>
+#include <Bt/Core/StrCmp.h>
 #include <Bt/SolarMonitor/Cli/Command.h>
 
 namespace Bt {
@@ -20,14 +23,8 @@ namespace Cli {
 
 class CommandRepository
 {
-      struct StrCmp
-      {
-            bool operator()(char const *a, char const *b)
-            {
-               return strcmp(a, b) < 0;
-            }
-      };
-      typedef std::map<const char*, Command, StrCmp> Commands;
+   private:
+      typedef std::map<const char*, Command, Bt::Core::StrCmp> Commands;
    public:
 
       CommandRepository();
@@ -38,8 +35,7 @@ class CommandRepository
       Commands::const_iterator begin() const { return mCommands.begin(); }
       Commands::const_iterator end() const { return mCommands.end(); }
 
-      void add(const Command& pCommand);
-
+      void add(const char* pName, const Command& pCommand);
       Command* lookup(const char* pName);
 
    private:

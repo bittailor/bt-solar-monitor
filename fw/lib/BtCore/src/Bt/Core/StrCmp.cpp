@@ -1,15 +1,13 @@
 //*************************************************************************************************
 //
-//  BITTAILOR.CH - Bt::SolarMonitor::Cli::Command
+//  BITTAILOR.CH - Bt::Core::StrCmp
 //
 //*************************************************************************************************
 
-#include "Bt/SolarMonitor/Cli/Command.h"
+#include "Bt/Core/StrCmp.h"
 
 namespace Bt {
-namespace SolarMonitor {
-namespace Cli {
+namespace Core {
 
-} // namespace Cli
-} // namespace SolarMonitor
+} // namespace Core
 } // namespace Bt

@@ -14,22 +14,7 @@ namespace Bt {
 namespace SolarMonitor {
 namespace Cli {
 
-class Command
-{
-   public:
-      Command(const char* pName, std::function<void(Stream& pStream, int pArgc, char* pArgv[])> pExecutor);
-      Command(const Command&) = default;
-      Command& operator=(const Command&) = default;
-      ~Command();
-
-      const char* name() const {return mName;}
-      void execute(Stream& pStream, int pArgc, char* pArgv[]);
-
-   private:
-      const char* mName;
-      std::function<void(Stream& pStream, int pArgc, char* pArgv[])> mExecutor;
-      
-};
+typedef std::function<void(Stream& pStream, int pArgc, char* pArgv[])> Command;
 
 } // namespace Cli
 } // namespace SolarMonitor
