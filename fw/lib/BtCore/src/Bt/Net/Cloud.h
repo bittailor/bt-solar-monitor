@@ -79,66 +79,6 @@ class Cloud
          this->handle(&CloudState<TRadio,TClient>::OnSystemEvent, event, param);
       }
 
-//      void executeConnected(std::function<void (Client&)> pExecutor) {
-//         unsigned long timer = millis();
-//         BT_CORE_LOG_INFO("mRadio.on() ...");
-//         mRadio.on();
-//         BT_CORE_LOG_INFO("... mRadio.on() DONE");
-//         BT_CORE_LOG_INFO("mRadio.connect() ...");
-//         mRadio.connect();
-//         BT_CORE_LOG_INFO("... mRadio.connect() DONE");
-//         while(! mRadio.ready() &&  mRadio.connecting()) {
-//            BT_CORE_LOG_INFO("Check - mRadio.ready()");
-//            mCloud.process();
-//         }
-//         mCloud.process();
-//
-//         BT_CORE_LOG_INFO("mRadio.connect() ...");
-//         mCloud.connect();
-//         BT_CORE_LOG_INFO("... mRadio.connect() DONE");
-//
-//         BT_CORE_LOG_INFO("while(!mCloud.connected() ...");
-//         while(!mCloud.connected()) {
-//            mCloud.process();
-//         }
-//         BT_CORE_LOG_INFO("... while(!mCloud.connected() DONE");
-//
-//         mCloud.publish(mEventNameStatus, "online", WITH_ACK);
-//
-//         pExecutor(mCloud);
-//         mCloud.process();
-//
-//         mCloud.publish(mEventNameStatus, "offline", WITH_ACK);
-//
-//         BT_CORE_LOG_INFO("mRadio.disconnect() ...");
-//         mCloud.disconnect();
-//         BT_CORE_LOG_INFO("... mRadio.disconnect() DONE");
-//
-//         BT_CORE_LOG_INFO("while(mCloud.connected() ...");
-//         while(mCloud.connected()) {
-//            mCloud.process();
-//         }
-//         BT_CORE_LOG_INFO("... while(mCloud.connected() DONE");
-//
-//         {
-//            unsigned long start = millis();
-//            while(millis() - start <  1000) {
-//               mCloud.process();;
-//            }
-//         }
-//
-//         BT_CORE_LOG_INFO("mRadio.disconnect() ...");
-//         mRadio.disconnect();
-//         BT_CORE_LOG_INFO("... mRadio.disconnect() DONE");
-//         BT_CORE_LOG_INFO("mRadio.off() ...");
-//         mRadio.off();
-//         BT_CORE_LOG_INFO("... mRadio.off() DONE");
-//         timer = millis() - timer;
-//
-//         BT_CORE_LOG_INFO("executeConnected took %lu ms",timer);
-//         BT_CORE_LOG_DEBUG("free memory: %lu", System.freeMemory());
-//      }
-
       virtual const char* name() {
          return "Cloud";
       }
