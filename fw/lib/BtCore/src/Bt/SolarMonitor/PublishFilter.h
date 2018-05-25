@@ -32,8 +32,9 @@ class PublishFilter
             BT_CORE_LOG_INFO("PublishFilter B consume %p - %u ", (void*)pMessages, forPrintf(pSize));
             int republishLimit = 10;
             for (size_t msgCounter = 0; msgCounter < pSize; ++msgCounter) {
+               BT_CORE_LOG_INFO("b cloud.publish(%d)", strlen(pMessages[msgCounter]));
                bool ack = client.publish(mEventName, pMessages[msgCounter], WITH_ACK);
-               BT_CORE_LOG_INFO("cloud.publish(%d) => %d", strlen(pMessages[msgCounter]), ack);
+               BT_CORE_LOG_INFO("e cloud.publish(%d) => %d", strlen(pMessages[msgCounter]), ack);
                client.process();
                if(!ack) {
                   republishLimit--;

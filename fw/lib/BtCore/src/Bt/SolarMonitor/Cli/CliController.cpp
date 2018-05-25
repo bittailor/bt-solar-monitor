@@ -36,6 +36,12 @@ CliController::CliController(Stream& pStream)
       System.dfu();
    });
 
+   mCommandRepository.add("reset", [](Stream& pStream, int pArgc, char* pArgv[]){
+         pStream.printlnf("reset !");
+         pStream.flush();
+         System.reset();
+   });
+
    mCommandRepository.add("memory", [](Stream& pStream, int pArgc, char* pArgv[]){
       pStream.printlnf("freeMemory = %" PRIu32, System.freeMemory());
    });
@@ -69,10 +75,20 @@ void CliController::afterStopModeSleep(bool pWakeUpPinState) {
 
 
 Core::Scheduling CliController::idle() {
+   consumeStream();
    return Core::Scheduling::never();
 }
 
 Core::Scheduling CliController::listening() {
+   consumeStream();
+   if(mActiveTimer.expired()) {
+      mStream.printlnf("*** CLI => exit ***");
+      mStateFunction = &CliController::idle;
+   }
+   return Core::Scheduling::immediately();
+}
+
+void CliController::consumeStream() {
    Bt::Core::Timer timer(200);
    while(mStream.available() && !timer.expired()) {
       mActiveTimer = Core::Timer(30*1000);
@@ -97,11 +113,6 @@ Core::Scheduling CliController::listening() {
       }
       mBuffer[mBufferIndex] = 0;
    }
-   if(mActiveTimer.expired()) {
-      mStream.printlnf("*** CLI => exit ***");
-      mStateFunction = &CliController::idle;
-   }
-   return Core::Scheduling::immediately();
 }
 
 void CliController::execute(char* cmdline) {

@@ -28,19 +28,14 @@
 
 // ==== <Configuration> ==========
 
-#define MEASURE_SLEEP 5
-
-const size_t AVERAGE_SECONDS = 5 *  60; // 5  * 10;  // 5 *  60;
-const size_t STOARGE_SECONDS = 60 * 60; // 10 * 60;  // 60 * 60;
-// const size_t AVERAGE_SECONDS = 15; // 5  * 10;  // 5 *  60;
-// const size_t STOARGE_SECONDS = 3 * 60; // 10 * 60;  // 60 * 60;
+#define MEASURE_SLEEP 10 * 60
 
 #define APN       "gprs.swisscom.ch"
 #define USERNAME  ""
 #define PASSWORD  ""
 
-#define EVENT_NAME_DATA "solar/data"
-#define EVENT_NAME_STATUS "solar/status"
+#define EVENT_NAME_DATA "dev/cloud/data"
+#define EVENT_NAME_STATUS "dev/cloud/status"
 
 // ==== </Configuration> ==========
 
@@ -56,44 +51,18 @@ STARTUP(cellular_credentials_set(APN, USERNAME, PASSWORD, NULL));
    #define Radio WiFi
 #endif
 
-void measure();
-
 SYSTEM_THREAD(ENABLED);
 
+void measure();
 
 Bt::SolarMonitor::LogHandler sLogHandler;
 
-int sBlueLed = 7;
-
-typedef Bt::SolarMonitor::Reader Reader;
-Reader sReader(Serial4, Serial5);
-
-static const size_t STORAGE_SIZE = (STOARGE_SECONDS/AVERAGE_SECONDS);
-
-static_assert(STORAGE_SIZE == 12,"oops" );
-
 typedef Bt::Net::Cloud<decltype(Radio),decltype(Particle)> Cloud;
-typedef Bt::SolarMonitor::PublishFilter<Cloud> PublishFilter;
-typedef Bt::SolarMonitor::MessageFilter<Reader::NUMBER_OF_VALUES,STORAGE_SIZE> MessageFilter;
-typedef Bt::SolarMonitor::ValidateFilter<float, Reader::NUMBER_OF_VALUES> ValidateFilter;
-typedef Bt::SolarMonitor::AveragingFilter<std::array<float, Reader::NUMBER_OF_VALUES>> AveragingFilter;
-typedef Bt::SolarMonitor::LogFilter<Reader::NUMBER_OF_VALUES> LogFilter;
-
-typedef Bt::SolarMonitor::ForkFilter<Reader::Readings,2> ForkFilter;
 
 Bt::Core::Time sTime;
 Bt::Core::Singleton<Bt::Core::I_Time>::Instance sTimeInstance(sTime);
 
 Cloud sCloud(Radio, Particle, EVENT_NAME_STATUS);
-PublishFilter sPublishFilter(sCloud, EVENT_NAME_DATA);
-MessageFilter sMessageFilter(std::bind(&PublishFilter::consume, &sPublishFilter, std::placeholders::_1, std::placeholders::_2));
-AveragingFilter sAveragingFilter(((AVERAGE_SECONDS)/MEASURE_SLEEP), std::bind(&MessageFilter::consume,&sMessageFilter, std::placeholders::_1));
-ValidateFilter sValidateFilter(std::bind(&AveragingFilter::consume, &sAveragingFilter, std::placeholders::_1));
-LogFilter sLogFilter;
-ForkFilter sForkFilter(ForkFilter::Consumers{
-   std::bind(&LogFilter::consume, &sLogFilter, std::placeholders::_1),
-   std::bind(&ValidateFilter::consume, &sValidateFilter, std::placeholders::_1),
-});
 
 Bt::Core::Workcycle sWorkcycle(A0);
 Bt::Core::PeriodicCallback sMeasureLoop(
@@ -140,18 +109,6 @@ void setup() {
    sUp.begin();
    sDown.begin();
 
-   // RGB.control(true);
-   // RGB.color(0, 0, 0);
-
-   Wire.setSpeed(CLOCK_SPEED_100KHZ);
-   Wire.begin();
-
-   pinMode(sBlueLed, OUTPUT);
-   digitalWrite(sBlueLed, LOW);
-
-   Serial4.begin(19200);
-   Serial5.begin(19200);
-
 #if PLATFORM_ID == 10
    BT_CORE_LOG_INFO("!!! FuelGauge.sleep()  !!!");
    FuelGauge().sleep();
@@ -161,7 +118,6 @@ void setup() {
    sCloud.executeConnected([](Cloud::Client& client){
       bool ack = client.publish(EVENT_NAME_STATUS, "startup", WITH_ACK);
       BT_CORE_LOG_INFO(" ... cloud.publish(\"startup\") %d", ack);
-      sLogHandler.changeLevel(LogLevel::WARN_LEVEL);
    });
    BT_CORE_LOG_INFO("setup done => wait for cloud.publish(\"startup\")");
 }
@@ -172,6 +128,19 @@ void loop() {
 }
 
 void measure() {
-   auto readings = sReader.read();
-   sForkFilter.consume(readings);
+   sCloud.executeConnected([](Cloud::Client& client){
+      bool ack = client.publish(EVENT_NAME_STATUS, "b measure", WITH_ACK);
+      double sumRssi = 0;
+      double sumQual = 0;
+      for(int i=0 ; i < 60 ; i++) {
+         auto signal = Radio.RSSI();
+         BT_CORE_LOG_INFO("RSSI |%d|%d", signal.rssi, signal.qual);
+         sumRssi += signal.rssi;
+         sumQual += signal.qual;
+         delay(1000);
+      }
+      BT_CORE_LOG_INFO("Mean RSSI |%d|%d", int(sumRssi/60), int(sumQual/60));
+
+      ack = client.publish(EVENT_NAME_STATUS, "e measure", WITH_ACK);
+   });
 }

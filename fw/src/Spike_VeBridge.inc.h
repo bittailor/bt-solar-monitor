@@ -52,6 +52,18 @@ void onCommand(const char* pCmd) {
       pInputStream = &Serial5;
       return;
    }
+   if(strcmp("dfu",pCmd) == 0){
+         Serial.println("exe>dfu");
+         Serial.flush();
+         System.dfu();
+         return;
+   }
+   if(strcmp("reset",pCmd) == 0){
+         Serial.println("exe>dfu");
+         Serial.flush();
+         System.reset();
+         return;
+      }
    Serial.println("fail>unknown command");
 }
 

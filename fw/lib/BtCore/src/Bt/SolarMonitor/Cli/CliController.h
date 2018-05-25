@@ -36,6 +36,7 @@ class CliController : public Core::I_Runnable , public Core::I_SchedulingListene
    private:
       Core::Scheduling idle();
       Core::Scheduling listening();
+      void consumeStream();
       void execute(char* cmdline);
       void execute(int pArgc, char* pArgv[]);
       

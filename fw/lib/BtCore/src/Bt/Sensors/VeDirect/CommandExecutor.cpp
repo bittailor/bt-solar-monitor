@@ -35,7 +35,7 @@ CommandExecutor::~CommandExecutor() {
 const char* CommandExecutor::execute() {
    mBuffer[0] = 0;
    mBufferIndex = 0;
-   mTimer = Bt::Core::Timer(500);
+   mTimer = Bt::Core::Timer(200);
    mStateFunction = &CommandExecutor::waitForStartCharacter;
    flush();
    BT_CORE_LOG_DEBUG("send command '%s'", mCommand);

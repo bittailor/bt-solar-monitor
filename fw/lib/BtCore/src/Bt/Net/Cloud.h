@@ -7,6 +7,7 @@
 #ifndef INC__Bt_Net_Cloud__h
 #define INC__Bt_Net_Cloud__h
 
+#include <inttypes.h>
 #include <deque>
 #include <vector>
 #include <functional>
@@ -57,7 +58,7 @@ class Cloud
       , mCloudConnecting(*this)
       , mCloudConnected(*this)
       , mCloudDisconnecting(*this)
-      , mRadioDisconnecting(*this) {
+      , mRadioDisconnecting(*this){
       }
 
       Cloud(const Cloud&) = delete;
@@ -116,6 +117,7 @@ class Cloud
             }
 
             virtual void executeConnected(std::function<void (TClient&)> pExecutor) {
+               this->mController->connectStartTime = millis();
                this->mController->mExecutors.push_back(pExecutor);
                BT_CORE_LOG_INFO("mRadio.on ...");
                this->mController->mRadio.on();
@@ -175,10 +177,34 @@ class Cloud
             }
 
             virtual void onEnter() {
+               this->mController->publishStartTime = millis();
+               {
+                  const size_t messageSize = 100;
+                  char message[messageSize+1] = {0};
+                  uint32_t connectTime = (this->mController->publishStartTime - this->mController->connectStartTime) / 1000;
+                  auto signal = this->mController->mRadio.RSSI();
+                  snprintf(message, messageSize, "online|%" PRIu32 "|%d|%d",
+                           connectTime,
+                           signal.rssi,
+                           signal.qual);
+                  BT_CORE_LOG_INFO("b cloud.publish(%s)", message);
+                  bool ack = this->mController->mCloud.publish(this->mController->mEventNameStatus, message, WITH_ACK);
+                  BT_CORE_LOG_INFO("e cloud.publish(online) => %d", ack);
+               }
                while(!this->mController->mExecutors.empty()) {
                   auto executor = this->mController->mExecutors.front();
                   this->mController->mExecutors.pop_front();
                   executor(this->mController->mCloud);
+               }
+               {
+                  const size_t messageSize = 100;
+                  char message[messageSize+1] = {0};
+                  uint32_t publishTime = (millis() - this->mController->publishStartTime) / 1000;
+                  snprintf(message, messageSize, "offline|%" PRIu32,
+                           publishTime);
+                  BT_CORE_LOG_INFO("b cloud.publish(%s)", message);
+                  bool ack = this->mController->mCloud.publish(this->mController->mEventNameStatus, message, WITH_ACK);
+                  BT_CORE_LOG_INFO("e cloud.publish(offline) => %d", ack);
                }
                this->mController->mCloud.disconnect();
                this->mController->nextState(this->mController->mCloudDisconnecting);
@@ -247,6 +273,9 @@ class Cloud
       CloudDisconnecting mCloudDisconnecting;
       RadioDisconnecting mRadioDisconnecting;
       
+      uint32_t connectStartTime;
+      uint32_t publishStartTime;
+
 };
 
 } // namespace Net
