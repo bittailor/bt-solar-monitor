@@ -114,6 +114,7 @@ class Cloud
 
             virtual void onExit() {
                this->mController->scheduling(Core::Scheduling::immediately());
+               this->mController->setTimer(10*60*1000);
             }
 
             virtual void executeConnected(std::function<void (TClient&)> pExecutor) {
@@ -147,6 +148,13 @@ class Cloud
                   this->mController->nextState(this->mController->mCloudConnecting);
                }
             }
+
+            virtual void timeUp(){
+               BT_CORE_LOG_ERROR("Cloud connect timeout!");
+               this->mController->mExecutors.clear();
+               this->mController->mRadio.off();
+               this->mController->nextState(this->mController->mRadioOff);
+            }
       };
 
       class CloudConnecting : public Parent::StateBase  {
@@ -166,6 +174,14 @@ class Cloud
                   this->mController->nextState(this->mController->mCloudConnected);
                }
             }
+
+            virtual void timeUp(){
+               BT_CORE_LOG_ERROR("Cloud connect timeout!");
+               this->mController->mExecutors.clear();
+               this->mController->mRadio.disconnect();
+               this->mController->nextState(this->mController->mRadioDisconnecting);
+            }
+
       };
 
       class CloudConnected : public Parent::StateBase  {
@@ -177,6 +193,7 @@ class Cloud
             }
 
             virtual void onEnter() {
+               this->mController->resetTimer();
                this->mController->publishStartTime = millis();
                {
                   const size_t messageSize = 100;

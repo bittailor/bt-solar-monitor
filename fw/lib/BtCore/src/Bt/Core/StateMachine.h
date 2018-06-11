@@ -57,7 +57,9 @@ class StateMachine : public Bt::Core::I_Runnable
             return Scheduling::immediately();
          }
 
-         return Scheduling::inMillis(mInterval - diff);
+         Scheduling timerScheduling = Scheduling::inMillis(mInterval - diff);
+
+         return std::min(mScheduling, timerScheduling);
       }
 
    protected:
