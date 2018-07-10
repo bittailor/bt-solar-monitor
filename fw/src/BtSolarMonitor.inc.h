@@ -20,20 +20,25 @@
 #include <Bt/SolarMonitor/ForkFilter.h>
 #include <Bt/SolarMonitor/ValidateFilter.h>
 #include <Bt/SolarMonitor/LogFilter.h>
+#include <Bt/SolarMonitor/MessageBufferSink.h>
 #include <Bt/SolarMonitor/PublishFilter.h>
 #include <Bt/SolarMonitor/LogHandler.h>
 #include <Bt/SolarMonitor/Reader.h>
+#include <Bt/SolarMonitor/EmulatedReader.h>
 #include <Bt/SolarMonitor/Cli/CliController.h>
 #include <Bt/Core/InterruptPushButton.h>
 
+#if defined(SOLAR_PROD)
+
 // ==== <Configuration> ==========
+
+#define CONFIGURATION_ENVIRONMENT "PROD"
 
 #define MEASURE_SLEEP 5
 
+#define PUBLISH_SLEEP 60 * 60
+
 const size_t AVERAGE_SECONDS = 5 *  60; // 5  * 10;  // 5 *  60;
-const size_t STOARGE_SECONDS = 60 * 60; // 10 * 60;  // 60 * 60;
-// const size_t AVERAGE_SECONDS = 15; // 5  * 10;  // 5 *  60;
-// const size_t STOARGE_SECONDS = 3 * 60; // 10 * 60;  // 60 * 60;
 
 #define APN       "gprs.swisscom.ch"
 #define USERNAME  ""
@@ -42,7 +47,40 @@ const size_t STOARGE_SECONDS = 60 * 60; // 10 * 60;  // 60 * 60;
 #define EVENT_NAME_DATA "solar/data"
 #define EVENT_NAME_STATUS "solar/status"
 
+#define RUN_LOG_LEVEL WARN_LEVEL
+
+typedef Bt::SolarMonitor::Reader Reader;
+
 // ==== </Configuration> ==========
+
+#elif defined(SOLAR_DEV)
+
+// ==== <Configuration> ==========
+
+#define CONFIGURATION_ENVIRONMENT "DEV"
+
+#define MEASURE_SLEEP 5
+
+#define PUBLISH_SLEEP 2 * 60
+
+const size_t AVERAGE_SECONDS = 10; // 5  * 10;  // 5 *  60;
+
+#define APN       "gprs.swisscom.ch"
+#define USERNAME  ""
+#define PASSWORD  ""
+
+#define EVENT_NAME_DATA "solar-dev/data"
+#define EVENT_NAME_STATUS "solar-dev/status"
+
+#define RUN_LOG_LEVEL INFO_LEVEL
+
+typedef Bt::SolarMonitor::EmulatedReader Reader;
+
+// ==== </Configuration> ==========
+
+#else
+   #error no solar enviroment defined
+#endif
 
 SYSTEM_MODE(MANUAL);
 
@@ -65,16 +103,17 @@ Bt::SolarMonitor::LogHandler sLogHandler;
 
 int sBlueLed = 7;
 
-typedef Bt::SolarMonitor::Reader Reader;
+
 Reader sReader(Serial4, Serial5);
 
-static const size_t STORAGE_SIZE = (STOARGE_SECONDS/AVERAGE_SECONDS);
+static const size_t MESSAGE_BUFFER_SIZE = 24 * 2;
+static const size_t NUMBER_OF_RECORDS_IN_A_MESSAGE = 6;
 
-static_assert(STORAGE_SIZE == 12,"oops" );
 
 typedef Bt::Net::Cloud<decltype(Radio),decltype(Particle)> Cloud;
 typedef Bt::SolarMonitor::PublishFilter<Cloud> PublishFilter;
-typedef Bt::SolarMonitor::MessageFilter<Reader::NUMBER_OF_VALUES,STORAGE_SIZE> MessageFilter;
+typedef Bt::SolarMonitor::MessageBufferSink<MESSAGE_BUFFER_SIZE> MessageBufferSink;
+typedef Bt::SolarMonitor::MessageFilter<Reader::NUMBER_OF_VALUES,NUMBER_OF_RECORDS_IN_A_MESSAGE> MessageFilter;
 typedef Bt::SolarMonitor::ValidateFilter<float, Reader::NUMBER_OF_VALUES> ValidateFilter;
 typedef Bt::SolarMonitor::AveragingFilter<std::array<float, Reader::NUMBER_OF_VALUES>> AveragingFilter;
 typedef Bt::SolarMonitor::LogFilter<Reader::NUMBER_OF_VALUES> LogFilter;
@@ -85,8 +124,9 @@ Bt::Core::Time sTime;
 Bt::Core::Singleton<Bt::Core::I_Time>::Instance sTimeInstance(sTime);
 
 Cloud sCloud(Radio, Particle, EVENT_NAME_STATUS);
-PublishFilter sPublishFilter(sCloud, EVENT_NAME_DATA);
-MessageFilter sMessageFilter(std::bind(&PublishFilter::consume, &sPublishFilter, std::placeholders::_1, std::placeholders::_2));
+MessageBufferSink sMessageBufferSink;
+PublishFilter sPublishFilter(sCloud, EVENT_NAME_DATA, sMessageBufferSink);
+MessageFilter sMessageFilter(std::bind(&MessageBufferSink::consume, &sMessageBufferSink, std::placeholders::_1));
 AveragingFilter sAveragingFilter(((AVERAGE_SECONDS)/MEASURE_SLEEP), std::bind(&MessageFilter::consume,&sMessageFilter, std::placeholders::_1));
 ValidateFilter sValidateFilter(std::bind(&AveragingFilter::consume, &sAveragingFilter, std::placeholders::_1));
 LogFilter sLogFilter;
@@ -100,6 +140,15 @@ Bt::Core::PeriodicCallback sMeasureLoop(
          Bt::Core::PeriodicCallback::SECONDS,
          MEASURE_SLEEP,
          &measure
+);
+
+Bt::Core::PeriodicCallback sPublishLoop(
+         Bt::Core::PeriodicCallback::SECONDS,
+         PUBLISH_SLEEP,
+         [](){
+
+   sPublishFilter.publish();
+}
 );
 
 Bt::Core::InterruptPushButton sSelect(A0, [](){
@@ -116,12 +165,13 @@ Bt::SolarMonitor::Cli::CliController sCliController(Serial1);
 
 void setup() {
    sLogHandler.changeLevel(LogLevel::INFO_LEVEL);
-   BT_CORE_LOG_INFO("*** bt-solar-monitor ***");
+   BT_CORE_LOG_INFO("*** bt-solar-monitor " CONFIGURATION_ENVIRONMENT " ***");
    BT_CORE_LOG_INFO("System version: %s", System.version().c_str());
 
    Bt::Drivers::PowerManagment().disableCharging();
 
    sWorkcycle.add(sMeasureLoop);
+   sWorkcycle.add(sPublishLoop);
    sWorkcycle.add(sSelect);
    sWorkcycle.add(sUp);
    sWorkcycle.add(sDown);
@@ -140,12 +190,6 @@ void setup() {
    sUp.begin();
    sDown.begin();
 
-   // RGB.control(true);
-   // RGB.color(0, 0, 0);
-
-   Wire.setSpeed(CLOCK_SPEED_100KHZ);
-   Wire.begin();
-
    pinMode(sBlueLed, OUTPUT);
    digitalWrite(sBlueLed, LOW);
 
@@ -161,7 +205,7 @@ void setup() {
    sCloud.executeConnected([](Cloud::Client& client){
       bool ack = client.publish(EVENT_NAME_STATUS, "startup", WITH_ACK);
       BT_CORE_LOG_INFO(" ... cloud.publish(\"startup\") %d", ack);
-      sLogHandler.changeLevel(LogLevel::WARN_LEVEL);
+      sLogHandler.changeLevel(LogLevel::RUN_LOG_LEVEL);
    });
    BT_CORE_LOG_INFO("setup done => wait for cloud.publish(\"startup\")");
 }

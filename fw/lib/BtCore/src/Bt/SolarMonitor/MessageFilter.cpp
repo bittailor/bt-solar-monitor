@@ -17,36 +17,26 @@ namespace {
    }
 }
 
-Message::Message(): mCountMax(0), mCount(0) {
+MessageBuilderBase::MessageBuilderBase(): mMessageCounter(0), mValuesCounter(0) {
    mBuffer[0] = 0;
 }
 
-void Message::begin(size_t pCountMax, size_t id, size_t i, size_t n) {
+void MessageBuilderBase::appendBegin() {
    mBuffer[0] = 0;
-   mCountMax = pCountMax;
-   mCount = 0;
-   snprintf(mBuffer, MESSAGE_BUFFER_LENGHT, "%u|%u|%u|", forPrintf(id), forPrintf(i), forPrintf(n));
+   snprintf(mBuffer, MESSAGE_BUFFER_LENGHT, "%u|%u|%u|%s|", forPrintf(mMessageCounter), 0, 0, Time.format(TIME_FORMAT_ISO8601_FULL).c_str());
 }
 
-void Message::end() {
+void MessageBuilderBase::appendEnd() {
    BT_CORE_LOG_INFO("Message: Message::end() %u", forPrintf(strlen(mBuffer)));
    size_t length = strlen(mBuffer);
    snprintf(mBuffer + length, MESSAGE_BUFFER_LENGHT - length, "|%s",  Time.format(TIME_FORMAT_ISO8601_FULL).c_str());
 }
 
-bool Message::full() {
-   return mCount >= mCountMax;
+void MessageBuilderBase::appendValues(float pFirst , float pSecond) {
+   appendValues(scale(pFirst), scale(pSecond));
 }
 
-const char* Message::raw() {
-   return mBuffer;
-}
-
-void Message::append(float pFirst , float pSecond) {
-   append(scale(pFirst), scale(pSecond));
-}
-
-void Message::append(int16_t pFirst , int16_t pSecond) {
+void MessageBuilderBase::appendValues(int16_t pFirst , int16_t pSecond) {
    const size_t BUFFER_SIZE = 4;
    uint8_t buffer[BUFFER_SIZE];
    buffer[0] = (pFirst >> 8) & 0xff;
