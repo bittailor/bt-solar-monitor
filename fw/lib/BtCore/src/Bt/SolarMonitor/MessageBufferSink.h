@@ -16,9 +16,12 @@
 namespace Bt {
 namespace SolarMonitor {
 
-template<size_t BUFFER_SIZE>
+template<size_t SIZE>
 class MessageBufferSink : public I_MessageBuffer
 {
+   private:
+      static const size_t BUFFER_SIZE = SIZE + 1;
+
    public:
       static const size_t MESSAGE_BUFFER_LENGHT = 256;
 
