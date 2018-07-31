@@ -70,7 +70,7 @@ class WebHookController
             'b_load_i'
         );
 
-        $values = array_map(function($c) { return ':'.$c; }, $columns);
+        $values = \array_map(function($c) { return ':'.$c; }, $columns);
         
         $sql = 'INSERT INTO Measurements(' . implode(",", $columns). ') VALUES (' . implode(",", $values) .')';
         \error_log("sql is $sql");

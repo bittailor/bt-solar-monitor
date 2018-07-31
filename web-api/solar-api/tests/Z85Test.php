@@ -6,12 +6,21 @@ use SolarApi\Message;
 
 class Z85Test extends TestCase
 {
-    public function testDecode()
+    public function testSpecDecode()
     {
+        // see https://rfc.zeromq.org/spec:32/Z85/#test-case
         $decoded = Z85::decode("HelloWorld");
         $this->assertEquals('array', gettype($decoded));
         $this->assertEquals(8, count($decoded));
         $this->assertEquals(array(0x86, 0x4F, 0xD2, 0x6F, 0xB5, 0x59, 0xF7, 0x5B), $decoded);
+    }
+    public function testSpecEncode()
+    {
+        // see https://rfc.zeromq.org/spec:32/Z85/#test-case
+        $encoded = Z85::encode(array(0x86, 0x4F, 0xD2, 0x6F, 0xB5, 0x59, 0xF7, 0x5B));
+        $this->assertEquals('string', gettype($encoded));
+        $this->assertEquals(10, strlen($encoded));
+        $this->assertEquals("HelloWorld", $encoded);
     }
 
     public function testD()

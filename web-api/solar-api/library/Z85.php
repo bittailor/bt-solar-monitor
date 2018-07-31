@@ -2,6 +2,7 @@
 
 namespace SolarApi;
 
+// see https://rfc.zeromq.org/spec:32/Z85/
 class Z85
 {
   const ENCODER = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:+=^!/*?&<>()[]{}@%$#";
@@ -24,7 +25,7 @@ class Z85
 
   public static function encode ($data) {
       if( !is_array($data) ) {
-          $data = str_split($data);
+          return null;
       }
       if ((count($data) % 4) !== 0) {
           return null;
@@ -34,7 +35,7 @@ class Z85
       $size = count( $data );
       $value = 0;
       while ($byte_nbr < $size) {
-          $characterCode = ord($data[$byte_nbr++]);
+          $characterCode = $data[$byte_nbr++];
           $value = ($value * 256) + $characterCode;
           if (($byte_nbr % 4) === 0) {
               $divisor = 85 * 85 * 85 * 85;

@@ -184,7 +184,7 @@ gulp.task('web:api:test', () => {
     var cwd = conf.web.api;
     return sh('php',[
         '-d', 'xdebug.remote_enable=1',
-        '-d', 'xdebug.remote_enable=1',
+        '-d', 'xdebug.remote_autostart=1',
         'vendor/bin/phpunit',
         'tests'
     ],cwd);
