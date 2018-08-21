@@ -27,7 +27,7 @@ class MessageFactory {
 		for ($i = 0; $i < count($decoded); $i+=2) {
 			$value = ( $decoded[$i] & 0xff);
 			$value = ($value << 8) | ($decoded[$i+1] & 0xff);
-            if($i % 10 != 2) {
+            if(($i % 10 != 0) && ($i % 10 != 2)) {
                 if($value >= 32768) {
                     $value = -65536 + $value;
                 }
