@@ -19,13 +19,22 @@ class MessageFactoryTest extends TestCase
         $this->assertEquals(array(4567, 4711), $values);
     }
 
-    public function testUnpack_int16_t_negative()
+    public function testUnpack_uint16_t_max()
     {
         $messageString = "%nSb#";
         $values = MessageFactory::unpack($messageString);     
         $this->assertEquals('array', gettype($values));
         $this->assertEquals(2, count( $values));
-        $this->assertEquals(array(-1, 65534), $values);
+        $this->assertEquals(array(65535, 65534), $values);
+    }
+
+    public function testUnpack_int16_t_negative()
+    {
+        $messageString = "%nSb#%nSb#";
+        $values = MessageFactory::unpack($messageString);     
+        $this->assertEquals('array', gettype($values));
+        $this->assertEquals(4, count( $values));
+        $this->assertEquals(array(65535, 65534, -1, -2), $values);
     }
 
     public function testUnpack_int16_t_boundries()
@@ -33,7 +42,7 @@ class MessageFactoryTest extends TestCase
         $messageString = "FbY*70096100960(D1FQ";
         $values = MessageFactory::unpack($messageString);     
         $this->assertEquals('array', gettype($values));
-        $this->assertEquals(array(32767, 2345 , 1, 0, 0, -1 , 60104 , -32768), $values);
+        $this->assertEquals(array(32767, 2345 , 1, 0, 0, 65535 , 60104 , -32768), $values);
     }
 
     public function testtestUnpack_SolarMessage()
