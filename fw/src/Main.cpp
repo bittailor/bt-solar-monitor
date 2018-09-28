@@ -1,4 +1,4 @@
-#define SOLAR_PROD 1
+#define SOLAR_PROD 0
 
 #include "BtSolarMonitor.inc.h"
 
