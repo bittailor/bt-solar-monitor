@@ -200,6 +200,10 @@ gulp.task('web:api:deploy', () => {
     return sh('lftp', [ '-u', `${secrets.solar.hosting.user},${secrets.solar.hosting.pw}`, '-e', `set ftp:ssl-allow no; mirror --no-symlinks --reverse ${path.join(pwd,'web-api/solar-api')} /solar; exit`, 'ftp.bockmattli.ch' ]);
 });
 
+gulp.task('web:ui:deploy', () => {
+    return sh('lftp', [ '-u', `${secrets.solar.hosting.user},${secrets.solar.hosting.pw}`, '-e', `set ftp:ssl-allow no; mirror --no-symlinks --reverse ${path.join(pwd,'web-ui')} /solardaten; exit`, 'ftp.bockmattli.ch' ]);
+});
+
 //----
 
 gulp.task('clean-app', function(cb) {
@@ -229,7 +233,7 @@ gulp.task('clean-dir', function () {
 gulp.task('clean',['clean-dir','clean-core','clean-app'])
 
 gulp.task('compile-core', function(cb){
-    spawn('make', ['all', 'PLATFORM=' + conf.platform, 'APPDIR=' + path.join(pwd, 'fw')],{
+    spawn('make', ['all', 'PLATFORM=' + conf.platform],{
         stdio: 'inherit',
         cwd:'../firmware/modules'
     }).on('exit', (code) => {
