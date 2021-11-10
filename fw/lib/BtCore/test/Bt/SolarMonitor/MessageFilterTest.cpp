@@ -91,8 +91,8 @@ TEST(MessageFilterTest, checkDataTwoFloats) {
 
    EXPECT_CALL(consumer, consume(Truly([](const char* message) -> bool {
       std::vector<std::string> parts = split(std::string(message),'|');
-      EXPECT_EQ(6, parts.size());
-      EXPECT_STREQ("1wx8*", parts[4].c_str());
+      EXPECT_EQ(4, parts.size());
+      EXPECT_STREQ("1wx8*", parts[2].c_str());
       return true;
    })))
    .Times(Exactly(1));

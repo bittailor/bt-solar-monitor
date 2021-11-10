@@ -22,7 +22,7 @@ template<typename TRadio, typename TClient>
 class CloudState {
    public:
       virtual ~CloudState() {}
-      virtual void executeConnected(std::function<void (TClient&)> pExecutor){};
+      virtual void executeConnected(std::function<bool (TClient&)> pExecutor){};
       virtual void OnSystemEvent(system_event_t event, int param){}
 };
 
@@ -72,7 +72,7 @@ class Cloud
          this->init(mInitial);
       }
 
-      void executeConnected(std::function<void (TClient&)> pExecutor) {
+      void executeConnected(std::function<bool (TClient&)> pExecutor) {
          this->handle(&CloudState<TRadio,TClient>::executeConnected, pExecutor);
       }
 
@@ -117,7 +117,7 @@ class Cloud
                this->mController->setTimer(10*60*1000);
             }
 
-            virtual void executeConnected(std::function<void (TClient&)> pExecutor) {
+            virtual void executeConnected(std::function<bool (TClient&)> pExecutor) {
                this->mController->connectStartTime = millis();
                this->mController->mExecutors.push_back(pExecutor);
                BT_CORE_LOG_INFO("mRadio.on ...");
@@ -138,7 +138,7 @@ class Cloud
                return "RadioConnecting";
             }
 
-            virtual void executeConnected(std::function<void (TClient&)> pExecutor) {
+            virtual void executeConnected(std::function<bool (TClient&)> pExecutor) {
                this->mController->mExecutors.push_back(pExecutor);
             }
 
@@ -165,7 +165,7 @@ class Cloud
                return "CloudConnecting";
             }
 
-            virtual void executeConnected(std::function<void (TClient&)> pExecutor) {
+            virtual void executeConnected(std::function<bool (TClient&)> pExecutor) {
                this->mController->mExecutors.push_back(pExecutor);
             }
 
@@ -200,37 +200,67 @@ class Cloud
                   char message[messageSize+1] = {0};
                   uint32_t connectTime = (this->mController->publishStartTime - this->mController->connectStartTime) / 1000;
                   auto signal = this->mController->mRadio.RSSI();
-                  snprintf(message, messageSize, "online|%" PRIu32 "|%d|%d",
+                  snprintf(message, messageSize, "online|%" PRIu32 "|%.1f|%.1f",
                            connectTime,
-                           signal.rssi,
-                           signal.qual);
+                           signal.getStrength(),
+                           signal.getQuality());
                   BT_CORE_LOG_INFO("b cloud.publish(%s)", message);
                   bool ack = this->mController->mCloud.publish(this->mController->mEventNameStatus, message, WITH_ACK);
+                  this->mController->mCloud.publishVitals();
                   BT_CORE_LOG_INFO("e cloud.publish(online) => %d", ack);
                }
-               while(!this->mController->mExecutors.empty()) {
-                  auto executor = this->mController->mExecutors.front();
-                  this->mController->mExecutors.pop_front();
-                  executor(this->mController->mCloud);
-               }
-               {
-                  const size_t messageSize = 100;
-                  char message[messageSize+1] = {0};
-                  uint32_t publishTime = (millis() - this->mController->publishStartTime) / 1000;
-                  snprintf(message, messageSize, "offline|%" PRIu32,
-                           publishTime);
-                  BT_CORE_LOG_INFO("b cloud.publish(%s)", message);
-                  bool ack = this->mController->mCloud.publish(this->mController->mEventNameStatus, message, WITH_ACK);
-                  BT_CORE_LOG_INFO("e cloud.publish(offline) => %d", ack);
-               }
+               processConnected();
+            }
+
+            virtual void onExit() {
+               const size_t messageSize = 100;
+               char message[messageSize+1] = {0};
+               uint32_t publishTime = (millis() - this->mController->publishStartTime) / 1000;
+               snprintf(message, messageSize, "offline|%" PRIu32, publishTime);
+               BT_CORE_LOG_INFO("b cloud.publish(%s)", message);
+               bool ack = this->mController->mCloud.publish(this->mController->mEventNameStatus, message, WITH_ACK);
+               BT_CORE_LOG_INFO("e cloud.publish(offline) => %d", ack);
                this->mController->mCloud.disconnect();
-               this->mController->nextState(this->mController->mCloudDisconnecting);
             }
 
-            virtual void executeConnected(std::function<void (TClient&)> pExecutor) {
-               pExecutor(this->mController->mCloud);
+            virtual void executeConnected(std::function<bool (TClient&)> pExecutor) {
+               if(!pExecutor(this->mController->mCloud)) {
+                  this->mController->mExecutors.push_back(pExecutor);   
+               }
             }
 
+            virtual void timeUp(){
+               processConnected();   
+            }
+
+            void processConnected() {
+               BT_CORE_LOG_INFO("processConnected %d ...", this->mController->mExecutors.size());
+               bool allDone = runExecutors();
+               if(allDone) {
+                  BT_CORE_LOG_INFO("... processConnected all done => disconnecting");
+                  this->mController->nextState(this->mController->mCloudDisconnecting);
+               } else {
+                  BT_CORE_LOG_INFO("... processConnected %d left => reprocess in 1s", this->mController->mExecutors.size());
+                  this->mController->setTimer(1000);
+               }
+            }
+
+            bool runExecutors() {
+               if(this->mController->mExecutors.empty()) {
+                  return true;
+               }
+
+               std::deque<std::function<bool (Client&)>> executors;
+               executors.swap(this->mController->mExecutors);
+               while(!executors.empty()) {
+                  auto executor = executors.front();
+                  executors.pop_front();
+                  if(!executor(this->mController->mCloud)) {
+                     this->mController->mExecutors.push_back(executor);   
+                  }
+               }
+               return this->mController->mExecutors.empty();
+            }
       };
 
       class CloudDisconnecting : public Parent::StateBase  {
@@ -241,7 +271,7 @@ class Cloud
                return "CloudDisconnecting";
             }
 
-            virtual void executeConnected(std::function<void (TClient&)> pExecutor) {
+            virtual void executeConnected(std::function<bool (TClient&)> pExecutor) {
                this->mController->mExecutors.push_back(pExecutor);
                this->mController->mCloud.connect();
                this->mController->nextState(this->mController->mCloudConnecting);
@@ -263,7 +293,7 @@ class Cloud
                return "RadioDisconnecting";
             }
 
-            virtual void executeConnected(std::function<void (TClient&)> pExecutor) {
+            virtual void executeConnected(std::function<bool (TClient&)> pExecutor) {
                this->mController->mExecutors.push_back(pExecutor);
                this->mController->mRadio.connect();
                this->mController->nextState(this->mController->mRadioConnecting);
@@ -279,7 +309,7 @@ class Cloud
 
       TRadio& mRadio;
       TClient& mCloud;
-      std::deque<std::function<void (Client&)> > mExecutors;
+      std::deque<std::function<bool (Client&)> > mExecutors;
       const char* mEventNameStatus;
 
       Initial mInitial;
@@ -287,6 +317,7 @@ class Cloud
       RadioConnecting mRadioConnecting;
       CloudConnecting mCloudConnecting;
       CloudConnected mCloudConnected;
+      
       CloudDisconnecting mCloudDisconnecting;
       RadioDisconnecting mRadioDisconnecting;
       

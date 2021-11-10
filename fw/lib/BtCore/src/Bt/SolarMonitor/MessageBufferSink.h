@@ -13,40 +13,10 @@
 #include <Bt/Core/Log.h>
 #include <Bt/Core/CircularBuffer.h>
 #include "Bt/SolarMonitor/I_MessageBuffer.h"
+#include "Bt/SolarMonitor/Message.h"
 
 namespace Bt {
 namespace SolarMonitor {
-
-class Message {
-   public:
-      static const size_t MESSAGE_BUFFER_LENGHT = 256;
-
-      Message() {
-         mBuffer[0] = 0;
-      }
-
-      Message(const char* pMessage) {
-         strncpy(mBuffer, pMessage, MESSAGE_BUFFER_LENGHT);
-      }
-
-      Message(const Message& pOther) {
-         strncpy(mBuffer, pOther.mBuffer, MESSAGE_BUFFER_LENGHT);
-      }
-
-      Message& operator=(const Message& pOther) {
-         if(this != &pOther) {
-            strncpy(mBuffer, pOther.mBuffer, MESSAGE_BUFFER_LENGHT);
-         }
-         return *this;
-      }
-
-      const char* message() const {
-         return mBuffer;
-      }
-
-   private:
-      char mBuffer[MESSAGE_BUFFER_LENGHT];
-};
 
 template<size_t SIZE>
 class MessageBufferSink : public I_MessageBuffer
@@ -58,6 +28,7 @@ class MessageBufferSink : public I_MessageBuffer
 
       void consume(const char* pMessage){
          mCircularBuffer.push(pMessage);
+         BT_CORE_LOG_INFO("MessageBufferSink: new message added [count=%u]", forPrintf(mCircularBuffer.count()));
       }
 
       virtual const char* peak() const {

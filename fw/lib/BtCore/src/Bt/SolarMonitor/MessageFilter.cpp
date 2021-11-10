@@ -23,11 +23,10 @@ MessageBuilderBase::MessageBuilderBase(): mMessageCounter(0), mValuesCounter(0) 
 
 void MessageBuilderBase::appendBegin() {
    mBuffer[0] = 0;
-   snprintf(mBuffer, MESSAGE_BUFFER_LENGHT, "%u|%u|%u|%s|", forPrintf(mMessageCounter), 0, 0, Time.format(TIME_FORMAT_ISO8601_FULL).c_str());
+   snprintf(mBuffer, MESSAGE_BUFFER_LENGHT, "%u|%s|", forPrintf(mMessageCounter), Time.format(TIME_FORMAT_ISO8601_FULL).c_str());
 }
 
 void MessageBuilderBase::appendEnd() {
-   BT_CORE_LOG_INFO("Message: Message::end() %u", forPrintf(strlen(mBuffer)));
    size_t length = strlen(mBuffer);
    snprintf(mBuffer + length, MESSAGE_BUFFER_LENGHT - length, "|%s",  Time.format(TIME_FORMAT_ISO8601_FULL).c_str());
 }

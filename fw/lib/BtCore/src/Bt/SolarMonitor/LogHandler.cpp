@@ -23,32 +23,33 @@ namespace {
    };
 }
 
-LogHandler::LogHandler() : mLevel(LOG_LEVEL_WARN) {
+LogHandler::LogHandler(LogLevel pLevel, std::function<spark::LogHandler*(LogLevel pLevel)> pFactory) 
+: mLevel(pLevel)
+, mFactory(pFactory ? pFactory : [](LogLevel pLevel){ return new Serial1LogHandler(115200, pLevel);}) {
    enable();
 }
 
 LogHandler::~LogHandler() {
-   if(mSerial1LogHandler) {
-      mSerial1LogHandler.dispose();
-   }
+   disable();
 }
 
 void LogHandler::disable() {
-   if(mSerial1LogHandler) {
-      mSerial1LogHandler.dispose();
+   if(mLogHandler != nullptr) {
+      delete mLogHandler;
+      mLogHandler = nullptr;
    }
 }
 
 void LogHandler::enable() {
-   if(!mSerial1LogHandler) {
-      mSerial1LogHandler.create(115200, mLevel);
+   if(mLogHandler == nullptr) {
+      mLogHandler = mFactory(mLevel);
    }
 }
 
 void LogHandler::changeLevel(LogLevel pLevel) {
    if(mLevel != pLevel) {
       mLevel = pLevel;
-      if(mSerial1LogHandler) {
+      if(mLogHandler != nullptr) {
          disable();
          enable();
       }

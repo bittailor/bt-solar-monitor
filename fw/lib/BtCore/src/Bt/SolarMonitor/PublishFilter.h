@@ -23,7 +23,7 @@ class PublishFilter
       typedef const char* MessageString;
 
       PublishFilter(TCloud& pCloud, const char* pEventName, I_MessageBuffer& pMessageBuffer)
-      : mCloud(pCloud), mEventName(pEventName), mMessageBuffer(pMessageBuffer) {
+      : mCloud(pCloud), mEventName(pEventName), mMessageBuffer(pMessageBuffer), mRepublishLimit(10) {
       }
       PublishFilter(const PublishFilter&) = delete;
       PublishFilter& operator=(const PublishFilter&) = delete;
@@ -32,7 +32,6 @@ class PublishFilter
          BT_CORE_LOG_INFO("PublishFilter A publish %u ", forPrintf(mMessageBuffer.count()));
          mCloud.executeConnected([this] (typename TCloud::Client& client) {
             BT_CORE_LOG_INFO("PublishFilter B publish %u ", forPrintf(mMessageBuffer.count()));
-            int republishLimit = 10;
             while(!mMessageBuffer.empty()) {
                const char* message = mMessageBuffer.peak();
                BT_CORE_LOG_INFO("b cloud.publish(%d)", strlen(message));
@@ -40,21 +39,21 @@ class PublishFilter
                BT_CORE_LOG_INFO("e cloud.publish(%d) => %d", strlen(message), ack);
                client.process();
                if(!ack) {
-                  republishLimit--;
-                  if(republishLimit > 0) {
+                  mRepublishLimit--;
+                  if(mRepublishLimit > 0) {
                      BT_CORE_LOG_WARN("publish failed => sleep and try to re-publish");
-                     client.process();
-                     Bt::Core::msSleep(1000);
-                     client.process();
+                     return false;
                   } else {
                      BT_CORE_LOG_WARN("republish limit reached => skip all!");
-                     return;
+                     mRepublishLimit = 10;
+                     return true;
                   }
                } else {
-                  republishLimit = 10;
+                  mRepublishLimit = 10;
                   mMessageBuffer.pop();
                }
             }
+            return true;
          });
       }
 
@@ -62,6 +61,7 @@ class PublishFilter
       TCloud& mCloud;
       const char* mEventName;
       I_MessageBuffer& mMessageBuffer;
+      int mRepublishLimit;
 
 };
 

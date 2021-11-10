@@ -30,10 +30,10 @@ class LogFilter
 
       void consume(const std::array<Bt::Core::Result<float>, N>& pReadings) {
          mLoopCounter++;
-         BT_CORE_LOG_INFO("loop %" PRIu32 " {%" PRIu32 "}", mLoopCounter, mFailCounter);
+         BT_CORE_LOG_INFO("measure loop %" PRIu32 " {%" PRIu32 "}", mLoopCounter, mFailCounter);
          bool allValid = true;
          for(size_t i = 0 ; i < pReadings.size() ; i++) {
-            BT_CORE_LOG_INFO(" r[%u]=%5.2f %s", forPrintf(i), pReadings[i].value(), pReadings[i] ? "" : "!");
+            BT_CORE_LOG_DEBUG(" r[%u]=%5.2f %s", forPrintf(i), pReadings[i].value(), pReadings[i] ? "" : "!");
             allValid = allValid && pReadings[i];
          }
          if(!allValid) {

@@ -28,7 +28,7 @@
 
 // ==== <Configuration> ==========
 
-#define MEASURE_SLEEP 10 * 60
+#define MEASURE_SLEEP 60 //* 60
 
 #define APN       "gprs.swisscom.ch"
 #define USERNAME  ""
@@ -42,7 +42,7 @@
 SYSTEM_MODE(MANUAL);
 
 #if PLATFORM_ID == 10
-STARTUP(cellular_credentials_set(APN, USERNAME, PASSWORD, NULL));
+// STARTUP(cellular_credentials_set(APN, USERNAME, PASSWORD, NULL));
 #endif
 
 #if PLATFORM_ID == 10
@@ -55,13 +55,13 @@ SYSTEM_THREAD(ENABLED);
 
 void measure();
 
-Bt::SolarMonitor::LogHandler sLogHandler;
-
 typedef Bt::Net::Cloud<decltype(Radio),decltype(Particle)> Cloud;
+
+
+Bt::SolarMonitor::LogHandler sLogHandler; //(LOG_LEVEL_ALL);
 
 Bt::Core::Time sTime;
 Bt::Core::Singleton<Bt::Core::I_Time>::Instance sTimeInstance(sTime);
-
 Cloud sCloud(Radio, Particle, EVENT_NAME_STATUS);
 
 Bt::Core::Workcycle sWorkcycle(A0);
@@ -71,29 +71,15 @@ Bt::Core::PeriodicCallback sMeasureLoop(
          &measure
 );
 
-Bt::Core::InterruptPushButton sSelect(A0, [](){
-   BT_CORE_LOG_INFO("click select");
-});
-Bt::Core::InterruptPushButton sUp(C5, [](){
-   BT_CORE_LOG_INFO("click up");
-});
-Bt::Core::InterruptPushButton sDown(C4, [](){
-   BT_CORE_LOG_INFO("click down");
-});
-
 Bt::SolarMonitor::Cli::CliController sCliController(Serial1);
 
 void setup() {
-   sLogHandler.changeLevel(LogLevel::INFO_LEVEL);
-   BT_CORE_LOG_INFO("*** bt-solar-monitor ***");
+   BT_CORE_LOG_INFO("*** Cloud Signal Strengh ***");
    BT_CORE_LOG_INFO("System version: %s", System.version().c_str());
 
    Bt::Drivers::PowerManagment().disableCharging();
 
    sWorkcycle.add(sMeasureLoop);
-   sWorkcycle.add(sSelect);
-   sWorkcycle.add(sUp);
-   sWorkcycle.add(sDown);
    sWorkcycle.add(sCloud);
    sWorkcycle.add(sCliController);
 
@@ -105,9 +91,6 @@ void setup() {
 
    sCloud.begin();
    sWorkcycle.begin();
-   sSelect.begin();
-   sUp.begin();
-   sDown.begin();
 
 #if PLATFORM_ID == 10
    BT_CORE_LOG_INFO("!!! FuelGauge.sleep()  !!!");
@@ -123,24 +106,23 @@ void setup() {
 }
 
 void loop() {
-   BT_CORE_LOG_DEBUG("-- loop memory %lu", System.freeMemory());
    sWorkcycle.oneWorkcycle();
 }
 
 void measure() {
    sCloud.executeConnected([](Cloud::Client& client){
-      bool ack = client.publish(EVENT_NAME_STATUS, "b measure", WITH_ACK);
+      client.publish(EVENT_NAME_STATUS, "measure RSSI", WITH_ACK);
       double sumRssi = 0;
       double sumQual = 0;
-      for(int i=0 ; i < 60 ; i++) {
+      for(int i=0 ; i < 30 ; i++) {
          auto signal = Radio.RSSI();
-         BT_CORE_LOG_INFO("RSSI |%d|%d", signal.rssi, signal.qual);
-         sumRssi += signal.rssi;
-         sumQual += signal.qual;
-         delay(1000);
+         sumRssi += signal.getStrength();
+         sumQual += signal.getQuality();
+         BT_CORE_LOG_INFO("RSSI |%.1f|%.1f", signal.getStrength(), signal.getQuality());
+         delay(500);
       }
-      BT_CORE_LOG_INFO("Mean RSSI |%d|%d", int(sumRssi/60), int(sumQual/60));
+      BT_CORE_LOG_INFO("Mean RSSI |%d|%d", int(sumRssi/30), int(sumQual/30));
 
-      ack = client.publish(EVENT_NAME_STATUS, "e measure", WITH_ACK);
+      client.publishVitals();
    });
 }

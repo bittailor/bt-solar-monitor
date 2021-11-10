@@ -13,6 +13,7 @@
 #include <math.h>
 #include "Bt/Core/Log.h"
 #include "Bt/Encoding/Z85.h"
+#include "Bt/SolarMonitor/Message.h"
 #include "Bt/SolarMonitor/MeasurementRecord.h"
 
 namespace Bt {
@@ -20,7 +21,7 @@ namespace SolarMonitor {
 
 class MessageBuilderBase {
    public:
-      static const size_t MESSAGE_BUFFER_LENGHT = 256;
+      static const size_t MESSAGE_BUFFER_LENGHT = Message::MESSAGE_BUFFER_LENGHT;
 
    protected:
       MessageBuilderBase();
@@ -38,7 +39,7 @@ class MessageBuilderBase {
 template<size_t NUMBER_OF_VALUES_IN_ONE_MESSAGE>
 class MessageBuilder : MessageBuilderBase {
    public:
-      static const size_t MAX_NUMBER_OF_VALUES_IN_ONE_MESSAGE = 60;
+      static const size_t MAX_NUMBER_OF_VALUES_IN_ONE_MESSAGE = 160;
       static_assert(NUMBER_OF_VALUES_IN_ONE_MESSAGE <= MAX_NUMBER_OF_VALUES_IN_ONE_MESSAGE, "NUMBER_OF_VALUES_IN_ONE_MESSAGE must be smaller or equal to MAX_NUMBER_OF_VALUES_IN_ONE_MESSAGE" );
 
       template<size_t N>
@@ -56,7 +57,7 @@ class MessageBuilder : MessageBuilderBase {
 
          if(mValuesCounter >= NUMBER_OF_VALUES_IN_ONE_MESSAGE) {
             appendEnd();
-            BT_CORE_LOG_INFO("MessageBuilder: message ready");
+            BT_CORE_LOG_INFO("MessageBuilder: message ready [size=%u]", forPrintf(strlen(mBuffer)));
             pConsumer(mBuffer);
             mMessageCounter++;
             mValuesCounter = 0;

@@ -18,7 +18,7 @@ namespace SolarMonitor {
 class LogHandler
 {
    public:
-      LogHandler();
+      LogHandler(LogLevel pLevel = LOG_LEVEL_INFO, std::function<spark::LogHandler*(LogLevel pLevel)> pFactory = nullptr);
       LogHandler(const LogHandler&) = delete;
       LogHandler& operator=(const LogHandler&) = delete;
       ~LogHandler();
@@ -31,7 +31,8 @@ class LogHandler
 
    private:
       LogLevel mLevel;
-      PlacementPointer<Serial1LogHandler> mSerial1LogHandler;
+      std::function<spark::LogHandler*(LogLevel pLevel)> mFactory;
+      spark::LogHandler* mLogHandler;
       
 };
 

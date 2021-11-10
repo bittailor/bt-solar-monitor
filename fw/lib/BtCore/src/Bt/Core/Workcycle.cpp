@@ -61,14 +61,14 @@ void Workcycle::removeSchedulingListener(I_SchedulingListener& pSchedulingListen
 
 void Workcycle::oneWorkcycle() {
    uint32_t timer = millis();
-   BT_CORE_LOG_DEBUG(">>workcycle start");
+   // BT_CORE_LOG_DEBUG(">>workcycle start");
    Scheduling nextScheduling = Scheduling::never();
    for (I_Runnable& runnable : mRunnables) {
       Scheduling runnableScheduling = runnable.workcycle();
       nextScheduling = std::min(runnableScheduling, nextScheduling);
    }
    timer = millis() - timer;
-   BT_CORE_LOG_DEBUG("<<workcycle end took %" PRIu32 " ms => scheduling %s  [%" PRIu32 "]", timer, nextScheduling.typeString(), nextScheduling.delay());
+   // BT_CORE_LOG_DEBUG("<<workcycle end took %" PRIu32 " ms => scheduling %s  [%" PRIu32 "]", timer, nextScheduling.typeString(), nextScheduling.delay());
    scheduling(nextScheduling);
 }
 

@@ -112,7 +112,9 @@ class StateMachine : public Bt::Core::I_Runnable
       }
 
       void processPending() {
-         BT_CORE_LOG_INFO("%s: processPending %d", name() ,forPrintf(mQueue.size()));
+         if(!mQueue.empty()){
+            BT_CORE_LOG_INFO("%s: processPending %d", name() ,forPrintf(mQueue.size()));
+         }
          while(!mQueue.empty()) {
             mQueue.front()(mCurrentState);
             mQueue.pop_front();

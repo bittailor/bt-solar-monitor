@@ -59,11 +59,11 @@ typedef Bt::SolarMonitor::Reader Reader;
 
 #define CONFIGURATION_ENVIRONMENT "DEV"
 
-#define MEASURE_SLEEP 5
+#define MEASURE_SLEEP 5 // 5 sec
 
-#define PUBLISH_SLEEP 2 * 60
+#define PUBLISH_SLEEP 60 * 15 // 15 min
 
-const size_t AVERAGE_SECONDS = 10; // 5  * 10;  // 5 *  60;
+const size_t AVERAGE_SECONDS = 30; // 30 sec 
 
 #define APN       "gprs.swisscom.ch"
 #define USERNAME  ""
@@ -85,29 +85,50 @@ typedef Bt::SolarMonitor::EmulatedReader Reader;
 SYSTEM_MODE(MANUAL);
 
 #if PLATFORM_ID == 10
-STARTUP(cellular_credentials_set(APN, USERNAME, PASSWORD, NULL));
+// STARTUP(cellular_credentials_set(APN, USERNAME, PASSWORD, NULL));
 #endif
 
 #if PLATFORM_ID == 10
    #define Radio Cellular
+   #define BUTTON_SELECT A0
+   #define BUTTON_UP C5
+   #define BUTTON_DOWN C4
+
+
 #else
    #define Radio WiFi
+   #define BUTTON_SELECT A0
+   #define BUTTON_UP D1
+   #define BUTTON_DOWN D0
+
+   class SerialStub : public Stream {
+      public:
+         virtual int available(){return 0;}
+         virtual int read(){return 0;}
+         virtual int peek(){return 0;}
+         virtual void flush(){}
+         virtual size_t write(uint8_t){return 0;}
+         void begin(unsigned long){}
+   };
+   
+   
+   SerialStub Serial4; 
+   SerialStub Serial5;
 #endif
 
 void measure();
 
 SYSTEM_THREAD(ENABLED);
 
-
 Bt::SolarMonitor::LogHandler sLogHandler;
+// Serial1LogHandler logHandler(115200,LOG_LEVEL_ALL);
 
 int sBlueLed = 7;
-
 
 Reader sReader(Serial4, Serial5);
 
 static const size_t MESSAGE_BUFFER_SIZE = 24 * 2;
-static const size_t NUMBER_OF_RECORDS_IN_A_MESSAGE = 6;
+static const size_t NUMBER_OF_RECORDS_IN_A_MESSAGE = 16 ; //16;  //6;
 
 
 typedef Bt::Net::Cloud<decltype(Radio),decltype(Particle)> Cloud;
@@ -122,6 +143,7 @@ typedef Bt::SolarMonitor::ForkFilter<Reader::Readings,2> ForkFilter;
 
 Bt::Core::Time sTime;
 Bt::Core::Singleton<Bt::Core::I_Time>::Instance sTimeInstance(sTime);
+
 
 Cloud sCloud(Radio, Particle, EVENT_NAME_STATUS);
 MessageBufferSink sMessageBufferSink;
@@ -151,24 +173,28 @@ Bt::Core::PeriodicCallback sPublishLoop(
 }
 );
 
-Bt::Core::InterruptPushButton sSelect(A0, [](){
+
+Bt::Core::InterruptPushButton sSelect(BUTTON_SELECT, [](){
    BT_CORE_LOG_INFO("click select");
 });
-Bt::Core::InterruptPushButton sUp(C5, [](){
+Bt::Core::InterruptPushButton sUp(BUTTON_UP, [](){
    BT_CORE_LOG_INFO("click up");
 });
-Bt::Core::InterruptPushButton sDown(C4, [](){
+Bt::Core::InterruptPushButton sDown(BUTTON_DOWN, [](){
    BT_CORE_LOG_INFO("click down");
 });
 
 Bt::SolarMonitor::Cli::CliController sCliController(Serial1);
 
+
 void setup() {
    sLogHandler.changeLevel(LogLevel::INFO_LEVEL);
    BT_CORE_LOG_INFO("*** bt-solar-monitor " CONFIGURATION_ENVIRONMENT " ***");
    BT_CORE_LOG_INFO("System version: %s", System.version().c_str());
+   BT_CORE_LOG_INFO("PLATFORM_ID %d",PLATFORM_ID);
 
    Bt::Drivers::PowerManagment().disableCharging();
+
 
    sWorkcycle.add(sMeasureLoop);
    sWorkcycle.add(sPublishLoop);
@@ -180,6 +206,7 @@ void setup() {
 
    sWorkcycle.addSchedulingListener(sCliController);
 
+
    sCliController.addCommand("loglevel", [](Stream& pStream, int pArgc, char* pArgv[]){
       sLogHandler.changeLevel(pStream,pArgc,pArgv);
    });
@@ -190,23 +217,33 @@ void setup() {
    sUp.begin();
    sDown.begin();
 
+
    pinMode(sBlueLed, OUTPUT);
    digitalWrite(sBlueLed, LOW);
 
    Serial4.begin(19200);
    Serial5.begin(19200);
 
+   
+   BT_CORE_LOG_INFO("=> %d",PLATFORM_ID);
 #if PLATFORM_ID == 10
    BT_CORE_LOG_INFO("!!! FuelGauge.sleep()  !!!");
    FuelGauge().sleep();
    BT_CORE_LOG_INFO("!!! FuelGauge DONE  !!!");
 #endif
+   BT_CORE_LOG_INFO(" <= %d",PLATFORM_ID);
+
 
    sCloud.executeConnected([](Cloud::Client& client){
       bool ack = client.publish(EVENT_NAME_STATUS, "startup", WITH_ACK);
+      if(!ack) {
+         return false;
+      }
       BT_CORE_LOG_INFO(" ... cloud.publish(\"startup\") %d", ack);
       sLogHandler.changeLevel(LogLevel::RUN_LOG_LEVEL);
+      return true;
    });
+
    BT_CORE_LOG_INFO("setup done => wait for cloud.publish(\"startup\")");
 }
 
@@ -219,3 +256,4 @@ void measure() {
    auto readings = sReader.read();
    sForkFilter.consume(readings);
 }
+
