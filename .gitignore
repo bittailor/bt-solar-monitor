@@ -1,3 +1,5 @@
+.DS_Store
+
 git-crypt-key.key
 
 *.bak
@@ -18,3 +20,6 @@ web-api/solar-api/vendor/
 web-api/solar-api/filestorage/
 
 web-api/skeleton/
+
+worker/DeviceManagement/bin
+worker/DeviceManagement/obj

@@ -1,6 +1,3 @@
-#define SOLAR_DEV 1
-
-
 #include "BtSolarMonitor.inc.h"
 
 // #include "Spike_DataUsage.inc.h"

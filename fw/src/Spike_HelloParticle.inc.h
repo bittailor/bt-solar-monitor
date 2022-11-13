@@ -15,7 +15,7 @@ void setup() {
 
 void loop() {
    Log.info("--loop--");
-   Particle.publish("dev/cloud/log", "Hello Particle", WITH_ACK);
+   Particle.publish("bt/dev/cloud/log", "Hello Particle", WITH_ACK);
    delay(5000);
 }
 

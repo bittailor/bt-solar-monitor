@@ -21,13 +21,19 @@ class Timer {
       Timer(int ms) : mInterval(ms), mStart(millis()) {
       }
 
-      bool expired() {
+      bool expired() const {
          return (millis() - mStart) >= mInterval;
       }
 
+      uint32_t msTillExpired() const {
+         return mInterval - (millis() - mStart);
+      }
+
+      /*
       void expand(int ms) {
          mInterval = mInterval + ms;
       }
+      */
 
    private:
       uint32_t mInterval;

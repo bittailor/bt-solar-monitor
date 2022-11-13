@@ -6,7 +6,7 @@ use SolarApi\Message;
 
 class Z85Test extends TestCase
 {
-    public function testSpecDecode()
+    public function testSpecDecode() : void
     {
         // see https://rfc.zeromq.org/spec:32/Z85/#test-case
         $decoded = Z85::decode("HelloWorld");
@@ -14,7 +14,7 @@ class Z85Test extends TestCase
         $this->assertEquals(8, count($decoded));
         $this->assertEquals(array(0x86, 0x4F, 0xD2, 0x6F, 0xB5, 0x59, 0xF7, 0x5B), $decoded);
     }
-    public function testSpecEncode()
+    public function testSpecEncode() : void
     {
         // see https://rfc.zeromq.org/spec:32/Z85/#test-case
         $encoded = Z85::encode(array(0x86, 0x4F, 0xD2, 0x6F, 0xB5, 0x59, 0xF7, 0x5B));
@@ -23,14 +23,14 @@ class Z85Test extends TestCase
         $this->assertEquals("HelloWorld", $encoded);
     }
 
-    public function testD()
+    public function testD() : void
     {
         $decoded = Z85::decode("00S(M00S(E00J/A00A-u%n0fi000Cc00S(H00S(y00A-z00A-u%n0fg000Cc00S(H00S(z00J/A00rVu%n0fg000Ca00S(H00S(z00J/C00rVu%n0fi000Cb00S(G00S(x00S(B00A-v%n0fg000Cc00S(H00S(z00J/A00A-u%n0fg000Cb");
         $this->assertEquals('array', gettype($decoded));
         $this->assertEquals(6*24, count($decoded));
     }
 
-    public function testDecode__int16_t()
+    public function testDecode__int16_t() : void
     {
         $decoded = Z85::decode("5.vUd");
         $this->assertEquals('array', gettype($decoded));

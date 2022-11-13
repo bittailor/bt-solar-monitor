@@ -1,3 +1,6 @@
+#define SOLAR_PROD 1
+
+
 #include <functional>
 #include <Particle.h>
 #include <Serial4/Serial4.h>
@@ -36,7 +39,7 @@
 
 #define MEASURE_SLEEP 5
 
-#define PUBLISH_SLEEP 60 * 60
+#define PUBLISH_SLEEP 60 * 15
 
 const size_t AVERAGE_SECONDS = 5 *  60; // 5  * 10;  // 5 *  60;
 
@@ -59,9 +62,9 @@ typedef Bt::SolarMonitor::Reader Reader;
 
 #define CONFIGURATION_ENVIRONMENT "DEV"
 
-#define MEASURE_SLEEP 5 // 5 sec
+#define MEASURE_SLEEP 5 // 1 // 5 sec
 
-#define PUBLISH_SLEEP 60 * 15 // 15 min
+#define PUBLISH_SLEEP 60 * 15    // 30 // 15 min
 
 const size_t AVERAGE_SECONDS = 30; // 30 sec 
 
@@ -121,7 +124,6 @@ void measure();
 SYSTEM_THREAD(ENABLED);
 
 Bt::SolarMonitor::LogHandler sLogHandler;
-// Serial1LogHandler logHandler(115200,LOG_LEVEL_ALL);
 
 int sBlueLed = 7;
 
@@ -145,7 +147,7 @@ Bt::Core::Time sTime;
 Bt::Core::Singleton<Bt::Core::I_Time>::Instance sTimeInstance(sTime);
 
 
-Cloud sCloud(Radio, Particle, EVENT_NAME_STATUS);
+Cloud sCloud(Radio, Particle);
 MessageBufferSink sMessageBufferSink;
 PublishFilter sPublishFilter(sCloud, EVENT_NAME_DATA, sMessageBufferSink);
 MessageFilter sMessageFilter(std::bind(&MessageBufferSink::consume, &sMessageBufferSink, std::placeholders::_1));

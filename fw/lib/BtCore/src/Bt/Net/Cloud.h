@@ -14,6 +14,7 @@
 #include <Bt/Core/Platform.h>
 #include <Bt/Core/Log.h>
 #include <Bt/Core/StateMachine.h>
+#include <Bt/Core/Timer.h>
 
 namespace Bt {
 namespace Net {
@@ -45,13 +46,18 @@ class Cloud
          , private CloudBase
 {
    public:
+
+
+
+      static constexpr auto cEventNameOnline = "bt/device/state/online"; 
+      static constexpr auto cEventNameOffline = "bt/device/state/offline"; 
+
       typedef Core::StateMachine<CloudState<TRadio,TClient>, Cloud<TRadio,TClient> > Parent;
       typedef TClient Client;
 
-      Cloud(TRadio& pRadio, TClient& pCloud, const char* pEventNameStatus)
+      Cloud(TRadio& pRadio, TClient& pCloud)
       : mRadio(pRadio)
       , mCloud(pCloud)
-      , mEventNameStatus(pEventNameStatus)
       , mInitial(*this)
       , mRadioOff(*this)
       , mRadioConnecting(*this)
@@ -69,15 +75,43 @@ class Cloud
 
       virtual void begin() {
          CloudBase::begin();
-         this->init(mInitial);
+         bool success = mCloud.function("Cloud-updateOnlinePeriod", &Cloud::updateOnlinePeriod, this);
+         BT_CORE_LOG_INFO("mCloud.function(stayOnlineTime) => %d", success);
+         this->init(mInitial);         
       }
 
       void executeConnected(std::function<bool (TClient&)> pExecutor) {
          this->handle(&CloudState<TRadio,TClient>::executeConnected, pExecutor);
       }
 
-      virtual void OnSystemEvent(system_event_t event, int param) {
-         this->handle(&CloudState<TRadio,TClient>::OnSystemEvent, event, param);
+      virtual void OnSystemEvent(system_event_t pEvent, int pParam) {
+         this->handle(&CloudState<TRadio,TClient>::OnSystemEvent, pEvent, pParam);
+      }
+
+      int updateOnlinePeriod(String data) {
+         int onlinePeriod = data.toInt();
+         BT_CORE_LOG_INFO("mCloud.updateOnlinePeriod(%s) => %d", data.c_str(), onlinePeriod);
+         mOnlineTimer = Core::Timer(onlinePeriod * 1000);
+         return onlinePeriod;
+      }
+
+      void handleCmd(const char *pEventName, const char *pData) {
+         BT_CORE_LOG_ERROR("handleCmd (%s %s)", pEventName, pData); 
+
+         int seconds = 0;
+         
+         JSONValue outerObj = JSONValue::parseCopy(pData);
+         JSONObjectIterator iter(outerObj);
+         while(iter.next()) {
+            BT_CORE_LOG_INFO("key=%s value=%s", 
+               (const char *) iter.name(), 
+               (const char *) iter.value().toString());
+            if(iter.name() == "second") {
+               seconds = iter.value().toInt();   
+            }
+         }
+         BT_CORE_LOG_INFO(" mOnlineTimer = %d ",seconds);
+         mOnlineTimer = Core::Timer(seconds * 1000); 
       }
 
       virtual const char* name() {
@@ -186,7 +220,9 @@ class Cloud
 
       class CloudConnected : public Parent::StateBase  {
          public:
-            CloudConnected(Cloud& pController):Parent::StateBase(pController){}
+            CloudConnected(Cloud& pController):Parent::StateBase(pController){
+               mSubscribeName = std::string("bt/") + System.deviceID().c_str() + "/cmd";
+            }
 
             virtual const char* name() {
                return "CloudConnected";
@@ -195,31 +231,48 @@ class Cloud
             virtual void onEnter() {
                this->mController->resetTimer();
                this->mController->publishStartTime = millis();
+               this->mController->mOnlineTimer = Core::Timer(1000*30);
                {
+                  bool ack = this->mController->mCloud.subscribe(mSubscribeName.c_str(), &Cloud::handleCmd, this->mController);
+                  BT_CORE_LOG_INFO("cloud.subscribe(%s) => %d", mSubscribeName.c_str() ,ack);
+               }
+               {
+                  uint32_t timeToConnect = (this->mController->publishStartTime - this->mController->connectStartTime) / 1000;
+                  auto signal = this->mController->mRadio.RSSI();
                   const size_t messageSize = 100;
                   char message[messageSize+1] = {0};
-                  uint32_t connectTime = (this->mController->publishStartTime - this->mController->connectStartTime) / 1000;
-                  auto signal = this->mController->mRadio.RSSI();
-                  snprintf(message, messageSize, "online|%" PRIu32 "|%.1f|%.1f",
-                           connectTime,
-                           signal.getStrength(),
-                           signal.getQuality());
-                  BT_CORE_LOG_INFO("b cloud.publish(%s)", message);
-                  bool ack = this->mController->mCloud.publish(this->mController->mEventNameStatus, message, WITH_ACK);
+                  JSONBufferWriter writer(message, sizeof(message));
+                  writer.beginObject();
+                     writer.name("timeToConnect").value(timeToConnect);
+                     writer.name("signal").beginObject();
+                        writer.name("strength").value(signal.getStrength());
+                        writer.name("quality").value(signal.getQuality());
+                     writer.endObject();
+                  writer.endObject();
+                  BT_CORE_LOG_INFO("b cloud.publish(%s)", writer.buffer());
+                  bool ack = this->mController->mCloud.publish(cEventNameOnline, writer.buffer(), WITH_ACK);
                   this->mController->mCloud.publishVitals();
-                  BT_CORE_LOG_INFO("e cloud.publish(online) => %d", ack);
+                  BT_CORE_LOG_INFO("e cloud.publish(...) => %d", ack);
                }
                processConnected();
             }
 
             virtual void onExit() {
+               uint32_t onlinePeriod = (millis() - this->mController->publishStartTime) / 1000;
                const size_t messageSize = 100;
                char message[messageSize+1] = {0};
-               uint32_t publishTime = (millis() - this->mController->publishStartTime) / 1000;
-               snprintf(message, messageSize, "offline|%" PRIu32, publishTime);
-               BT_CORE_LOG_INFO("b cloud.publish(%s)", message);
-               bool ack = this->mController->mCloud.publish(this->mController->mEventNameStatus, message, WITH_ACK);
-               BT_CORE_LOG_INFO("e cloud.publish(offline) => %d", ack);
+               JSONBufferWriter writer(message, sizeof(message));
+                writer.beginObject();
+                  writer.name("onlinePeriod").value(onlinePeriod);
+               writer.endObject();
+               {
+                  BT_CORE_LOG_INFO("b cloud.publish(%s)", writer.buffer());
+                  bool ack = this->mController->mCloud.publish(cEventNameOffline, writer.buffer(), WITH_ACK);
+                  BT_CORE_LOG_INFO("e cloud.publish(...) => %d", ack);
+               }
+               {
+                  this->mController->mCloud.unsubscribe();
+               }
                this->mController->mCloud.disconnect();
             }
 
@@ -236,11 +289,11 @@ class Cloud
             void processConnected() {
                BT_CORE_LOG_INFO("processConnected %d ...", this->mController->mExecutors.size());
                bool allDone = runExecutors();
-               if(allDone) {
+               if(allDone && this->mController->mOnlineTimer.expired()) {
                   BT_CORE_LOG_INFO("... processConnected all done => disconnecting");
                   this->mController->nextState(this->mController->mCloudDisconnecting);
                } else {
-                  BT_CORE_LOG_INFO("... processConnected %d left => reprocess in 1s", this->mController->mExecutors.size());
+                  BT_CORE_LOG_INFO("... processConnected %d left [%" PRIu32 "] => reprocess in 1s", this->mController->mExecutors.size(), this->mController->mOnlineTimer.msTillExpired());
                   this->mController->setTimer(1000);
                }
             }
@@ -261,6 +314,8 @@ class Cloud
                }
                return this->mController->mExecutors.empty();
             }
+         private:
+            std::string mSubscribeName; 
       };
 
       class CloudDisconnecting : public Parent::StateBase  {
@@ -310,7 +365,7 @@ class Cloud
       TRadio& mRadio;
       TClient& mCloud;
       std::deque<std::function<bool (Client&)> > mExecutors;
-      const char* mEventNameStatus;
+      std::string mEventNameState;
 
       Initial mInitial;
       RadioOff mRadioOff;
@@ -320,9 +375,15 @@ class Cloud
       
       CloudDisconnecting mCloudDisconnecting;
       RadioDisconnecting mRadioDisconnecting;
+
+      Core::Timer  mOnlineTimer;
       
       uint32_t connectStartTime;
       uint32_t publishStartTime;
+     
+
+
+
 
 };
 

@@ -5,18 +5,18 @@ use SolarApi\Message;
 
 class MessageTest extends TestCase
 {
-    protected function setUp()
+    protected function setUp() : void
     {
         date_default_timezone_set('Europe/Zurich');
     }
 
-    public function testMessage_MeasurementsCount()
+    public function testMessage_MeasurementsCount() : void
     {
         $message = self::createExampleMessageWithThreeMeasurements();
         $this->assertEquals(3, count($message->measurements));
     }
 
-    public function testMessage_MeasurementDates()
+    public function testMessage_MeasurementDates() : void
     {
         $message = self::createExampleMessageWithThreeMeasurements();
         $this->assertEquals(new DateTime('2017-10-01T15:14:15CEST'), $message->measurements[0]->timestamp);
@@ -24,7 +24,7 @@ class MessageTest extends TestCase
         $this->assertEquals(new DateTime('2017-10-01T14:34:15+0100'), $message->measurements[2]->timestamp);
     }
 
-    public function testMessage_MeasurementReadings()
+    public function testMessage_MeasurementReadings() : void
     {
         $message = self::createExampleMessageWithThreeMeasurements();
         $this->assertEquals(0.139, $message->measurements[0]->values[4]);
@@ -35,13 +35,13 @@ class MessageTest extends TestCase
         $this->assertEquals(1.328, $message->measurements[2]->values[3]);
     }
 
-    public function testMessage_OneEntry()
+    public function testMessage_OneEntry() : void
     {
         $message = self::createExampleMessageWithOneMeasurements();
         $this->assertEquals(new DateTime('2017-10-01T13:14:15Z'), $message->measurements[0]->timestamp);
     }
 
-    public function testMessage_TwoEntry()
+    public function testMessage_TwoEntry() : void
     {
         $message = self::createExampleMessageWithTwoMeasurements();
         $this->assertEquals(new DateTime('2017-10-01T13:14:15Z'), $message->measurements[0]->timestamp);

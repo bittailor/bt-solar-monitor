@@ -41,6 +41,11 @@
         "*.ipp": "cpp",
         "__locale": "cpp",
         "string": "cpp",
-        "thread": "cpp"
-    }
+        "thread": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp",
+        "string_view": "cpp"
+    },
+    "appService.defaultWebAppToDeploy": "/subscriptions/ac4aebc2-3b2f-4b04-be33-6c2dd9c080f5/resourceGroups/bt-solar-device-api/providers/Microsoft.Web/sites/bt-solar-device-api",
+    "appService.deploySubpath": "web-api/web-api-net/Bt.Solar.WebApis/Bt.Solar.DeviceApi/bin/Release/net6.0/publish"
 }

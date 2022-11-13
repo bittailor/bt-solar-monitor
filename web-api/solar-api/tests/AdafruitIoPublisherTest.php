@@ -4,12 +4,12 @@ use SolarApi\AdafruitIoPublisher;
 
 class AdafruitIoPublisherTest extends TestCase
 {
-    protected function setUp()
+    protected function setUp() : void
     {
         date_default_timezone_set('Europe/Zurich');
     }
 
-    public function testPublish()
+    public function testPublish() : void
     {
         $configuration = new stdClass();
         $configuration->aioKey ="TestCase_AioKey";

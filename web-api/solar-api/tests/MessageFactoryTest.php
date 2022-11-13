@@ -5,12 +5,12 @@ use SolarApi\MessageFactory;
 
 class MessageFactoryTest extends TestCase
 {
-    protected function setUp()
+    protected function setUp() : void
     {
         date_default_timezone_set('Europe/Zurich');
     }
 
-    public function testUnpack_int16_t_positive()
+    public function testUnpack_int16_t_positive() : void
     {
         $messageString = "5.vUd";
         $values = MessageFactory::unpack($messageString);     
@@ -19,7 +19,7 @@ class MessageFactoryTest extends TestCase
         $this->assertEquals(array(4567, 4711), $values);
     }
 
-    public function testUnpack_uint16_t_max()
+    public function testUnpack_uint16_t_max() : void
     {
         $messageString = "%nSb#";
         $values = MessageFactory::unpack($messageString);     
@@ -28,7 +28,7 @@ class MessageFactoryTest extends TestCase
         $this->assertEquals(array(65535, 65534), $values);
     }
 
-    public function testUnpack_int16_t_negative()
+    public function testUnpack_int16_t_negative() : void
     {
         $messageString = "%nSb#%nSb#";
         $values = MessageFactory::unpack($messageString);     
@@ -37,7 +37,7 @@ class MessageFactoryTest extends TestCase
         $this->assertEquals(array(65535, 65534, -1, -2), $values);
     }
 
-    public function testUnpack_int16_t_boundries()
+    public function testUnpack_int16_t_boundries() : void
     {
         $messageString = "FbY*70096100960(D1FQ";
         $values = MessageFactory::unpack($messageString);     
@@ -45,7 +45,7 @@ class MessageFactoryTest extends TestCase
         $this->assertEquals(array(32767, 2345 , 1, 0, 0, 65535 , 60104 , -32768), $values);
     }
 
-    public function testtestUnpack_SolarMessage()
+    public function testtestUnpack_SolarMessage() : void
     {
         $messageString = "00S(M00S(E00J/A00A-u%n0fi000Cc00S(H00S(y00A-z00A-u%n0fg000Cc00S(H00S(z00J/A00rVu%n0fg000Ca00S(H00S(z00J/C00rVu%n0fi000Cb00S(G00S(x00S(B00A-v%n0fg000Cc00S(H00S(z00J/A00A-u%n0fg000Cb";
         $values = MessageFactory::unpack($messageString);     
@@ -53,18 +53,18 @@ class MessageFactoryTest extends TestCase
         $this->assertEquals(2*6*6, count( $values));
     }
 
-    public function testCreate_Timestamps()
+    public function testCreate_Timestamps() : void
     {
-        $rawData = "0|0|1|2017-10-01T13:14:15Z|1KnXT1KnXT1KnXT1KnXT1KnXT1KnXT2{--z2{--z2{--z2{--z2{--z2{--z4si^f4si^f4si^f|2017-10-01T13:34:15Z";
+        $rawData = "0|2017-10-01T13:14:15Z|1KnXT1KnXT1KnXT1KnXT1KnXT1KnXT2{--z2{--z2{--z2{--z2{--z2{--z4si^f4si^f4si^f|2017-10-01T13:34:15Z";
         $factory = new MessageFactory();
         $message = $factory->create($rawData);
         $this->assertEquals(new DateTime('2017-10-01T15:14:15CEST'), $message->startTime);
         $this->assertEquals(new DateTime('2017-10-01T15:34:15CEST'), $message->endTime);
     }
 
-    public function testCreate_Measurents()
+    public function testCreate_Measurents() : void
     {
-        $rawData = "0|0|1|2017-10-01T13:14:15Z|1wysJ1H6z(1R-Hk1:zOO1(7V}20:+p2Sah52:^oz2(Dv+31bDa3b!KE3mER*3(?5O41Hc}4cfkp|2017-10-01T13:34:15Z";
+        $rawData = "0|2017-10-01T13:14:15Z|1wysJ1H6z(1R-Hk1:zOO1(7V}20:+p2Sah52:^oz2(Dv+31bDa3b!KE3mER*3(?5O41Hc}4cfkp|2017-10-01T13:34:15Z";
         $factory = new MessageFactory();
         $message = $factory->create($rawData);
         $this->assertEquals(3, count($message->measurements));
