@@ -1,0 +1,12 @@
+# Build a neopo project with Travis CI
+os: linux
+language: shell
+install:
+  - bash <(curl -sL https://raw.githubusercontent.com/nrobinson2000/neopo/master/install.sh)
+script:
+  - neopo libs
+  - neopo build
+cache:
+  directories:
+    - $HOME/.particle
+    - $HOME/.neopo
