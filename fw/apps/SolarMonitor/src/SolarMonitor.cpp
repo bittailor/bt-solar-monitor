@@ -160,7 +160,7 @@ ForkFilter sForkFilter(ForkFilter::Consumers{
    std::bind(&ValidateFilter::consume, &sValidateFilter, std::placeholders::_1),
 });
 
-Bt::Core::Workcycle sWorkcycle(A0);
+Bt::Core::Workcycle sWorkcycle(A4);
 Bt::Core::PeriodicCallback sMeasureLoop(
          Bt::Core::PeriodicCallback::SECONDS,
          MEASURE_SLEEP,
@@ -221,8 +221,14 @@ void setup() {
    sDown.begin();
 
 
+   pinMode(B0, OUTPUT);
+   digitalWrite(B0, HIGH);
+
+
    pinMode(sBlueLed, OUTPUT);
    digitalWrite(sBlueLed, LOW);
+
+
 
    Serial4.begin(19200);
    Serial5.begin(19200);
