@@ -117,8 +117,16 @@ TimeClass Time;
 
 //*************************************************************************************************
 
+USARTSerial Serial1;
+
+//*************************************************************************************************
+
 void SystemClass::sleep(uint16_t wakeUpPin, InterruptMode edgeTriggerMode, long seconds) {
 
+}
+
+SystemSleepResult SystemClass::sleep(const SystemSleepConfiguration& config) {
+   return SystemSleepResult{};
 }
 
 SystemClass System;

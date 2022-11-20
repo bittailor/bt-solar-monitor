@@ -52,6 +52,8 @@
 // WKP pin on Photon
 #define WKP 17
 
+typedef uint16_t pin_t;
+
 typedef enum InterruptMode {
   CHANGE,
   RISING,
@@ -141,14 +143,66 @@ class StreamMock : public Stream {
   MOCK_METHOD1(println, size_t(const char[]));
 };
 
+
+class USARTSerial {
+};
+
+extern USARTSerial Serial1;
+
+//*************************************************************************************************
+
+enum class SystemSleepMode: uint8_t {
+    NONE            = 0,
+    STOP            = 1,
+    ULTRA_LOW_POWER = 2,
+    HIBERNATE       = 3,
+};
+
+enum class SystemSleepWakeupReason: uint16_t {
+    UNKNOWN = 0,
+    BY_GPIO = 1,
+    BY_ADC = 2,
+    BY_DAC = 3,
+    BY_RTC = 4,
+    BY_LPCOMP = 5,
+    BY_USART = 6,
+    BY_I2C = 7,
+    BY_SPI = 8,
+    BY_TIMER = 9,
+    BY_CAN = 10,
+    BY_USB = 11,
+    BY_BLE = 12,
+    BY_NFC = 13,
+    BY_NETWORK = 14,
+};
+
+class SystemSleepConfiguration {
+  public:
+    SystemSleepConfiguration& mode(SystemSleepMode mode) {return *this;}
+    SystemSleepConfiguration& gpio(pin_t pin, InterruptMode mode) {return *this;}
+    SystemSleepConfiguration& usart(const USARTSerial& serial) {return *this;}
+    SystemSleepConfiguration& duration(uint32_t ms) {return *this;}
+    SystemSleepConfiguration& duration(std::chrono::milliseconds ms) {return *this;}
+};
+
+class SystemSleepResult {
+  public:
+    SystemSleepWakeupReason wakeupReason() const {
+      return SystemSleepWakeupReason::BY_GPIO;
+    }
+};
+
 //*************************************************************************************************
 
 class SystemClass {
    public:
       static void sleep(uint16_t wakeUpPin, InterruptMode edgeTriggerMode, long seconds=0);
+      SystemSleepResult sleep(const SystemSleepConfiguration& config); 
 };
 
 extern SystemClass System;
+
+
 
 //*************************************************************************************************
 

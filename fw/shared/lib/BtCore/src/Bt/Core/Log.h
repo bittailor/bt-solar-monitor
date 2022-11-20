@@ -18,10 +18,14 @@
 
 #define BT_CORE_LOG_ERROR(formatString, ...) Log.error(formatString,##__VA_ARGS__)
 
-
-
 namespace Bt {
 namespace Core {
+
+template <typename Enumeration>
+auto asInteger(Enumeration const value) -> typename std::underlying_type<Enumeration>::type
+{
+    return static_cast<typename std::underlying_type<Enumeration>::type>(value);
+}
 
 } // namespace Core
 } // namespace Bt

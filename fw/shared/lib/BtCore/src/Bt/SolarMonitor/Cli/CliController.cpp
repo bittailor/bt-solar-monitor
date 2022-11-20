@@ -65,8 +65,8 @@ void CliController::beforeStopModeSleep() {
 
 }
 
-void CliController::afterStopModeSleep(bool pWakeUpPinState) {
-   if(pWakeUpPinState) {
+void CliController::afterStopModeSleep(SystemSleepWakeupReason pWakeUpReason) {
+   if(pWakeUpReason == SystemSleepWakeupReason::BY_USART) {
       mStream.printlnf("*** CLI => listening ***");
       mActiveTimer = Core::Timer(20*1000);
       mStateFunction = &CliController::listening;
@@ -89,7 +89,7 @@ Core::Scheduling CliController::listening() {
 }
 
 void CliController::consumeStream() {
-   Bt::Core::Timer timer(200);
+   Bt::Core::Timer timer(500);
    while(mStream.available() && !timer.expired()) {
       mActiveTimer = Core::Timer(30*1000);
       char c = mStream.read();

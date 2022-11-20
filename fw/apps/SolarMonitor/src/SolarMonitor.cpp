@@ -32,6 +32,12 @@
 #include <Bt/SolarMonitor/Cli/CliController.h>
 #include <Bt/Core/InterruptPushButton.h>
 
+#define ENABLE_GxEPD2_GFX 0
+
+#include <Adafruit_GFX.h>
+#include <FreeMonoBold9pt7b.h>
+#include <GxEPD2_BW.h>
+
 #if defined(SOLAR_PROD)
 
 // ==== <Configuration> ==========
@@ -189,6 +195,8 @@ Bt::Core::InterruptPushButton sDown(BUTTON_DOWN, [](){
 
 Bt::SolarMonitor::Cli::CliController sCliController(Serial1);
 
+GxEPD2_BW<GxEPD2_290, GxEPD2_290::HEIGHT> sDisplay(GxEPD2_290(/*CS=A2*/ SS, /*DC=*/ A1, /*RST=*/ A0, /*BUSY=*/ D4));
+
 
 void setup() {
    sLogHandler.changeLevel(LogLevel::INFO_LEVEL);
@@ -252,6 +260,20 @@ void setup() {
       sLogHandler.changeLevel(LogLevel::RUN_LOG_LEVEL);
       return true;
    });
+
+
+   sDisplay.init(115200);
+   sDisplay.setRotation(1);
+   sDisplay.setFont(&FreeMonoBold9pt7b);
+   sDisplay.setTextColor(GxEPD_BLACK);
+   sDisplay.fillScreen(GxEPD_WHITE);
+  
+   sDisplay.fillRect(0,0,sDisplay.width(),20, GxEPD_BLACK);
+   sDisplay.setTextColor(GxEPD_WHITE);
+   sDisplay.setCursor(5, 14);
+   sDisplay.print("Solar");
+   sDisplay.setTextColor(GxEPD_BLACK);
+   sDisplay.display();
 
    BT_CORE_LOG_INFO("setup done => wait for cloud.publish(\"startup\")");
 }

@@ -1,0 +1,6 @@
+[submodule "fw/shared/lib/GxEPD2"]
+	path = fw/shared/lib/GxEPD2
+	url = https://github.com/ZinggJM/GxEPD2.git
+[submodule "fw/shared/lib/Adafruit_GFX_RK"]
+	path = fw/shared/lib/Adafruit_GFX_RK
+	url = https://github.com/rickkas7/Adafruit_GFX_RK.git

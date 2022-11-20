@@ -85,14 +85,27 @@ void Workcycle::scheduling(Scheduling pScheduling) {
       }
       case Scheduling::SECONDS_DELAY : {
          beforeStopModeSleep();
-         System.sleep(mWakeUpPin, RISING, pScheduling.delay());
-         afterStopModeSleep();
+         SystemSleepConfiguration config;
+         config.mode(SystemSleepMode::STOP)
+               .gpio(mWakeUpPin, RISING)
+               .usart(Serial1)
+               .duration(pScheduling.delay()*1000);;
+         SystemSleepResult result = System.sleep(config);
+         auto reason = result.wakeupReason();
+         BT_CORE_LOG_INFO("wakeupReason = %d", asInteger(reason));
+         afterStopModeSleep(reason);
          return;
       }
       case Scheduling::NEVER : {
          beforeStopModeSleep();
-         System.sleep(mWakeUpPin, RISING);
-         afterStopModeSleep();
+         SystemSleepConfiguration config;
+         config.mode(SystemSleepMode::STOP)
+               .gpio(mWakeUpPin, RISING)
+               .usart(Serial1);
+         SystemSleepResult result = System.sleep(config);
+         auto reason = result.wakeupReason();
+         BT_CORE_LOG_INFO("wakeupReason = %d", asInteger(reason));
+         afterStopModeSleep(reason);
          return;
       }
    }
@@ -109,11 +122,10 @@ void Workcycle::beforeStopModeSleep()
 
 //-------------------------------------------------------------------------------------------------
 
-void Workcycle::afterStopModeSleep()
+void Workcycle::afterStopModeSleep(SystemSleepWakeupReason pWakeUpReason)
 {
-   bool wakeUpPin = pinReadFast(mWakeUpPin) == HIGH;
    for (I_SchedulingListener& listener : mSchedulingListeners) {
-      listener.afterStopModeSleep(wakeUpPin);
+      listener.afterStopModeSleep(pWakeUpReason);
    }
 }
 

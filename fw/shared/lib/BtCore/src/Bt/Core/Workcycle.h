@@ -40,7 +40,7 @@ class Workcycle : public I_Workcycle
 
       void scheduling(Scheduling pScheduling);
       void beforeStopModeSleep();
-      void afterStopModeSleep();
+      void afterStopModeSleep(SystemSleepWakeupReason pWakeUpReason);
 
       typedef Core::IntrusiveList<I_Runnable> Runnables;
       typedef Core::IntrusiveList<I_SchedulingListener> SchedulingListeners;

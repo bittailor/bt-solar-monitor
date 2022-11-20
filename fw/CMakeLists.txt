@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.24)
 project(BtCoreTest)
 
-set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD 17)
 
 ################################
 # GTest
@@ -15,13 +15,13 @@ include_directories(${gmock_SOURCE_DIR}/include ${gmock_SOURCE_DIR})
 # Platfrom Mock
 ################################
 
-set(PLATFROM_MOCK_SOURCE_DIR ${PROJECT_SOURCE_DIR}/lib/BtCore/mock)
+set(PLATFROM_MOCK_SOURCE_DIR ${PROJECT_SOURCE_DIR}/shared/lib/BtCore/mock)
 
 file(GLOB_RECURSE PLATFROM_MOCK_SOURCES 
     ${PLATFROM_MOCK_SOURCE_DIR}/*.cpp 
 )
 
-message ("PLATFROM_MOCK_SOURCES is ${PLATFROM_MOCK_SOURCES}")
+# message ("PLATFROM_MOCK_SOURCES is ${PLATFROM_MOCK_SOURCES}")
 
 include_directories(${PLATFROM_MOCK_SOURCE_DIR})
 add_library(PlatformMock STATIC ${PLATFROM_MOCK_SOURCES})
@@ -31,7 +31,7 @@ add_library(PlatformMock STATIC ${PLATFROM_MOCK_SOURCES})
 # Library
 ################################
 
-set(BTCORE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/lib/BtCore/src)
+set(BTCORE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/shared/lib/BtCore/src)
 
 file(GLOB_RECURSE LIBRARY_SOURCES 
     ${BTCORE_SOURCE_DIR}/Bt/Sensors/VeDirect/*.cpp 
@@ -48,7 +48,7 @@ list(REMOVE_ITEM LIBRARY_SOURCES
     ${BTCORE_SOURCE_DIR}/Bt/Core/RuntimeLogHandler.cpp
 )
 
-message ("LIBRARY_SOURCES is ${LIBRARY_SOURCES}")
+# message ("LIBRARY_SOURCES is ${LIBRARY_SOURCES}")
 
 set(BTCORE_SOURCE_FILES 
     ${LIBRARY_SOURCES}
@@ -69,7 +69,7 @@ file(GLOB_RECURSE TEST_SOURCES
     ${BTCORE_SOURCE_DIR}/../test/*.cpp
 )
 
-message ("TEST_SOURCES is ${TEST_SOURCES}")
+# message ("TEST_SOURCES is ${TEST_SOURCES}")
 include_directories(${BTCORE_SOURCE_DIR}/../test)
 add_executable( BtCoreTest ${TEST_SOURCES} )
 # Link test executable against gtest & gtest_main

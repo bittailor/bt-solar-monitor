@@ -31,7 +31,7 @@ class CliController : public Core::I_Runnable , public Core::I_SchedulingListene
       virtual Core::Scheduling workcycle();
 
       virtual void beforeStopModeSleep();
-      virtual void afterStopModeSleep(bool pWakeUpPinState);
+      virtual void afterStopModeSleep(SystemSleepWakeupReason pWakeUpReason);
 
    private:
       Core::Scheduling idle();
