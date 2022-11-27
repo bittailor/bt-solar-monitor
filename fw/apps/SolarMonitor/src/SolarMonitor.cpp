@@ -99,16 +99,18 @@ STARTUP(cellular_credentials_set(APN, USERNAME, PASSWORD, NULL));
 
 #if PLATFORM_ID == 10
    #define Radio Cellular
-   #define BUTTON_SELECT A0
-   #define BUTTON_UP C5
-   #define BUTTON_DOWN C4
+   #define BUTTON_LEFT D5
+   #define BUTTON_RIGHT D4
+   #define BUTTON_UP D2
+   #define BUTTON_DOWN D3
 
 
 #else
    #define Radio WiFi
-   #define BUTTON_SELECT A0
-   #define BUTTON_UP D1
-   #define BUTTON_DOWN D0
+   #define BUTTON_LEFT D5
+   #define BUTTON_RIGHT D4
+   #define BUTTON_UP D2
+   #define BUTTON_DOWN D3
 
    class SerialStub : public Stream {
       public:
@@ -182,8 +184,11 @@ Bt::Core::PeriodicCallback sPublishLoop(
 );
 
 
-Bt::Core::InterruptPushButton sSelect(BUTTON_SELECT, [](){
-   BT_CORE_LOG_INFO("click select");
+Bt::Core::InterruptPushButton sLeft(BUTTON_LEFT, [](){
+   BT_CORE_LOG_INFO("click left");
+});
+Bt::Core::InterruptPushButton sRight(BUTTON_RIGHT, [](){
+   BT_CORE_LOG_INFO("click right");
 });
 Bt::Core::InterruptPushButton sUp(BUTTON_UP, [](){
    BT_CORE_LOG_INFO("click up");
@@ -194,7 +199,7 @@ Bt::Core::InterruptPushButton sDown(BUTTON_DOWN, [](){
 
 Bt::SolarMonitor::Cli::CliController sCliController(Serial1);
 
-GxEPD2_BW<GxEPD2_290, GxEPD2_290::HEIGHT> sDisplay(GxEPD2_290(/*CS=A2*/ SS, /*DC=*/ A1, /*RST=*/ A0, /*BUSY=*/ D4));
+GxEPD2_BW<GxEPD2_290, GxEPD2_290::HEIGHT> sDisplay(GxEPD2_290(/*CS=A2*/ SS, /*DC=*/ A1, /*RST=*/ A0, /*BUSY=*/ B5));
 
 
 void setup() {
@@ -207,11 +212,13 @@ void setup() {
 
    sWorkcycle.add(sMeasureLoop);
    sWorkcycle.add(sPublishLoop);
-   sWorkcycle.add(sSelect);
+   sWorkcycle.add(sLeft);
+   sWorkcycle.add(sRight);
    sWorkcycle.add(sUp);
    sWorkcycle.add(sDown);
    sWorkcycle.add(sCloud);
    sWorkcycle.add(sCliController);
+
 
    sWorkcycle.addSchedulingListener(sCliController);
 
@@ -222,10 +229,10 @@ void setup() {
 
    sCloud.begin();
    sWorkcycle.begin();
-   sSelect.begin();
+   sLeft.begin();
+   sRight.begin();
    sUp.begin();
    sDown.begin();
-
 
    pinMode(B0, OUTPUT);
    digitalWrite(B0, HIGH);
