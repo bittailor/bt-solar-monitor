@@ -25,7 +25,7 @@ class BothGMock : public I_Runnable , public I_SchedulingListener {
 
 class WorkcycleTest : public ::testing::Test {
    public:
-      WorkcycleTest() : mWorkcycle(10) {
+      WorkcycleTest() : mWorkcycle() {
 
       }
 

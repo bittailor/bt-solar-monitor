@@ -17,7 +17,7 @@ namespace Core {
 class Workcycle : public I_Workcycle
 {
    public:
-      Workcycle(uint16_t pWakeUpPin);
+      Workcycle();
       ~Workcycle();
 
       void begin();
@@ -47,7 +47,6 @@ class Workcycle : public I_Workcycle
 
       Runnables mRunnables;
       SchedulingListeners mSchedulingListeners;
-      uint16_t mWakeUpPin;
 };
 
 

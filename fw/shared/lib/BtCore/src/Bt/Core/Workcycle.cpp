@@ -17,7 +17,7 @@ namespace Core {
 
 //-------------------------------------------------------------------------------------------------
 
-Workcycle::Workcycle(uint16_t pWakeUpPin) : mWakeUpPin(pWakeUpPin) {
+Workcycle::Workcycle() {
 
 }
 
@@ -30,7 +30,6 @@ Workcycle::~Workcycle() {
 //-------------------------------------------------------------------------------------------------
 
 void Workcycle::begin() {
-   pinMode(mWakeUpPin, INPUT_PULLDOWN);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -90,10 +89,7 @@ void Workcycle::scheduling(Scheduling pScheduling) {
          config.mode(SystemSleepMode::STOP);
          if(pScheduling.type()==Scheduling::SECONDS_DELAY) {
             config.duration(std::chrono::seconds(pScheduling.delay()));
-         }
-
-         config.gpio(mWakeUpPin, RISING);
-               
+         }               
          beforeStopModeSleep(config);
          
          SystemSleepResult result = System.sleep(config);

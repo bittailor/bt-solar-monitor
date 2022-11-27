@@ -10,11 +10,12 @@
 #include <stdint.h>
 #include <Bt/Core/Timer.h>
 #include <Bt/Core/I_Runnable.h>
+#include <Bt/Core/I_SchedulingListener.h>
 
 namespace Bt {
 namespace Core {
 
-class InterruptPushButton : public I_Runnable
+class InterruptPushButton : public I_Runnable, public I_SchedulingListener
 {
    public:
       InterruptPushButton(uint16_t pPin, std::function<void()> pOnClick = std::function<void()>());
@@ -23,7 +24,12 @@ class InterruptPushButton : public I_Runnable
       ~InterruptPushButton();
 
       void begin();
+   
       virtual Scheduling workcycle();
+
+      virtual void beforeStopModeSleep(SystemSleepConfiguration& pSleepConfiguration);
+      virtual void afterStopModeSleep(SystemSleepWakeupReason pWakeUpReason);
+
 
    private:
       void interruptHandler();
@@ -33,6 +39,7 @@ class InterruptPushButton : public I_Runnable
       bool mPressed;
       bool mFire;
       Timer mTimer;
+      Timer mAwakeTimer;
 };
 
 } // namespace Core

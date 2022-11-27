@@ -14,7 +14,7 @@
 namespace Bt {
 namespace Core {
 namespace {
-   // DBG_BT const size_t MSG_SIZE = 30;
+   // DBG_BT const size_t MSG_SIZE = 100;
    // DBG_BT std::array<char[MSG_SIZE],10> sMessages;
    // DBG_BT size_t sMessagesIndex = 0;
    // DBG_BT bool mToggle = false;
@@ -63,7 +63,15 @@ Scheduling InterruptPushButton::workcycle() {
          mOnClick();
       }
    }
-   return Scheduling::never();
+   return mAwakeTimer.expired() ? Scheduling::never() : Core::Scheduling::immediately() ;
+}
+
+void InterruptPushButton::beforeStopModeSleep(SystemSleepConfiguration& pSleepConfiguration) {
+   pSleepConfiguration.gpio(mPin, RISING);
+}
+
+void InterruptPushButton::afterStopModeSleep(SystemSleepWakeupReason pWakeUpReason){
+   mAwakeTimer = Core::Timer(1000);   
 }
 
 void InterruptPushButton::interruptHandler() {

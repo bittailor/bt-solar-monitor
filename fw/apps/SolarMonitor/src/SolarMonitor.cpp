@@ -167,7 +167,7 @@ ForkFilter sForkFilter(ForkFilter::Consumers{
    std::bind(&ValidateFilter::consume, &sValidateFilter, std::placeholders::_1),
 });
 
-Bt::Core::Workcycle sWorkcycle(A4);
+Bt::Core::Workcycle sWorkcycle;
 Bt::Core::PeriodicCallback sMeasureLoop(
          Bt::Core::PeriodicCallback::SECONDS,
          MEASURE_SLEEP,
@@ -220,6 +220,10 @@ void setup() {
    sWorkcycle.add(sCliController);
 
 
+   sWorkcycle.addSchedulingListener(sLeft);
+   sWorkcycle.addSchedulingListener(sRight);
+   sWorkcycle.addSchedulingListener(sUp);
+   sWorkcycle.addSchedulingListener(sDown);
    sWorkcycle.addSchedulingListener(sCliController);
 
 
