@@ -17,7 +17,7 @@ class I_SchedulingListener : public IntrusiveList<I_SchedulingListener>::Element
    public:
       virtual ~I_SchedulingListener() {}
 
-      virtual void beforeStopModeSleep() = 0;
+      virtual void beforeStopModeSleep(SystemSleepConfiguration& pSleepConfiguration) = 0;
       virtual void afterStopModeSleep(SystemSleepWakeupReason pWakeUpReason) = 0;
 };
 

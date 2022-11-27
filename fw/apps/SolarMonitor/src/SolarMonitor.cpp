@@ -35,7 +35,6 @@
 #define ENABLE_GxEPD2_GFX 0
 
 #include <Adafruit_GFX.h>
-#include <FreeMonoBold9pt7b.h>
 #include <GxEPD2_BW.h>
 
 #if defined(SOLAR_PROD)
@@ -206,7 +205,6 @@ void setup() {
 
    Bt::Drivers::PowerManagment().disableCharging();
 
-
    sWorkcycle.add(sMeasureLoop);
    sWorkcycle.add(sPublishLoop);
    sWorkcycle.add(sSelect);
@@ -264,13 +262,13 @@ void setup() {
 
    sDisplay.init(115200);
    sDisplay.setRotation(1);
-   sDisplay.setFont(&FreeMonoBold9pt7b);
    sDisplay.setTextColor(GxEPD_BLACK);
    sDisplay.fillScreen(GxEPD_WHITE);
   
    sDisplay.fillRect(0,0,sDisplay.width(),20, GxEPD_BLACK);
    sDisplay.setTextColor(GxEPD_WHITE);
-   sDisplay.setCursor(5, 14);
+   sDisplay.setCursor(1,1);
+   sDisplay.setTextSize(2);
    sDisplay.print("Solar");
    sDisplay.setTextColor(GxEPD_BLACK);
    sDisplay.display();
@@ -279,12 +277,22 @@ void setup() {
 }
 
 void loop() {
-   BT_CORE_LOG_DEBUG("-- loop memory %lu", System.freeMemory());
+   // BT_CORE_LOG_DEBUG("-- loop memory %lu", System.freeMemory());
    sWorkcycle.oneWorkcycle();
 }
+
+int sCounter = 0;
 
 void measure() {
    auto readings = sReader.read();
    sForkFilter.consume(readings);
+
+   sDisplay.fillRect(0, 20, sDisplay.width(), sDisplay.height()-20, GxEPD_WHITE);
+   sDisplay.setTextColor(GxEPD_BLACK);
+   sDisplay.setTextSize(3);
+   sDisplay.setCursor(10, 80);
+   sDisplay.printf("%2.2f => %2.3f", readings[0].value(),readings[1].value());
+   
+   sDisplay.display((sCounter++)%20 != 0);
 }
 

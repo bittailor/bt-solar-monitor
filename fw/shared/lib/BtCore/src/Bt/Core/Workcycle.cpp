@@ -83,28 +83,22 @@ void Workcycle::scheduling(Scheduling pScheduling) {
          msSleep(pScheduling.delay());
          return;
       }
-      case Scheduling::SECONDS_DELAY : {
-         beforeStopModeSleep();
+      case Scheduling::SECONDS_DELAY :
+      case Scheduling::NEVER         : {
+         
          SystemSleepConfiguration config;
-         config.mode(SystemSleepMode::STOP)
-               .gpio(mWakeUpPin, RISING)
-               .usart(Serial1)
-               .duration(pScheduling.delay()*1000);;
+         config.mode(SystemSleepMode::STOP);
+         if(pScheduling.type()==Scheduling::SECONDS_DELAY) {
+            config.duration(std::chrono::seconds(pScheduling.delay()));
+         }
+
+         config.gpio(mWakeUpPin, RISING);
+               
+         beforeStopModeSleep(config);
+         
          SystemSleepResult result = System.sleep(config);
          auto reason = result.wakeupReason();
-         BT_CORE_LOG_INFO("wakeupReason = %d", asInteger(reason));
-         afterStopModeSleep(reason);
-         return;
-      }
-      case Scheduling::NEVER : {
-         beforeStopModeSleep();
-         SystemSleepConfiguration config;
-         config.mode(SystemSleepMode::STOP)
-               .gpio(mWakeUpPin, RISING)
-               .usart(Serial1);
-         SystemSleepResult result = System.sleep(config);
-         auto reason = result.wakeupReason();
-         BT_CORE_LOG_INFO("wakeupReason = %d", asInteger(reason));
+         BT_CORE_LOG_DEBUG("wakeupReason = %d", asInteger(reason));
          afterStopModeSleep(reason);
          return;
       }
@@ -113,10 +107,10 @@ void Workcycle::scheduling(Scheduling pScheduling) {
 
 //-------------------------------------------------------------------------------------------------
 
-void Workcycle::beforeStopModeSleep()
+void Workcycle::beforeStopModeSleep(SystemSleepConfiguration& pSleepConfiguration)
 {
    for (I_SchedulingListener& listener : mSchedulingListeners) {
-      listener.beforeStopModeSleep();
+      listener.beforeStopModeSleep(pSleepConfiguration);
    }
 }
 

@@ -14,6 +14,15 @@ using namespace testing;
 namespace Bt {
 namespace Core {
 
+/*
+class BothGMock : public I_Runnable , public I_SchedulingListener {
+   public:
+      MOCK_METHOD0(workcycle,Scheduling());
+      MOCK_METHOD1(beforeStopModeSleep,void(SystemSleepConfiguration&));
+      MOCK_METHOD1(afterStopModeSleep,void(SystemSleepWakeupReason));
+};
+*/
+
 class WorkcycleTest : public ::testing::Test {
    public:
       WorkcycleTest() : mWorkcycle(10) {
@@ -62,6 +71,21 @@ TEST_F(WorkcycleTest, oneWorkcycle) {
 
 }
 
+/*
+TEST_F(WorkcycleTest, registerBoth) {
+   BothGMock bothMock;
+   mWorkcycle.add(bothMock);
+
+   EXPECT_CALL(bothMock,workcycle()).Times(1).WillRepeatedly(Return(Scheduling::inSeconds(5)));
+   EXPECT_CALL(bothMock,beforeStopModeSleep(_)).Times(1);
+   EXPECT_CALL(bothMock,afterStopModeSleep(_)).Times(1);
+
+
+
+   mWorkcycle.oneWorkcycle();
+
+}
+*/
 
 
 } // namespace Core

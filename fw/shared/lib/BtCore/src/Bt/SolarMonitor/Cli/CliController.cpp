@@ -13,8 +13,8 @@ namespace Bt {
 namespace SolarMonitor {
 namespace Cli {
 
-CliController::CliController(Stream& pStream)
-: mBufferIndex(0), mStateFunction(&CliController::idle), mStream(pStream)
+CliController::CliController(USARTSerial& pUSARTSerial)
+: mBufferIndex(0), mStateFunction(&CliController::idle), mUSARTSerial(pUSARTSerial)
 , mTokenizer([this](int pArgc, char* pArgv[]){
    execute(pArgc,pArgv);
 }){
@@ -61,13 +61,13 @@ Core::Scheduling CliController::workcycle() {
    return (this->*mStateFunction)();
 }
 
-void CliController::beforeStopModeSleep() {
-
+void CliController::beforeStopModeSleep(SystemSleepConfiguration& pSleepConfiguration) {
+   pSleepConfiguration.usart(mUSARTSerial);
 }
 
 void CliController::afterStopModeSleep(SystemSleepWakeupReason pWakeUpReason) {
    if(pWakeUpReason == SystemSleepWakeupReason::BY_USART) {
-      mStream.printlnf("*** CLI => listening ***");
+      mUSARTSerial.printlnf("*** CLI => listening ***");
       mActiveTimer = Core::Timer(20*1000);
       mStateFunction = &CliController::listening;
    }
@@ -82,7 +82,7 @@ Core::Scheduling CliController::idle() {
 Core::Scheduling CliController::listening() {
    consumeStream();
    if(mActiveTimer.expired()) {
-      mStream.printlnf("*** CLI => exit ***");
+      mUSARTSerial.printlnf("*** CLI => exit ***");
       mStateFunction = &CliController::idle;
    }
    return Core::Scheduling::immediately();
@@ -90,10 +90,10 @@ Core::Scheduling CliController::listening() {
 
 void CliController::consumeStream() {
    Bt::Core::Timer timer(500);
-   while(mStream.available() && !timer.expired()) {
+   while(mUSARTSerial.available() && !timer.expired()) {
       mActiveTimer = Core::Timer(30*1000);
-      char c = mStream.read();
-      mStream.print(c);
+      char c = mUSARTSerial.read();
+      mUSARTSerial.print(c);
       if(c == '\r' || c == '\n' ) {
          if(mBufferIndex != 0 ) {
             execute(mBuffer.data());
@@ -116,7 +116,7 @@ void CliController::consumeStream() {
 }
 
 void CliController::execute(char* cmdline) {
-   mStream.printlnf("cli-i> cmdline = '%s'>", cmdline);
+   mUSARTSerial.printlnf("cli-i> cmdline = '%s'>", cmdline);
    mTokenizer.consume(cmdline);
 }
 
@@ -126,10 +126,10 @@ void CliController::execute(int pArgc, char* pArgv[]) {
    }
    Command* command = mCommandRepository.lookup(pArgv[0]);
    if(command == nullptr) {
-      mStream.printlnf("cli-e> cmd '%s' not found!>", pArgv[0]);
+      mUSARTSerial.printlnf("cli-e> cmd '%s' not found!>", pArgv[0]);
       return;
    }
-   (*command)(mStream, pArgc, pArgv);
+   (*command)(mUSARTSerial, pArgc, pArgv);
 }
 
 } // namespace Cli

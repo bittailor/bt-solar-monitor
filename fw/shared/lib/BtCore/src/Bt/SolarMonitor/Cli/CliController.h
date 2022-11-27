@@ -21,7 +21,7 @@ namespace Cli {
 class CliController : public Core::I_Runnable , public Core::I_SchedulingListener
 {
    public:
-      CliController(Stream& pStream);
+      CliController(USARTSerial& pUSARTSerial);
       CliController(const CliController&) = delete;
       CliController& operator=(const CliController&) = delete;
       ~CliController();
@@ -30,7 +30,7 @@ class CliController : public Core::I_Runnable , public Core::I_SchedulingListene
 
       virtual Core::Scheduling workcycle();
 
-      virtual void beforeStopModeSleep();
+      virtual void beforeStopModeSleep(SystemSleepConfiguration& pSleepConfiguration);
       virtual void afterStopModeSleep(SystemSleepWakeupReason pWakeUpReason);
 
    private:
@@ -48,7 +48,7 @@ class CliController : public Core::I_Runnable , public Core::I_SchedulingListene
       size_t mBufferIndex;
       std::array<char,BUFFER_SIZE> mBuffer;
       StateFunction mStateFunction;
-      Stream& mStream;
+      USARTSerial& mUSARTSerial;
       Tokenizer mTokenizer;
       CommandRepository mCommandRepository;
 

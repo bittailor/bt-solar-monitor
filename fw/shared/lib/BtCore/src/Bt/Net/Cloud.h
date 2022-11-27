@@ -231,7 +231,7 @@ class Cloud
             virtual void onEnter() {
                this->mController->resetTimer();
                this->mController->publishStartTime = millis();
-               this->mController->mOnlineTimer = Core::Timer(1000*30);
+               this->mController->mOnlineTimer = Core::Timer(1000*5); // 1000*30
                {
                   bool ack = this->mController->mCloud.subscribe(mSubscribeName.c_str(), &Cloud::handleCmd, this->mController);
                   BT_CORE_LOG_INFO("cloud.subscribe(%s) => %d", mSubscribeName.c_str() ,ack);

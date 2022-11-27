@@ -36,3 +36,4 @@ end
 
 
 task :default => :build
+task :flash => "SolarMonitor:flash"
