@@ -10,7 +10,6 @@
 #include <functional>
 #include "Bt/Core/Log.h"
 #include "Bt/SolarMonitor/Averaging.h"
-#include "Bt/SolarMonitor/MeasurementRecord.h"
 
 namespace Bt {
 namespace SolarMonitor {

@@ -9,35 +9,35 @@
 #include <cellular_hal.h>
 #endif
 
-#include <BtCore.h>
-
-#include <Bt/Core/InterruptPushButton.h>
-#include <Bt/Core/Log.h>
-#include <Bt/Core/Workcycle.h>
-#include <Bt/Core/PeriodicCallback.h>
-#include <Bt/Core/Time.h>
-#include <Bt/Core/Singleton.h>
-#include <Bt/Drivers/PowerManagment.h>
-#include <Bt/Net/Cloud.h>
-#include <Bt/Ui/GfxCanvas.h>
-#include <Bt/SolarMonitor/AveragingFilter.h>
-#include <Bt/SolarMonitor/StorageFilter.h>
-#include <Bt/SolarMonitor/MessageFilter.h>
-#include <Bt/SolarMonitor/ForkFilter.h>
-#include <Bt/SolarMonitor/ValidateFilter.h>
-#include <Bt/SolarMonitor/LogFilter.h>
-#include <Bt/SolarMonitor/MessageBufferSink.h>
-#include <Bt/SolarMonitor/PublishFilter.h>
-#include <Bt/SolarMonitor/LogHandler.h>
-#include <Bt/SolarMonitor/Reader.h>
-#include <Bt/SolarMonitor/EmulatedReader.h>
-#include <Bt/SolarMonitor/Cli/CliController.h>
-#include <Bt/SolarMonitor/Ui/SolarChargerView.h>
-
 #define ENABLE_GxEPD2_GFX 0
 
 #include <Adafruit_GFX.h>
 #include <GxEPD2_BW.h>
+
+#include <BtCore.h>
+
+#include <Bt/Core/InterruptPushButton.h>
+#include <Bt/Core/Log.h>
+#include <Bt/Core/PeriodicCallback.h>
+#include <Bt/Core/Singleton.h>
+#include <Bt/Core/Time.h>
+#include <Bt/Core/Workcycle.h>
+#include <Bt/Drivers/PowerManagment.h>
+#include <Bt/Net/Cloud.h>
+#include <Bt/SolarMonitor/AveragingFilter.h>
+#include <Bt/SolarMonitor/Cli/CliController.h>
+#include <Bt/SolarMonitor/EmulatedReader.h>
+#include <Bt/SolarMonitor/ForkFilter.h>
+#include <Bt/SolarMonitor/LogFilter.h>
+#include <Bt/SolarMonitor/LogHandler.h>
+#include <Bt/SolarMonitor/MessageBufferSink.h>
+#include <Bt/SolarMonitor/MessageFilter.h>
+#include <Bt/SolarMonitor/PublishFilter.h>
+#include <Bt/SolarMonitor/Reader.h>
+#include <Bt/SolarMonitor/Ui/SolarChargerView.h>
+#include <Bt/SolarMonitor/ValidateFilter.h>
+#include <Bt/Ui/GfxCanvas.h>
+
 
 #if defined(SOLAR_PROD)
 

@@ -14,7 +14,6 @@
 #include "Bt/Core/Log.h"
 #include "Bt/Encoding/Z85.h"
 #include "Bt/SolarMonitor/Message.h"
-#include "Bt/SolarMonitor/MeasurementRecord.h"
 
 namespace Bt {
 namespace SolarMonitor {
