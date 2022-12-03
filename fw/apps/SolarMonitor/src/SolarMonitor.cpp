@@ -11,6 +11,7 @@
 
 #include <BtCore.h>
 
+#include <Bt/Core/InterruptPushButton.h>
 #include <Bt/Core/Log.h>
 #include <Bt/Core/Workcycle.h>
 #include <Bt/Core/PeriodicCallback.h>
@@ -18,6 +19,7 @@
 #include <Bt/Core/Singleton.h>
 #include <Bt/Drivers/PowerManagment.h>
 #include <Bt/Net/Cloud.h>
+#include <Bt/Ui/GfxCanvas.h>
 #include <Bt/SolarMonitor/AveragingFilter.h>
 #include <Bt/SolarMonitor/StorageFilter.h>
 #include <Bt/SolarMonitor/MessageFilter.h>
@@ -30,7 +32,7 @@
 #include <Bt/SolarMonitor/Reader.h>
 #include <Bt/SolarMonitor/EmulatedReader.h>
 #include <Bt/SolarMonitor/Cli/CliController.h>
-#include <Bt/Core/InterruptPushButton.h>
+#include <Bt/SolarMonitor/Ui/SolarChargerView.h>
 
 #define ENABLE_GxEPD2_GFX 0
 
@@ -200,7 +202,8 @@ Bt::Core::InterruptPushButton sDown(BUTTON_DOWN, [](){
 Bt::SolarMonitor::Cli::CliController sCliController(Serial1);
 
 GxEPD2_BW<GxEPD2_290, GxEPD2_290::HEIGHT> sDisplay(GxEPD2_290(/*CS=A2*/ SS, /*DC=*/ A1, /*RST=*/ A0, /*BUSY=*/ B5));
-
+Bt::Ui::GfxCanvas sGfxCanvas(sDisplay);
+Bt::SolarMonitor::Ui::SolarChargerView sSolarChargerView;
 
 void setup() {
    sLogHandler.changeLevel(LogLevel::INFO_LEVEL);
@@ -296,14 +299,18 @@ int sCounter = 0;
 
 void measure() {
    auto readings = sReader.read();
+   sSolarChargerView.update(readings);
+   sDisplay.fillRect(0, 20, sDisplay.width(), sDisplay.height()-20, GxEPD_WHITE);
+   sSolarChargerView.render(sGfxCanvas);
+   sDisplay.display((sCounter++)%20 != 0);
    sForkFilter.consume(readings);
 
-   sDisplay.fillRect(0, 20, sDisplay.width(), sDisplay.height()-20, GxEPD_WHITE);
+   /*
    sDisplay.setTextColor(GxEPD_BLACK);
    sDisplay.setTextSize(3);
    sDisplay.setCursor(10, 80);
    sDisplay.printf("%2.2f => %2.3f", readings[0].value(),readings[1].value());
+   */
    
-   sDisplay.display((sCounter++)%20 != 0);
 }
 

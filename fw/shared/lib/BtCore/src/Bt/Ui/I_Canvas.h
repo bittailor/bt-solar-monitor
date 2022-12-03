@@ -1,0 +1,32 @@
+//*************************************************************************************************
+//
+//  BITTAILOR.CH  -  Bt::Ui::I_Canvas
+//
+//*************************************************************************************************
+
+#ifndef INC__Bt_Ui_I_Canvas__h
+#define INC__Bt_Ui_I_Canvas__h
+
+#include <stdio.h>
+
+#include "Bt/Ui/Color.h"
+
+namespace Bt {
+namespace Ui {
+
+class I_Canvas {
+   public:
+      virtual ~I_Canvas() {}
+
+      virtual void setTextColor(const Color& pColor) = 0;
+      virtual void setCursor(int16_t pX, int16_t pY) = 0;
+
+      virtual size_t printf(const char* pFormat, ...) __attribute__ ((format(printf, 2, 3))) = 0;
+      virtual size_t vprintf(bool newline, const char* format, va_list args) __attribute__ ((format(printf, 3, 0))) = 0;
+};
+
+} // namespace Ui
+} // namespace Bt
+
+#endif // INC__Bt_Ui_I_Canvas__h
+
