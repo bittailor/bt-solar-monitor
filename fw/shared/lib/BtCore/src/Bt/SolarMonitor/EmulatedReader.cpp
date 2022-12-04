@@ -16,8 +16,8 @@ namespace {
       return I;
    }
 
-   float seedEmulated() {
-      float r = random(10,150);
+   float seedEmulated(float pMin = 0.1, float pMax = 1.5) {
+      float r = random(pMin*100, pMax*100);
       return r / 100;
    }
 
@@ -34,17 +34,17 @@ EmulatedReader::~EmulatedReader() {
 
 EmulatedReader::Readings EmulatedReader::read() {
    EmulatedReader::Readings readings;
-      readings[checkedIndex<0>()] = 3 + seedEmulated();
-      readings[checkedIndex<1>()] = 13 + seedEmulated();
-      readings[checkedIndex<2>()] = 0.5 + seedEmulated();
-      readings[checkedIndex<3>()] = 12 + seedEmulated();
-      readings[checkedIndex<4>()] = 0.2 + seedEmulated();
+      readings[checkedIndex<0>()] = seedEmulated(0,80);
+      readings[checkedIndex<1>()] = seedEmulated(0,20);
+      readings[checkedIndex<2>()] = seedEmulated(0.1,9);
+      readings[checkedIndex<3>()] = seedEmulated(10,15);
+      readings[checkedIndex<4>()] = seedEmulated(0,9);
 
-      readings[checkedIndex<5>()] = 3 + seedEmulated();
-      readings[checkedIndex<6>()] = 13 + seedEmulated();
-      readings[checkedIndex<7>()] = 0.5 + seedEmulated();
-      readings[checkedIndex<8>()] = 12 + seedEmulated();
-      readings[checkedIndex<9>()] = 0.2 + seedEmulated();
+      readings[checkedIndex<5>()] = seedEmulated(0,80);
+      readings[checkedIndex<6>()] = seedEmulated(0,20);
+      readings[checkedIndex<7>()] = seedEmulated(0.1,9);
+      readings[checkedIndex<8>()] = seedEmulated(10,15);
+      readings[checkedIndex<9>()] = seedEmulated(0,9);
 
    return readings;
 }

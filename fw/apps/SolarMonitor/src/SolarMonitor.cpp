@@ -70,7 +70,7 @@ typedef Bt::SolarMonitor::Reader Reader;
 
 #define CONFIGURATION_ENVIRONMENT "DEV"
 
-#define MEASURE_SLEEP 5 // 1 // 5 sec
+#define MEASURE_SLEEP 2 // 1 // 5 sec
 
 #define PUBLISH_SLEEP 60 * 15    // 30 // 15 min
 
@@ -205,11 +205,23 @@ GxEPD2_BW<GxEPD2_290, GxEPD2_290::HEIGHT> sDisplay(GxEPD2_290(/*CS=A2*/ SS, /*DC
 Bt::Ui::GfxCanvas sGfxCanvas(sDisplay);
 Bt::SolarMonitor::Ui::SolarChargerView sSolarChargerView;
 
+
+class KeepAwake : public Bt::Core::I_Runnable {
+   public:
+      virtual Bt::Core::Scheduling workcycle(){
+         return Bt::Core::Scheduling::immediately();
+      }  
+};
+KeepAwake sKeepAwake;
+
+
 void setup() {
    sLogHandler.changeLevel(LogLevel::INFO_LEVEL);
    BT_CORE_LOG_INFO("*** bt-solar-monitor " CONFIGURATION_ENVIRONMENT " ***");
    BT_CORE_LOG_INFO("System version: %s", System.version().c_str());
    BT_CORE_LOG_INFO("PLATFORM_ID %d",PLATFORM_ID);
+
+   Time.zone(+1);
 
    Bt::Drivers::PowerManagment().disableCharging();
 
@@ -221,6 +233,8 @@ void setup() {
    sWorkcycle.add(sDown);
    sWorkcycle.add(sCloud);
    sWorkcycle.add(sCliController);
+   sWorkcycle.add(sKeepAwake);
+   
 
 
    sWorkcycle.addSchedulingListener(sLeft);
@@ -275,7 +289,7 @@ void setup() {
 
 
    sDisplay.init(115200);
-   sDisplay.setRotation(1);
+   sDisplay.setRotation(2);
    sDisplay.setTextColor(GxEPD_BLACK);
    sDisplay.fillScreen(GxEPD_WHITE);
   
@@ -300,17 +314,9 @@ int sCounter = 0;
 void measure() {
    auto readings = sReader.read();
    sSolarChargerView.update(readings);
-   sDisplay.fillRect(0, 20, sDisplay.width(), sDisplay.height()-20, GxEPD_WHITE);
+   sDisplay.fillRect(0, 0, sDisplay.width(), sDisplay.height(), GxEPD_WHITE);
    sSolarChargerView.render(sGfxCanvas);
-   sDisplay.display((sCounter++)%20 != 0);
-   sForkFilter.consume(readings);
-
-   /*
-   sDisplay.setTextColor(GxEPD_BLACK);
-   sDisplay.setTextSize(3);
-   sDisplay.setCursor(10, 80);
-   sDisplay.printf("%2.2f => %2.3f", readings[0].value(),readings[1].value());
-   */
-   
+   sDisplay.display((sCounter++)%(30*5) != 0);
+   sForkFilter.consume(readings);   
 }
 

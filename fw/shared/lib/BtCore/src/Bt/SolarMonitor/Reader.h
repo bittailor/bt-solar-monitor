@@ -16,7 +16,7 @@ namespace SolarMonitor {
 class Reader
 {
    public:
-      static const int NUMBER_OF_VALUES = 10;
+      static constexpr size_t NUMBER_OF_VALUES = 10;
       typedef std::array<Core::Result<float>,NUMBER_OF_VALUES> Readings;
 
       Reader(Stream& pStreamA, Stream& pStreamB);
@@ -34,11 +34,42 @@ class Reader
       Sensors::VeDirect::Register<uint16_t> mChargerVoltage;
       Sensors::VeDirect::Register<uint16_t> mLoadCurrent;
       Stream& mStreamA;
-      Stream& mStreamB;
-
-
-      
+      Stream& mStreamB;     
 };
+
+class SolarReading {
+   
+   public:
+      enum Facility {A=0,B=1};
+
+      static SolarReading unpack(const Reader::Readings& pReadings, Facility pFacility ) {
+         return SolarReading(pReadings,pFacility);     
+      }
+
+      Bt::Core::Result<float> panelPower() const {
+         return mReadings[(mFacility*READINGS_PER_FACILITY)];
+      }
+      Bt::Core::Result<float> panelVoltage() const {
+         return mReadings[(mFacility*READINGS_PER_FACILITY+1)];
+      }
+      Bt::Core::Result<float> chargerCurrent() const {
+         return mReadings[(mFacility*READINGS_PER_FACILITY+2)];
+      } 
+      Bt::Core::Result<float> chargerVoltage() const{
+         return mReadings[(mFacility*READINGS_PER_FACILITY+3)];
+      } 
+      Bt::Core::Result<float> loadCurrent() const{
+         return mReadings[(mFacility*READINGS_PER_FACILITY+4)];
+      } 
+   
+   private:
+      static constexpr size_t READINGS_PER_FACILITY = 5;
+
+      SolarReading(const Reader::Readings& pReadings, Facility pFacility):mReadings(pReadings),mFacility(pFacility){}
+      const Reader::Readings& mReadings; 
+      Facility mFacility;
+};
+
 
 } // namespace SolarMonitor
 } // namespace Bt

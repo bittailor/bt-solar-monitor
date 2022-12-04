@@ -6,6 +6,8 @@
 
 #include "Bt/Ui/GfxCanvas.h"
 
+#include <stdarg.h>
+
 namespace Bt {
 namespace Ui {
 

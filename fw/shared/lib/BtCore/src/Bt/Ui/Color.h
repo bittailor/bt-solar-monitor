@@ -104,6 +104,7 @@ class Color
 };
 
 constexpr Color BLACK {0,0,0};
+constexpr Color WHITE {0xFF,0xFF,0xFF};
 
 
 

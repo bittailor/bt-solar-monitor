@@ -53,5 +53,11 @@ Reader::Readings Reader::read() {
    return readings;
 }
 
+
+
+ 
+
+
+
 } // namespace SolarMonitor
 } // namespace Bt

@@ -37,8 +37,10 @@ file(GLOB_RECURSE LIBRARY_SOURCES
     ${BTCORE_SOURCE_DIR}/Bt/Sensors/VeDirect/*.cpp 
     ${BTCORE_SOURCE_DIR}/Bt/Encoding/Z85.cpp    
     ${BTCORE_SOURCE_DIR}/Bt/SolarMonitor/MessageFilter.cpp
+    ${BTCORE_SOURCE_DIR}/Bt/SolarMonitor/Reader.cpp
     ${BTCORE_SOURCE_DIR}/Bt/SolarMonitor/Cli/Tokenizer.cpp
     ${BTCORE_SOURCE_DIR}/Bt/Core/*.cpp
+    ${BTCORE_SOURCE_DIR}/Bt/Ui/*.cpp
 #    ${BTCORE_SOURCE_DIR}/Bt/Core/Platform.cpp
 #    ${BTCORE_SOURCE_DIR}/Bt/Core/Timer.cpp 
 )
@@ -46,6 +48,7 @@ file(GLOB_RECURSE LIBRARY_SOURCES
 list(REMOVE_ITEM LIBRARY_SOURCES 
     ${BTCORE_SOURCE_DIR}/Bt/Core/Cloud.cpp
     ${BTCORE_SOURCE_DIR}/Bt/Core/RuntimeLogHandler.cpp
+    ${BTCORE_SOURCE_DIR}/Bt/Ui/GfxCanvas.cpp
 )
 
 # message ("LIBRARY_SOURCES is ${LIBRARY_SOURCES}")

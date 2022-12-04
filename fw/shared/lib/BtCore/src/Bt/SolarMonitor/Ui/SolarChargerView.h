@@ -27,6 +27,9 @@ class SolarChargerView
       void update(Bt::SolarMonitor::Reader::Readings& pReadings);
 
    private:
+      void renderSolarReading(::Bt::Ui::I_Canvas& pCanvas, SolarReading& pSolarReading);
+
+
       Bt::SolarMonitor::Reader::Readings mReadings;
       
 };
