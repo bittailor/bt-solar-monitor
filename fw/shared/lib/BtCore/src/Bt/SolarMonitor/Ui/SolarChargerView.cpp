@@ -12,6 +12,31 @@ namespace Bt {
 namespace SolarMonitor {
 namespace Ui {
 
+namespace {
+    
+constexpr int16_t ICON_SIZE = 16;
+
+constexpr unsigned char sSunBits[] = {
+   0x00, 0x00, 0x80, 0x00, 0x84, 0x10, 0x88, 0x08, 0x10, 0x04, 0x80, 0x00,
+   0xc0, 0x01, 0xee, 0x3b, 0xc0, 0x01, 0x80, 0x00, 0x10, 0x04, 0x88, 0x08,
+   0x84, 0x10, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+constexpr unsigned char sBatteryBits[] = {
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0c, 0x18, 0x0c, 0x18, 0xfe, 0x3f,
+   0xfe, 0x3f, 0x56, 0x35, 0x56, 0x35, 0x56, 0x35, 0xfe, 0x3f, 0xfe, 0x3f,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+constexpr unsigned char sLightBits[] = {
+   0x00, 0x00, 0xc0, 0x03, 0x20, 0x04, 0x10, 0x08, 0x08, 0x10, 0x08, 0x10,
+   0x08, 0x10, 0x10, 0x08, 0x20, 0x04, 0x40, 0x02, 0xc0, 0x03, 0xc0, 0x03,
+   0xc0, 0x03, 0x80, 0x01, 0x00, 0x00, 0x00, 0x00
+};
+
+}
+
+
 SolarChargerView::SolarChargerView() {
 
 }
@@ -63,17 +88,21 @@ void SolarChargerView::renderSolarReading(::Bt::Ui::I_Canvas& pCanvas, SolarRead
     pCanvas.fillArc(50, 50, 243 , 78 , 48, 48 , 6,   Bt::Ui::WHITE);
     pCanvas.fillArc(50, 50, 240 , pSolarReading.panelPower().value() , 47, 47 , 4,   Bt::Ui::BLACK);
 
-    pCanvas.setTextSize(2);
-    pCanvas.setCursor(45,20);
+    pCanvas.drawXBitmap(42, 20, sSunBits, ICON_SIZE, ICON_SIZE, Bt::Ui::BLACK);
+    pCanvas.setTextSize(1);
+    pCanvas.setCursor(60,20);
     pCanvas.printf("W");
     pCanvas.setTextSize(3);
     pCanvas.setCursor(16,40);
     pCanvas.printf("%4.1f",pSolarReading.panelPower().value());
 
     pCanvas.setTextSize(2);
+
+    pCanvas.drawXBitmap(2, 80, sBatteryBits, ICON_SIZE, ICON_SIZE, Bt::Ui::BLACK);
     pCanvas.setCursor(20,80);
     pCanvas.printf("%4.1fV",pSolarReading.chargerVoltage().value());
 
+    pCanvas.drawXBitmap(2, 100, sLightBits, ICON_SIZE, ICON_SIZE, Bt::Ui::BLACK);
     pCanvas.setCursor(20,100);
     pCanvas.printf("%4.1fA",pSolarReading.loadCurrent().value());    
 }

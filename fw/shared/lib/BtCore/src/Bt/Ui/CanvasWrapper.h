@@ -46,6 +46,10 @@ class CanvasWrapper : public I_Canvas
          mCanvas.fillRect(pX+mOffsetX, pY+mOffsetY, pWidth, pHeight, pColor);   
       }
 
+      virtual void  drawXBitmap(int16_t pX, int16_t  pY, const uint8_t pBitmap[], int16_t pWidth, int16_t pHeight, const Color& pColor) {
+         mCanvas.drawXBitmap(pX+mOffsetX, pY+mOffsetY, pBitmap, pWidth, pHeight, pColor);    
+      }
+
    private:
       I_Canvas& mCanvas;
       int16_t mOffsetX;

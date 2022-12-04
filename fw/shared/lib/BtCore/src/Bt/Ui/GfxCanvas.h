@@ -89,6 +89,10 @@ class GfxCanvas : public I_Canvas
          }
       }
 
+      virtual void  drawXBitmap(int16_t pX, int16_t  pY, const uint8_t pBitmap[], int16_t pWidth, int16_t pHeight, const Color& pColor) {
+         mGfx.drawXBitmap(pX, pY, pBitmap, pWidth, pHeight, toGdxColor(pColor));    
+      }
+
    private:
       static constexpr float DEG2RAD = 0.0174532925;
 
