@@ -79,6 +79,9 @@ void SolarChargerView::render(::Bt::Ui::I_Canvas& pCanvas) {
     pCanvas.printf("%2d:%02d", Time.hour(), Time.minute());
     pCanvas.setCursor(31,pCanvas.height()-8);
     pCanvas.printf("%02d/%02d/%04d", Time.day(), Time.month(), Time.year());
+    pCanvas.setTextSize(2);
+    pCanvas.setCursor(49,pCanvas.height()-17);
+    pCanvas.drawChar(pCanvas.width()-12, pCanvas.height()-17, 0x10, Bt::Ui::WHITE, Bt::Ui::WHITE, 2);
 }
 
 void SolarChargerView::update(Bt::SolarMonitor::Reader::Readings& pReadings) {
@@ -101,12 +104,12 @@ void SolarChargerView::renderSolarReading(::Bt::Ui::I_Canvas& pCanvas, SolarRead
 
     pCanvas.setTextSize(2);
 
-    pCanvas.drawXBitmap(2, 80, sBatteryBits, ICON_SIZE, ICON_SIZE, Bt::Ui::BLACK);
-    pCanvas.setCursor(20,80);
+    pCanvas.drawXBitmap(8, 80, sBatteryBits, ICON_SIZE, ICON_SIZE, Bt::Ui::BLACK);
+    pCanvas.setCursor(25,80);
     pCanvas.printf("%4.1fV",pSolarReading.chargerVoltage().value());
 
-    pCanvas.drawXBitmap(2, 100, sLightBits, ICON_SIZE, ICON_SIZE, Bt::Ui::BLACK);
-    pCanvas.setCursor(20,100);
+    pCanvas.drawXBitmap(8, 100, sLightBits, ICON_SIZE, ICON_SIZE, Bt::Ui::BLACK);
+    pCanvas.setCursor(25,100);
     pCanvas.printf("%4.1fA",pSolarReading.loadCurrent().value());    
 }
 

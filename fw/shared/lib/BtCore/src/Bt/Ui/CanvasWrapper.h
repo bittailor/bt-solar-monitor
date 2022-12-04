@@ -38,6 +38,10 @@ class CanvasWrapper : public I_Canvas
       virtual size_t printf(const char* pFormat, ...) __attribute__ ((format(printf, 2, 3)));
       virtual size_t vprintf(bool newline, const char* format, va_list args) __attribute__ ((format(printf, 3, 0)));
 
+      virtual void drawChar(int16_t pX, int16_t pY, unsigned char pChar, const Color& pColor, const Color& pBackground, uint8_t pSize) {
+         mCanvas.drawChar(pX+mOffsetX, pY+mOffsetY, pChar, pColor, pBackground, pSize);  
+      }
+
       virtual void drawCircle(int16_t pX, int16_t pY, int16_t pR, const Color& pColor) {
          mCanvas.drawCircle(pX+mOffsetX, pY+mOffsetY, pR, pColor);   
       }

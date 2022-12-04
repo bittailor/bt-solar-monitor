@@ -50,6 +50,9 @@ class GfxCanvas : public I_Canvas
          mGfx.fillRect(pX , pY, pWidth, pHeight, toGdxColor(pColor)); 
       }
 
+      virtual void drawChar(int16_t pX, int16_t pY, unsigned char pChar, const Color& pColor, const Color& pBackground, uint8_t pSize) {
+         mGfx.drawChar(pX, pY, pChar, toGdxColor(pColor), toGdxColor(pBackground), pSize);  
+      }
 
       virtual void drawCircle(int16_t pX, int16_t pY, int16_t pR, const Color& pColor) {
          mGfx.drawCircle(pX , pY, pR, toGdxColor(pColor));   
