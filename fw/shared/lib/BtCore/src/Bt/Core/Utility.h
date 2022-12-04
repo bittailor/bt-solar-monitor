@@ -8,6 +8,7 @@
 #define INC__Bt_Core_Utility__h
 
 #include <stddef.h>
+#include <tuple>
 
 namespace Bt {
 namespace Core {
@@ -35,6 +36,9 @@ T binaryRead(Iterator iterator){
    }
    return t;
 }
+
+std::tuple<int,int> split(float pValue, int pDecimals);
+
 
 } // namespace Core
 } // namespace Bt

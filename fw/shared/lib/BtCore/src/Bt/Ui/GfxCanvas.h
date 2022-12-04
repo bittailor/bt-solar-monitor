@@ -40,6 +40,9 @@ class GfxCanvas : public I_Canvas
          mGfx.setCursor(pX,pY);   
       }
 
+      virtual int16_t getCursorX() const { return mGfx.getCursorX(); }
+      virtual int16_t getCursorY() const { return mGfx.getCursorY(); }
+
       virtual size_t printf(const char* pFormat, ...) __attribute__ ((format(printf, 2, 3)));
       virtual size_t vprintf(bool newline, const char* format, va_list args) __attribute__ ((format(printf, 3, 0)));
 

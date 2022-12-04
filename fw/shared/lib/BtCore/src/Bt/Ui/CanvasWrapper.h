@@ -32,6 +32,9 @@ class CanvasWrapper : public I_Canvas
          mCanvas.setCursor(pX+mOffsetX, pY+mOffsetY);   
       }
 
+      virtual int16_t getCursorX() const { return mCanvas.getCursorX() - mOffsetX ; }
+      virtual int16_t getCursorY() const { return mCanvas.getCursorY() - mOffsetY; }
+
       virtual size_t printf(const char* pFormat, ...) __attribute__ ((format(printf, 2, 3)));
       virtual size_t vprintf(bool newline, const char* format, va_list args) __attribute__ ((format(printf, 3, 0)));
 

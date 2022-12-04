@@ -6,6 +6,8 @@
 
 #include "Bt/SolarMonitor/Ui/SolarChargerView.h"
 
+#include <Bt/Core/Log.h>
+#include <Bt/Core/Utility.h>
 #include <Bt/Ui/CanvasWrapper.h>
 
 namespace Bt {
@@ -88,13 +90,14 @@ void SolarChargerView::renderSolarReading(::Bt::Ui::I_Canvas& pCanvas, SolarRead
     pCanvas.fillArc(50, 50, 243 , 78 , 48, 48 , 6,   Bt::Ui::WHITE);
     pCanvas.fillArc(50, 50, 240 , pSolarReading.panelPower().value() , 47, 47 , 4,   Bt::Ui::BLACK);
 
-    pCanvas.drawXBitmap(42, 20, sSunBits, ICON_SIZE, ICON_SIZE, Bt::Ui::BLACK);
-    pCanvas.setTextSize(1);
-    pCanvas.setCursor(60,20);
-    pCanvas.printf("W");
+    pCanvas.drawXBitmap(43, 20, sSunBits, ICON_SIZE, ICON_SIZE, Bt::Ui::BLACK);
     pCanvas.setTextSize(3);
     pCanvas.setCursor(16,40);
-    pCanvas.printf("%4.1f",pSolarReading.panelPower().value());
+    auto power = Bt::Core::split(pSolarReading.panelPower().value(),1);
+    pCanvas.printf("%2d",std::get<0>(power));
+    pCanvas.setCursor(pCanvas.getCursorX()-4,pCanvas.getCursorY()+8);
+    pCanvas.setTextSize(2);
+    pCanvas.printf(".%1dW",std::get<1>(power));
 
     pCanvas.setTextSize(2);
 
