@@ -11,7 +11,6 @@ git-crypt-key.key
 node_modules/
 
 fw/target/
-fw/external
 
 # 3rd party libs currently not commited
 fw/lib/HttpClient

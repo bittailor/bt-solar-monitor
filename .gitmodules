@@ -4,3 +4,7 @@
 [submodule "fw/shared/lib/Adafruit_GFX_RK"]
 	path = fw/shared/lib/Adafruit_GFX_RK
 	url = https://github.com/rickkas7/Adafruit_GFX_RK.git
+[submodule "fw/external/googletest"]
+	path = fw/external/googletest
+	url = https://github.com/google/googletest.git
+	branch = v1.12.x
