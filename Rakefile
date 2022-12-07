@@ -30,6 +30,7 @@ Dir.glob('fw/apps/**/project.properties').each do|project_properties|
             end
         end
     end
+    task :apps => "#{project_name}:build"
     task :build => "#{project_name}:build"
 end
 
