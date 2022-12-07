@@ -15,4 +15,7 @@ jobs:
           rake HostTest:build
       - name: Build Firmware Apps
         run: |
+          neopo install
+      - name: Build Firmware Apps
+        run: |
           rake apps
