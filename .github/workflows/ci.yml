@@ -13,9 +13,11 @@ jobs:
       - name: Build and Test On Host
         run: |
           rake HostTest:build
-      - name: Build Firmware Apps
+      - name: Configure neopo
         run: |
           neopo install
+          neopo configure electron 3.3.0 fw/apps/SolarMonitor
+          neopo configure electron 3.3.0 fw/apps/SpikeLogging
       - name: Build Firmware Apps
         run: |
           rake apps
