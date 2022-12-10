@@ -7,12 +7,6 @@ jobs:
     container: bittailor/bt-particle-io-development:latest
     steps:
       - name: Check out repository code
-        run: |
-          cd /github 
-          rm -rf home
-          ln -s /root home
-
-      - name: Check out repository code
         uses: actions/checkout@v3
         with:
           submodules: true
@@ -27,6 +21,7 @@ jobs:
           rake HostTest:build
       - name: Configure neopo
         run: |
+          neopo install
           neopo configure electron 3.3.0 fw/apps/SolarMonitor
           neopo configure electron 3.3.0 fw/apps/SpikeLogging
       - name: Build Firmware Apps
