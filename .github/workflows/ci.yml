@@ -14,12 +14,13 @@ jobs:
         run: |
           whoami
           echo $HOME
+          cd $HOME
+          ls -la
       - name: Build and Test On Host
         run: |
           rake HostTest:build
       - name: Configure neopo
         run: |
-          neopo install
           neopo configure electron 3.3.0 fw/apps/SolarMonitor
           neopo configure electron 3.3.0 fw/apps/SpikeLogging
       - name: Build Firmware Apps
