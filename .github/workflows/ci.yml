@@ -10,6 +10,10 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: true
+      - name: Some info
+        run: |
+          whoami
+          echo $HOME
       - name: Build and Test On Host
         run: |
           rake HostTest:build
