@@ -7,6 +7,12 @@ jobs:
     container: bittailor/bt-particle-io-development:latest
     steps:
       - name: Check out repository code
+        run: |
+          cd /github 
+          rm -rf home
+          ln -s /root home
+
+      - name: Check out repository code
         uses: actions/checkout@v3
         with:
           submodules: true
