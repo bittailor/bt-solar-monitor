@@ -1,5 +1,5 @@
 name: CI
-run-name: C++ Host Test & Build electron firmware 🚀
+run-name: C++ Host Test & Build Electron Firmware 🚀
 on: [push]
 jobs:
   Build-And-Test:
