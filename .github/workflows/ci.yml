@@ -5,6 +5,20 @@ jobs:
   Build-And-Test:
     runs-on: ubuntu-latest
     steps:
+      - name: Cache node modules
+        id: cache-npm
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-particle
+        with:
+          path: | 
+            ~/.particle
+            ~/.neopo
+          key: ${{ runner.os }}-ci-${{ env.cache-name }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}
+            ${{ runner.os }}-build-
+      
       - name: Install dependecies
         run: | 
           bash <(curl -sL neopo.xyz/install)
@@ -19,6 +33,7 @@ jobs:
           submodules: true
       - name: Some info
         run: |
+          pwd
           whoami
           echo $HOME
           ls -la $HOME
