@@ -1,5 +1,5 @@
 name: CI
-run-name: ${{ github.actor }} is testing C++ and particle.io 🚀
+run-name: C++ Host Test & Build electron firmware 🚀
 on: [push]
 jobs:
   Build-And-Test:
