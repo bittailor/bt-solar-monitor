@@ -1,4 +1,4 @@
-name: CI-RAW
+name: CI
 run-name: ${{ github.actor }} is testing C++ and particle.io 🚀
 on: [push]
 jobs:

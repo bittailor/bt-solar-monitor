@@ -1,4 +1,4 @@
-name: CI
+name: CI in container
 run-name: ${{ github.actor }} is testing C++ and particle.io 🚀
 on: [push]
 jobs:
