@@ -247,6 +247,13 @@ void setup() {
    sCliController.addCommand("loglevel", [](Stream& pStream, int pArgc, char* pArgv[]){
       sLogHandler.changeLevel(pStream,pArgc,pArgv);
    });
+   sCliController.addCommand("cloud", [](Stream& pStream, int pArgc, char* pArgv[]){
+      sCloud.executeConnected([&pStream](Cloud::Client& client){
+         pStream.printlnf("cloud connected");
+         pStream.flush();
+         return true;
+      });   
+   });
 
    sCloud.begin();
    sWorkcycle.begin();
