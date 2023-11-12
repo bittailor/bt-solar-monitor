@@ -64,7 +64,7 @@ class Cloud
       , mCloudConnecting(*this)
       , mCloudConnected(*this)
       , mCloudDisconnecting(*this)
-      , mRadioDisconnecting(*this){
+      , mRadioDisconnecting(*this) {
       }
 
       Cloud(const Cloud&) = delete;
@@ -152,7 +152,7 @@ class Cloud
             }
 
             virtual void executeConnected(std::function<bool (TClient&)> pExecutor) {
-               this->mController->connectStartTime = millis();
+               this->mController->mConnectStartTime = millis();
                this->mController->mExecutors.push_back(pExecutor);
                BT_CORE_LOG_INFO("mRadio.on ...");
                this->mController->mRadio.on();
@@ -221,7 +221,6 @@ class Cloud
       class CloudConnected : public Parent::StateBase  {
          public:
             CloudConnected(Cloud& pController):Parent::StateBase(pController){
-               mSubscribeName = std::string("bt/") + System.deviceID().c_str() + "/cmd";
             }
 
             virtual const char* name() {
@@ -230,14 +229,10 @@ class Cloud
 
             virtual void onEnter() {
                this->mController->resetTimer();
-               this->mController->publishStartTime = millis();
+               this->mController->mPublishStartTime = millis();
                this->mController->mOnlineTimer = Core::Timer(1000*5); // 1000*30
                {
-                  bool ack = this->mController->mCloud.subscribe(mSubscribeName.c_str(), &Cloud::handleCmd, this->mController);
-                  BT_CORE_LOG_INFO("cloud.subscribe(%s) => %d", mSubscribeName.c_str() ,ack);
-               }
-               {
-                  uint32_t timeToConnect = (this->mController->publishStartTime - this->mController->connectStartTime) / 1000;
+                  uint32_t timeToConnect = (this->mController->mPublishStartTime - this->mController->mConnectStartTime) / 1000;
                   auto signal = this->mController->mRadio.RSSI();
                   const size_t messageSize = 100;
                   char message[messageSize+1] = {0};
@@ -258,20 +253,17 @@ class Cloud
             }
 
             virtual void onExit() {
-               uint32_t onlinePeriod = (millis() - this->mController->publishStartTime) / 1000;
+               uint32_t onlinePeriod = (millis() - this->mController->mPublishStartTime) / 1000;
                const size_t messageSize = 100;
                char message[messageSize+1] = {0};
                JSONBufferWriter writer(message, sizeof(message));
-                writer.beginObject();
-                  writer.name("onlinePeriod").value(onlinePeriod);
+               writer.beginObject();
+               writer.name("onlinePeriod").value(onlinePeriod);
                writer.endObject();
                {
                   BT_CORE_LOG_INFO("b cloud.publish(%s)", writer.buffer());
                   bool ack = this->mController->mCloud.publish(cEventNameOffline, writer.buffer(), WITH_ACK);
                   BT_CORE_LOG_INFO("e cloud.publish(...) => %d", ack);
-               }
-               {
-                  this->mController->mCloud.unsubscribe();
                }
                this->mController->mCloud.disconnect();
             }
@@ -314,8 +306,6 @@ class Cloud
                }
                return this->mController->mExecutors.empty();
             }
-         private:
-            std::string mSubscribeName; 
       };
 
       class CloudDisconnecting : public Parent::StateBase  {
@@ -378,13 +368,8 @@ class Cloud
 
       Core::Timer  mOnlineTimer;
       
-      uint32_t connectStartTime;
-      uint32_t publishStartTime;
-     
-
-
-
-
+      uint32_t mConnectStartTime;
+      uint32_t mPublishStartTime;
 };
 
 } // namespace Net
