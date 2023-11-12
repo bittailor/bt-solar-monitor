@@ -176,6 +176,7 @@ Bt::Core::PeriodicCallback sMeasureLoop(
          &measure
 );
 
+
 Bt::Core::PeriodicCallback sPublishLoop(
          Bt::Core::PeriodicCallback::SECONDS,
          PUBLISH_SLEEP,
@@ -184,6 +185,7 @@ Bt::Core::PeriodicCallback sPublishLoop(
    sPublishFilter.publish();
 }
 );
+
 
 
 Bt::Core::InterruptPushButton sLeft(BUTTON_LEFT, [](){
@@ -312,7 +314,6 @@ void setup() {
 }
 
 void loop() {
-   // BT_CORE_LOG_DEBUG("-- loop memory %lu", System.freeMemory());
    sWorkcycle.oneWorkcycle();
 }
 
@@ -324,6 +325,7 @@ void measure() {
    sDisplay.fillRect(0, 0, sDisplay.width(), sDisplay.height(), GxEPD_WHITE);
    sSolarChargerView.render(sGfxCanvas);
    sDisplay.display((sCounter++)%(30*5) != 0);
-   sForkFilter.consume(readings);   
+   sForkFilter.consume(readings); 
+   BT_CORE_LOG_INFO(" available memory %lu", System.freeMemory());  
 }
 
