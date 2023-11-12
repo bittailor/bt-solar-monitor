@@ -243,6 +243,7 @@ class Cloud
                         writer.name("strength").value(signal.getStrength());
                         writer.name("quality").value(signal.getQuality());
                      writer.endObject();
+                     writer.name("memory").value(System.freeMemory());
                   writer.endObject();
                   BT_CORE_LOG_INFO("b cloud.publish(%s)", writer.buffer());
                   bool ack = this->mController->mCloud.publish(cEventNameOnline, writer.buffer(), WITH_ACK);
